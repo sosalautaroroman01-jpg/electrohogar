@@ -30,13 +30,43 @@ export default function EditarProducto() {
 
   async function guardarCambios(data) {
     try {
-      await editarProducto(id, data);
+      await editarProducto(id, {
+        ...data,
+
+        precio: Number(data.precio),
+
+        precio3:
+          data.precio3 === "" || data.precio3 === null
+            ? null
+            : Number(data.precio3),
+
+        precio6:
+          data.precio6 === "" || data.precio6 === null
+            ? null
+            : Number(data.precio6),
+
+        precio9:
+          data.precio9 === "" || data.precio9 === null
+            ? null
+            : Number(data.precio9),
+
+        precio12:
+          data.precio12 === "" || data.precio12 === null
+            ? null
+            : Number(data.precio12),
+
+        stock:
+          data.stock === "" || data.stock === null
+            ? null
+            : Number(data.stock),
+      });
+
+      alert("✅ Producto actualizado correctamente");
 
       navigate("/admin/productos");
-
     } catch (error) {
       console.error(error);
-      alert("Error al actualizar");
+      alert("❌ Error al actualizar el producto");
     }
   }
 
@@ -44,7 +74,7 @@ export default function EditarProducto() {
 
   return (
     <Layout>
-      <h1>Editar Producto</h1>
+      <h1>✏️ Editar Producto</h1>
 
       <ProductForm
         initialData={producto}

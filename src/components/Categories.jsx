@@ -11,6 +11,8 @@ function Categories() {
     "Heladeras",
     "Lavarropas",
     "Cocina",
+    "Calefacción",
+    "Termotanques",
     "Herramientas",
     "Celulares",
     "Hogar",
@@ -19,13 +21,15 @@ function Categories() {
   const iconos = {
     Todas: "🏠",
     "Smart TV": "📺",
-    Aires: "❄",
+    Aires: "❄️",
     Heladeras: "🧊",
     Lavarropas: "🧺",
     Cocina: "🍳",
+    Calefacción: "🔥",
+    Termotanques: "🚿",
     Herramientas: "🔧",
     Celulares: "📱",
-    Hogar: "🛏",
+    Hogar: "🛏️",
   };
 
   return (

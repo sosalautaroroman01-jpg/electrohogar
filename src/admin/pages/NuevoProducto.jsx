@@ -21,15 +21,17 @@ export default function NuevoProducto() {
         nombre: data.nombre,
         categoria: data.categoria,
 
-        // 💰 Precios
+        // 💰 Precio principal
         precio: Number(data.precio),
-        precio3: Number(data.precio3) || Number(data.precio),
-        precio6: Number(data.precio6) || Number(data.precio),
-        precio9: Number(data.precio9) || Number(data.precio),
-        precio12: Number(data.precio12) || Number(data.precio),
 
-        // 📦 Stock
-        stock: Number(data.stock) || 0,
+        // 🔥 Solo se guardan si vos los escribís
+        precio3: data.precio3 ? Number(data.precio3) : null,
+        precio6: data.precio6 ? Number(data.precio6) : null,
+        precio9: data.precio9 ? Number(data.precio9) : null,
+        precio12: data.precio12 ? Number(data.precio12) : null,
+
+        // 📦 Stock manual
+        stock: data.stock ? Number(data.stock) : null,
 
         descripcion: data.descripcion,
         imagen,

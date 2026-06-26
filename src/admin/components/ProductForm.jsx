@@ -59,12 +59,34 @@ export default function ProductForm({
 
     onSubmit({
       ...form,
+
       precio: Number(form.precio),
-      precio3: Number(form.precio3),
-      precio6: Number(form.precio6),
-      precio9: Number(form.precio9),
-      precio12: Number(form.precio12),
-      stock: Number(form.stock),
+
+      // SOLO se convierten a número si el usuario escribió algo
+      precio3:
+        form.precio3 === ""
+          ? ""
+          : Number(form.precio3),
+
+      precio6:
+        form.precio6 === ""
+          ? ""
+          : Number(form.precio6),
+
+      precio9:
+        form.precio9 === ""
+          ? ""
+          : Number(form.precio9),
+
+      precio12:
+        form.precio12 === ""
+          ? ""
+          : Number(form.precio12),
+
+      stock:
+        form.stock === ""
+          ? ""
+          : Number(form.stock),
     });
   }
 
@@ -161,44 +183,43 @@ export default function ProductForm({
 
       <label>📦 Stock</label>
 
-<input
-  type="number"
-  name="stock"
-  placeholder="Cantidad disponible"
-  value={form.stock}
-  onChange={handleChange}
-/>
+      <input
+        type="number"
+        name="stock"
+        placeholder="Cantidad disponible"
+        value={form.stock}
+        onChange={handleChange}
+      />
 
-<label>👁 Estado</label>
+      <label>👁 Estado</label>
 
-<select
-  name="visible"
-  value={String(form.visible)}
-  onChange={(e) =>
-    setForm({
-      ...form,
-      visible: e.target.value === "true",
-    })
-  }
->
-  <option value="true">🟢 Visible</option>
-  <option value="false">🔴 Oculto</option>
-</select>
+      <select
+        name="visible"
+        value={String(form.visible)}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            visible: e.target.value === "true",
+          })
+        }
+      >
+        <option value="true">🟢 Visible</option>
+        <option value="false">🔴 Oculto</option>
+      </select>
 
-<label>Descripción</label>
+      <label>Descripción</label>
 
-<textarea
-  name="descripcion"
-  rows="5"
-  placeholder="Descripción..."
-  value={form.descripcion}
-  onChange={handleChange}
-></textarea>
+      <textarea
+        name="descripcion"
+        rows="5"
+        placeholder="Descripción..."
+        value={form.descripcion}
+        onChange={handleChange}
+      ></textarea>
 
-<button type="submit">
-  💾 {textoBoton}
-</button>
-
+      <button type="submit">
+        💾 {textoBoton}
+      </button>
     </form>
   );
 }

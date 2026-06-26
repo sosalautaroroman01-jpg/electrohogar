@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
@@ -33,38 +34,32 @@ export function CartProvider({ children }) {
   }
 
   function aumentarCantidad(id) {
-  setCarrito((prev) => {
-    const nuevo = prev.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            cantidad: item.cantidad + 1,
-          }
-        : item
-    );
-
-    return [...nuevo];
-  });
-}
-
-  function disminuirCantidad(id) {
-  setCarrito((prev) => {
-    const nuevo = prev
-      .map((item) =>
+    setCarrito((prev) =>
+      prev.map((item) =>
         item.id === id
           ? {
               ...item,
-              cantidad: item.cantidad - 1,
+              cantidad: item.cantidad + 1,
             }
           : item
       )
-      .filter((item) => item.cantidad > 0);
+    );
+  }
 
-    console.log("NUEVO CARRITO", nuevo);
-
-    return [...nuevo];
-  });
-}
+  function disminuirCantidad(id) {
+    setCarrito((prev) =>
+      prev
+        .map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                cantidad: item.cantidad - 1,
+              }
+            : item
+        )
+        .filter((item) => item.cantidad > 0)
+    );
+  }
 
   function eliminarProducto(id) {
     setCarrito((prev) =>
@@ -73,24 +68,48 @@ export function CartProvider({ children }) {
   }
 
   function obtenerPrecio(item) {
-    if (item.cantidad >= 12 && Number(item.precio12) > 0)
+    if (
+      item.cantidad >= 12 &&
+      item.precio12 !== null &&
+      item.precio12 !== "" &&
+      Number(item.precio12) > 0
+    ) {
       return Number(item.precio12);
+    }
 
-    if (item.cantidad >= 9 && Number(item.precio9) > 0)
+    if (
+      item.cantidad >= 9 &&
+      item.precio9 !== null &&
+      item.precio9 !== "" &&
+      Number(item.precio9) > 0
+    ) {
       return Number(item.precio9);
+    }
 
-    if (item.cantidad >= 6 && Number(item.precio6) > 0)
+    if (
+      item.cantidad >= 6 &&
+      item.precio6 !== null &&
+      item.precio6 !== "" &&
+      Number(item.precio6) > 0
+    ) {
       return Number(item.precio6);
+    }
 
-    if (item.cantidad >= 3 && Number(item.precio3) > 0)
+    if (
+      item.cantidad >= 3 &&
+      item.precio3 !== null &&
+      item.precio3 !== "" &&
+      Number(item.precio3) > 0
+    ) {
       return Number(item.precio3);
+    }
 
     return Number(item.precio);
   }
 
-const total = carrito.reduce((acum, item) => {
-  return acum + obtenerPrecio(item) * item.cantidad;
-}, 0);;
+  const total = carrito.reduce((acum, item) => {
+    return acum + obtenerPrecio(item) * item.cantidad;
+  }, 0);
 
   return (
     <CartContext.Provider
