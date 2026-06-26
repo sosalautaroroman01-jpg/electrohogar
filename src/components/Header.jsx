@@ -1,13 +1,11 @@
 import "./Header.css";
 import logo from "../assets/logo.png";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
 function Header() {
-  const navigate = useNavigate();
-
   const { carrito } = useCart();
   const { usuario, logout } = useAuth();
 
@@ -20,12 +18,9 @@ function Header() {
     <header className="header">
       <div className="header-user">
         {!usuario ? (
-          <button
-            className="user-btn"
-            onClick={() => navigate("/admin/login")}
-          >
+          <Link to="/admin/login" className="user-btn">
             👤
-          </button>
+          </Link>
         ) : (
           <div className="admin-menu">
             <button className="user-btn">
@@ -35,13 +30,13 @@ function Header() {
             <div className="admin-dropdown">
               <p>{usuario.email}</p>
 
-              <button onClick={() => navigate("/admin")}>
+              <Link className="dropdown-link" to="/admin">
                 📊 Panel Admin
-              </button>
+              </Link>
 
-              <button onClick={() => navigate("/admin/productos")}>
+              <Link className="dropdown-link" to="/admin/productos">
                 📦 Productos
-              </button>
+              </Link>
 
               <button onClick={logout}>
                 🚪 Cerrar sesión

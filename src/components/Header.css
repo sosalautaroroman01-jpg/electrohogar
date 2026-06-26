@@ -23,6 +23,9 @@
 .user-btn{
     width:52px;
     height:52px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     border:none;
     border-radius:50%;
     background:#16a34a;
@@ -30,6 +33,7 @@
     font-size:24px;
     cursor:pointer;
     transition:.25s;
+    text-decoration:none;
 }
 
 .user-btn:hover{
@@ -101,6 +105,24 @@
 }
 
 .admin-dropdown button:hover{
+    background:#16a34a;
+    color:white;
+}
+
+.dropdown-link{
+    display:block;
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:10px;
+    background:#f4f4f4;
+    color:#111;
+    text-decoration:none;
+    box-sizing:border-box;
+    transition:.2s;
+}
+
+.dropdown-link:hover{
     background:#16a34a;
     color:white;
 }
