@@ -13,39 +13,41 @@ const vendedores = [
 ];
 
 function Cart() {
-  const {
-    carrito,
-    abierto,
-    setAbierto,
-    aumentarCantidad,
-    disminuirCantidad,
-    eliminarProducto,
-    obtenerPrecio,
-    total,
-  } = useCart();
+  const cart = useCart();
+
+const {
+  carrito,
+  abierto,
+  setAbierto,
+  aumentarCantidad,
+  disminuirCantidad,
+  eliminarProducto,
+  obtenerPrecio,
+  total,
+} = cart;
 
   function enviarWhatsApp(numero) {
-    let mensaje = "Hola Electro Hogar 👋%0A%0A";
-    mensaje += "Quiero consultar por los siguientes productos:%0A%0A";
+  let mensaje = "Hola Electro Hogar 👋%0A%0A";
+  mensaje += "Quiero consultar por los siguientes productos:%0A%0A";
 
-    carrito.forEach((producto) => {
-      const precio = obtenerPrecio(producto);
+  carrito.forEach((producto) => {
+    const precio = obtenerPrecio(producto);
 
-      mensaje += `• ${producto.nombre}%0A`;
-      mensaje += `Cantidad: ${producto.cantidad}%0A`;
-      mensaje += `Precio Unitario: $${precio.toLocaleString("es-AR")}%0A`;
-      mensaje += `Subtotal: $${(
-        precio * producto.cantidad
-      ).toLocaleString("es-AR")}%0A%0A`;
-    });
+    mensaje += `• ${producto.nombre}%0A`;
+    mensaje += `Cantidad: ${producto.cantidad}%0A`;
+    mensaje += `Precio Unitario: $${precio.toLocaleString("es-AR")}%0A`;
+    mensaje += `Subtotal: $${(
+      precio * producto.cantidad
+    ).toLocaleString("es-AR")}%0A%0A`;
+  });
 
-    mensaje += `💰 Total: $${total.toLocaleString("es-AR")}`;
+  mensaje += `💰 Total: $${total.toLocaleString("es-AR")}`;
 
-    window.open(
-      `https://wa.me/${numero}?text=${mensaje}`,
-      "_blank"
-    );
-  }
+  window.open(
+    `https://wa.me/${numero}?text=${mensaje}`,
+    "_blank"
+  );
+}
 
   if (!abierto) return null;
 
@@ -158,10 +160,10 @@ function Cart() {
               );
             })}
 
-            <h2 className="cart-total">
-              Total: $
-              {total.toLocaleString("es-AR")}
-            </h2>
+<h2 className="cart-total">
+  Total: $
+  {total.toLocaleString("es-AR")}
+</h2>
 
             <h3
               style={{

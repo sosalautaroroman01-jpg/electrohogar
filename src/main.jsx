@@ -6,15 +6,12 @@ import App from "./App";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { FilterProvider } from "./context/FilterContext";
-
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <AuthProvider>
-      <FilterProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </FilterProvider>
-    </AuthProvider>
-  </StrictMode>
+  <AuthProvider>
+    <FilterProvider>
+      <CartProvider>
+        <App />
+      </CartProvider>
+    </FilterProvider>
+  </AuthProvider>
 );

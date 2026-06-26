@@ -1,5 +1,4 @@
-import { createContext, useContext, useMemo, useState } from "react";
-
+import { createContext, useContext, useState } from "react";
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
@@ -34,32 +33,38 @@ export function CartProvider({ children }) {
   }
 
   function aumentarCantidad(id) {
-    setCarrito((prev) =>
-      prev.map((item) =>
+  setCarrito((prev) => {
+    const nuevo = prev.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            cantidad: item.cantidad + 1,
+          }
+        : item
+    );
+
+    return [...nuevo];
+  });
+}
+
+  function disminuirCantidad(id) {
+  setCarrito((prev) => {
+    const nuevo = prev
+      .map((item) =>
         item.id === id
           ? {
               ...item,
-              cantidad: item.cantidad + 1,
+              cantidad: item.cantidad - 1,
             }
           : item
       )
-    );
-  }
+      .filter((item) => item.cantidad > 0);
 
-  function disminuirCantidad(id) {
-    setCarrito((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                cantidad: item.cantidad - 1,
-              }
-            : item
-        )
-        .filter((item) => item.cantidad > 0)
-    );
-  }
+    console.log("NUEVO CARRITO", nuevo);
+
+    return [...nuevo];
+  });
+}
 
   function eliminarProducto(id) {
     setCarrito((prev) =>
@@ -83,11 +88,9 @@ export function CartProvider({ children }) {
     return Number(item.precio);
   }
 
-  const total = useMemo(() => {
-    return carrito.reduce((acum, item) => {
-      return acum + obtenerPrecio(item) * item.cantidad;
-    }, 0);
-  }, [carrito]);
+const total = carrito.reduce((acum, item) => {
+  return acum + obtenerPrecio(item) * item.cantidad;
+}, 0);;
 
   return (
     <CartContext.Provider
