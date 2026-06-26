@@ -20,6 +20,7 @@ function Cart() {
     aumentarCantidad,
     disminuirCantidad,
     eliminarProducto,
+    obtenerPrecio,
     total,
   } = useCart();
 
@@ -28,9 +29,14 @@ function Cart() {
     mensaje += "Quiero consultar por los siguientes productos:%0A%0A";
 
     carrito.forEach((producto) => {
+      const precio = obtenerPrecio(producto);
+
       mensaje += `• ${producto.nombre}%0A`;
       mensaje += `Cantidad: ${producto.cantidad}%0A`;
-      mensaje += `Precio: $${producto.precio.toLocaleString("es-AR")}%0A%0A`;
+      mensaje += `Precio Unitario: $${precio.toLocaleString("es-AR")}%0A`;
+      mensaje += `Subtotal: $${(
+        precio * producto.cantidad
+      ).toLocaleString("es-AR")}%0A%0A`;
     });
 
     mensaje += `💰 Total: $${total.toLocaleString("es-AR")}`;
@@ -64,55 +70,93 @@ function Cart() {
           <p>Tu carrito está vacío.</p>
         ) : (
           <>
-            {carrito.map((producto) => (
-              <div
-                key={producto.id}
-                className="cart-item"
-              >
-                <img
-                  src={producto.imagen}
-                  alt={producto.nombre}
-                />
+            {carrito.map((producto) => {
+              const precio = obtenerPrecio(producto);
 
-                <div className="cart-info">
-                  <h4>{producto.nombre}</h4>
+              let promo = "";
 
-                  <p>
-                    $
-                    {producto.precio.toLocaleString("es-AR")}
-                  </p>
+              if (producto.cantidad >= 12)
+                promo = "🔥 Precio x12 aplicado";
+              else if (producto.cantidad >= 9)
+                promo = "🔥 Precio x9 aplicado";
+              else if (producto.cantidad >= 6)
+                promo = "🔥 Precio x6 aplicado";
+              else if (producto.cantidad >= 3)
+                promo = "🔥 Precio x3 aplicado";
 
-                  <div className="cart-controls">
+              return (
+                <div
+                  key={producto.id}
+                  className="cart-item"
+                >
+                  <img
+                    src={producto.imagen}
+                    alt={producto.nombre}
+                  />
+
+                  <div className="cart-info">
+                    <h4>{producto.nombre}</h4>
+
+                    <p>
+                      ${precio.toLocaleString("es-AR")}
+                    </p>
+
+                    {promo && (
+                      <p
+                        style={{
+                          color: "#16a34a",
+                          fontWeight: "bold",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        {promo}
+                      </p>
+                    )}
+
+                    <div className="cart-controls">
+                      <button
+                        onClick={() =>
+                          disminuirCantidad(producto.id)
+                        }
+                      >
+                        −
+                      </button>
+
+                      <span>{producto.cantidad}</span>
+
+                      <button
+                        onClick={() =>
+                          aumentarCantidad(producto.id)
+                        }
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <p
+                      style={{
+                        fontWeight: "bold",
+                        marginTop: "8px",
+                      }}
+                    >
+                      Subtotal: $
+                      {(precio * producto.cantidad).toLocaleString(
+                        "es-AR"
+                      )}
+                    </p>
+
                     <button
+                      className="delete-btn"
                       onClick={() =>
-                        disminuirCantidad(producto.id)
+                        eliminarProducto(producto.id)
                       }
                     >
-                      −
-                    </button>
-
-                    <span>{producto.cantidad}</span>
-
-                    <button
-                      onClick={() =>
-                        aumentarCantidad(producto.id)
-                      }
-                    >
-                      +
+                      🗑 Eliminar
                     </button>
                   </div>
-
-                  <button
-                    className="delete-btn"
-                    onClick={() =>
-                      eliminarProducto(producto.id)
-                    }
-                  >
-                    🗑 Eliminar
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <h2 className="cart-total">
               Total: $

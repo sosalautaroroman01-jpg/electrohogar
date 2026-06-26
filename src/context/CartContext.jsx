@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 
 const CartContext = createContext();
 
@@ -7,48 +7,54 @@ export function CartProvider({ children }) {
   const [abierto, setAbierto] = useState(false);
 
   function agregarAlCarrito(producto, cantidad = 1) {
-    const existe = carrito.find((item) => item.id === producto.id);
+    setCarrito((prev) => {
+      const existe = prev.find((item) => item.id === producto.id);
 
-    if (existe) {
-      setCarrito(
-        carrito.map((item) =>
+      if (existe) {
+        return prev.map((item) =>
           item.id === producto.id
             ? {
                 ...item,
                 cantidad: item.cantidad + cantidad,
               }
             : item
-        )
-      );
-    } else {
-      setCarrito([
-        ...carrito,
+        );
+      }
+
+      return [
+        ...prev,
         {
           ...producto,
           cantidad,
         },
-      ]);
-    }
+      ];
+    });
 
     setAbierto(true);
   }
 
   function aumentarCantidad(id) {
-    setCarrito(
-      carrito.map((item) =>
+    setCarrito((prev) =>
+      prev.map((item) =>
         item.id === id
-          ? { ...item, cantidad: item.cantidad + 1 }
+          ? {
+              ...item,
+              cantidad: item.cantidad + 1,
+            }
           : item
       )
     );
   }
 
   function disminuirCantidad(id) {
-    setCarrito(
-      carrito
+    setCarrito((prev) =>
+      prev
         .map((item) =>
           item.id === id
-            ? { ...item, cantidad: item.cantidad - 1 }
+            ? {
+                ...item,
+                cantidad: item.cantidad - 1,
+              }
             : item
         )
         .filter((item) => item.cantidad > 0)
@@ -56,13 +62,32 @@ export function CartProvider({ children }) {
   }
 
   function eliminarProducto(id) {
-    setCarrito(carrito.filter((item) => item.id !== id));
+    setCarrito((prev) =>
+      prev.filter((item) => item.id !== id)
+    );
   }
 
-  const total = carrito.reduce(
-    (acum, item) => acum + item.precio * item.cantidad,
-    0
-  );
+  function obtenerPrecio(item) {
+    if (item.cantidad >= 12 && Number(item.precio12) > 0)
+      return Number(item.precio12);
+
+    if (item.cantidad >= 9 && Number(item.precio9) > 0)
+      return Number(item.precio9);
+
+    if (item.cantidad >= 6 && Number(item.precio6) > 0)
+      return Number(item.precio6);
+
+    if (item.cantidad >= 3 && Number(item.precio3) > 0)
+      return Number(item.precio3);
+
+    return Number(item.precio);
+  }
+
+  const total = useMemo(() => {
+    return carrito.reduce((acum, item) => {
+      return acum + obtenerPrecio(item) * item.cantidad;
+    }, 0);
+  }, [carrito]);
 
   return (
     <CartContext.Provider
@@ -72,6 +97,7 @@ export function CartProvider({ children }) {
         aumentarCantidad,
         disminuirCantidad,
         eliminarProducto,
+        obtenerPrecio,
         total,
         abierto,
         setAbierto,

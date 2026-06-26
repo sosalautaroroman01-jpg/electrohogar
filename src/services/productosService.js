@@ -55,6 +55,13 @@ export function editarProducto(id, data) {
   return updateDoc(doc(db, "productos", id), data);
 }
 
+// 👁 Cambiar visibilidad
+export function cambiarVisibilidad(id, visible) {
+  return updateDoc(doc(db, "productos", id), {
+    visible,
+  });
+}
+
 // Eliminar
 export function eliminarProducto(id) {
   return deleteDoc(doc(db, "productos", id));

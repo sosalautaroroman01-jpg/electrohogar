@@ -5,8 +5,14 @@ const EMPTY_FORM = {
   nombre: "",
   categoria: "",
   precio: "",
+  precio3: "",
+  precio6: "",
+  precio9: "",
+  precio12: "",
+  stock: "",
   descripcion: "",
   imagen: "",
+  visible: true,
 };
 
 export default function ProductForm({
@@ -19,7 +25,11 @@ export default function ProductForm({
 
   useEffect(() => {
     if (initialData) {
-      setForm(initialData);
+      setForm({
+        ...EMPTY_FORM,
+        ...initialData,
+      });
+
       setPreview(initialData.imagen || "");
     }
   }, [initialData]);
@@ -50,6 +60,11 @@ export default function ProductForm({
     onSubmit({
       ...form,
       precio: Number(form.precio),
+      precio3: Number(form.precio3),
+      precio6: Number(form.precio6),
+      precio9: Number(form.precio9),
+      precio12: Number(form.precio12),
+      stock: Number(form.stock),
     });
   }
 
@@ -93,7 +108,7 @@ export default function ProductForm({
         required
       />
 
-      <label>Precio</label>
+      <label>💰 Precio Unitario</label>
 
       <input
         type="number"
@@ -104,19 +119,86 @@ export default function ProductForm({
         required
       />
 
-      <label>Descripción</label>
+      <label>🔥 Precio x3</label>
 
-      <textarea
-        name="descripcion"
-        rows="5"
-        placeholder="Descripción..."
-        value={form.descripcion}
+      <input
+        type="number"
+        name="precio3"
+        placeholder="$0"
+        value={form.precio3}
         onChange={handleChange}
       />
 
-      <button type="submit">
-        💾 {textoBoton}
-      </button>
+      <label>🔥 Precio x6</label>
+
+      <input
+        type="number"
+        name="precio6"
+        placeholder="$0"
+        value={form.precio6}
+        onChange={handleChange}
+      />
+
+      <label>🔥 Precio x9</label>
+
+      <input
+        type="number"
+        name="precio9"
+        placeholder="$0"
+        value={form.precio9}
+        onChange={handleChange}
+      />
+
+      <label>🔥 Precio x12</label>
+
+      <input
+        type="number"
+        name="precio12"
+        placeholder="$0"
+        value={form.precio12}
+        onChange={handleChange}
+      />
+
+      <label>📦 Stock</label>
+
+<input
+  type="number"
+  name="stock"
+  placeholder="Cantidad disponible"
+  value={form.stock}
+  onChange={handleChange}
+/>
+
+<label>👁 Estado</label>
+
+<select
+  name="visible"
+  value={String(form.visible)}
+  onChange={(e) =>
+    setForm({
+      ...form,
+      visible: e.target.value === "true",
+    })
+  }
+>
+  <option value="true">🟢 Visible</option>
+  <option value="false">🔴 Oculto</option>
+</select>
+
+<label>Descripción</label>
+
+<textarea
+  name="descripcion"
+  rows="5"
+  placeholder="Descripción..."
+  value={form.descripcion}
+  onChange={handleChange}
+></textarea>
+
+<button type="submit">
+  💾 {textoBoton}
+</button>
+
     </form>
   );
 }
