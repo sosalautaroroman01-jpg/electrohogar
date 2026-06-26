@@ -3,12 +3,13 @@ import Header from "../components/Header";
 import SearchBar from "../components/SearchBar";
 import Categories from "../components/Categories";
 import ProductGrid from "../components/ProductGrid";
+import Cart from "../components/Cart";
 
 function Home() {
   return (
     <>
       <AnimatedBackground />
-
+<Cart />
       <div className="app">
         <Header />
 

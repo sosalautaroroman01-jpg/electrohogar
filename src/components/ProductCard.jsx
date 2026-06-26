@@ -1,5 +1,10 @@
 import "./ProductCard.css";
+import { useCart } from "../context/CartContext";
+
 function ProductCard({ producto }) {
+
+  const { agregarAlCarrito } = useCart();
+
   return (
     <div className="card">
 
@@ -12,15 +17,19 @@ function ProductCard({ producto }) {
       )}
 
       <div className="card-body">
+
         <h3>{producto.nombre}</h3>
 
         <p className="precio">
           ${producto.precio.toLocaleString("es-AR")}
         </p>
 
-        <button>
+        <button
+          onClick={() => agregarAlCarrito(producto)}
+        >
           🛒 Agregar al carrito
         </button>
+
       </div>
 
     </div>
