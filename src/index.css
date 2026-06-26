@@ -1,0 +1,42 @@
+/* ===== Fondo animado ===== */
+
+body::before{
+
+    content:"📺   ⚽   🇦🇷   📱   🔧   🧊   🧺   💻";
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+    justify-content:space-evenly;
+    align-items:center;
+    flex-wrap:wrap;
+
+    font-size:90px;
+
+    opacity:.04;
+
+    pointer-events:none;
+
+    z-index:-1;
+
+    animation:fondo 30s ease-in-out infinite;
+
+}
+
+@keyframes fondo{
+
+    0%{
+        transform:translateY(0px) rotate(0deg);
+    }
+
+    50%{
+        transform:translateY(-35px) rotate(4deg);
+    }
+
+    100%{
+        transform:translateY(0px) rotate(0deg);
+    }
+
+}

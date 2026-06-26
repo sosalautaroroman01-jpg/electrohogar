@@ -1,0 +1,45 @@
+.categories{
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+    justify-content:center;
+    margin:35px 0;
+}
+
+.category-btn{
+
+    background:white;
+    border:2px solid #14963d;
+    color:#14963d;
+
+    padding:14px 24px;
+
+    border-radius:50px;
+
+    font-size:16px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+}
+
+.category-btn:hover{
+
+    background:#14963d;
+    color:white;
+
+    transform:translateY(-4px);
+
+    box-shadow:0 12px 25px rgba(20,150,61,.35);
+
+}
+
+.category-btn:active{
+
+    transform:scale(.95);
+
+}
