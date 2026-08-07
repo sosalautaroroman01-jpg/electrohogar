@@ -16,8 +16,8 @@ export default defineConfig({
       ],
 
       manifest: {
-        name: "Electro Hogar Quilmes",
-        short_name: "Electro Hogar",
+        name: "Electro Hogar Local",
+        short_name: "EH Local",
 
         description: "Sistema de ventas Electro Hogar Quilmes",
 
@@ -28,7 +28,7 @@ export default defineConfig({
 
         orientation: "portrait",
 
-        start_url: "/",
+        start_url: "/local",
 
         scope: "/",
 
