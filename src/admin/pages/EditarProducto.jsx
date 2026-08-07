@@ -9,6 +9,11 @@ import {
   editarProducto,
 } from "../../services/productosService";
 
+import {
+  subirImagenes,
+  subirVideo,
+} from "../../services/storageService";
+
 export default function EditarProducto() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,35 +35,56 @@ export default function EditarProducto() {
 
   async function guardarCambios(data) {
     try {
+      let imagenes = [...(data.imagenes || [])];
+
+      if (!imagenes.length && data.imagen) {
+        imagenes.push(data.imagen);
+      }
+
+      if (data.imagenesFile?.length) {
+        const nuevasImagenes = await subirImagenes(
+          data.imagenesFile
+        );
+
+        imagenes = [...imagenes, ...nuevasImagenes];
+      }
+
+      let video = data.video || "";
+
+      if (data.videoFile) {
+        video = await subirVideo(data.videoFile);
+      }
+
+      const {
+        imagenesFile,
+        videoFile,
+        ...datos
+      } = data;
+
+      const numeroONull = (valor) =>
+        valor === "" || valor === null
+          ? null
+          : Number(valor);
+
       await editarProducto(id, {
-        ...data,
+        ...datos,
+
+        categoria: data.categoria,
+        marca: data.marca || "",
+        subcategoria: data.subcategoria || "",
+        moneda: data.moneda,
 
         precio: Number(data.precio),
+        precio2: numeroONull(data.precio2),
+        precio3: numeroONull(data.precio3),
+        precio6: numeroONull(data.precio6),
+        precio9: numeroONull(data.precio9),
+        precio12: numeroONull(data.precio12),
 
-        precio3:
-          data.precio3 === "" || data.precio3 === null
-            ? null
-            : Number(data.precio3),
+        imagenes,
+        imagen: imagenes[0] || "",
 
-        precio6:
-          data.precio6 === "" || data.precio6 === null
-            ? null
-            : Number(data.precio6),
-
-        precio9:
-          data.precio9 === "" || data.precio9 === null
-            ? null
-            : Number(data.precio9),
-
-        precio12:
-          data.precio12 === "" || data.precio12 === null
-            ? null
-            : Number(data.precio12),
-
-        stock:
-          data.stock === "" || data.stock === null
-            ? null
-            : Number(data.stock),
+        video,
       });
 
       alert("✅ Producto actualizado correctamente");
@@ -70,7 +96,9 @@ export default function EditarProducto() {
     }
   }
 
-  if (!producto) return <Layout>Cargando...</Layout>;
+  if (!producto) {
+    return <Layout>Cargando...</Layout>;
+  }
 
   return (
     <Layout>

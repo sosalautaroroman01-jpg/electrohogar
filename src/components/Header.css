@@ -1,128 +1,369 @@
 .header{
-    background:white;
-    border-radius:20px;
-    padding:20px 30px;
+
     display:grid;
-    grid-template-columns:80px 1fr 80px;
+
+    grid-template-columns:70px 1fr auto;
+
     align-items:center;
-    margin-bottom:25px;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+    gap:0;
+
+    width:100%;
+    max-width:1400px;
+
+    margin:0 auto 20px;
+
+    padding:20px 20px;
+
+    box-sizing:border-box;
+
+}
+
+.hero-logo{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:100%;
+
 }
 
 .logo{
-    width:420px;
+    display:block;
+    width:380px;
     max-width:100%;
-    justify-self:center;
+    margin:0 auto;
+    filter:drop-shadow(0 12px 25px rgba(0,0,0,.18));
+    transition:.35s;
 }
 
+.logo:hover{
+
+    transform:scale(1.02);
+
+}
+
+
+/* ================= USUARIO ================= */
+
 .header-user{
-    justify-self:start;
+
     position:relative;
+
+    justify-self:start;
+
+    margin-left:4px;
+
 }
 
 .user-btn{
+
     width:52px;
+
     height:52px;
+
     display:flex;
-    align-items:center;
+
     justify-content:center;
+
+    align-items:center;
+
     border:none;
+
     border-radius:50%;
-    background:#16a34a;
-    color:white;
-    font-size:24px;
+
     cursor:pointer;
-    transition:.25s;
+
     text-decoration:none;
+
+    font-size:22px;
+
+    color:white;
+
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+
+    box-shadow:0 10px 25px rgba(22,163,74,.28);
+
+    transition:.30s;
+
 }
 
 .user-btn:hover{
-    transform:scale(1.08);
+
+    transform:translateY(-2px);
+
+    box-shadow:0 15px 35px rgba(22,163,74,.35);
+
 }
 
-.cart-icon{
-    justify-self:end;
-    background:#16a34a;
-    color:white;
-    padding:12px 18px;
-    border-radius:50px;
-    font-size:22px;
-    font-weight:bold;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    box-shadow:0 8px 20px rgba(0,0,0,.15);
+.header-space{
+
+    width:52px;
+
 }
 
-.cart-icon span{
-    background:white;
-    color:#16a34a;
-    width:30px;
-    height:30px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:16px;
-}
+/* ================= MENU ================= */
 
 .admin-menu{
+
     position:relative;
+
+    display:inline-block;
+
 }
 
-.admin-dropdown{
-    display:none;
+
+/* Zona invisible para mantener abierto el menú */
+
+.admin-menu::after{
+
+    content:"";
+
     position:absolute;
-    top:60px;
+
     left:0;
-    width:220px;
-    background:white;
-    border-radius:15px;
-    padding:15px;
-    box-shadow:0 15px 35px rgba(0,0,0,.15);
-    z-index:100;
+
+    top:54px;
+
+    width:100%;
+
+    height:18px;
+
+}
+
+/* Dropdown */
+
+.admin-dropdown{
+
+    position:absolute;
+
+    top:60px;
+
+    left:0;
+
+    width:270px;
+
+    padding:20px;
+
+    border-radius:20px;
+
+    background:rgba(255,255,255,.96);
+
+    backdrop-filter:blur(25px);
+
+    -webkit-backdrop-filter:blur(25px);
+
+    border:1px solid rgba(255,255,255,.85);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.18),
+        0 8px 20px rgba(0,0,0,.08);
+
+    z-index:999;
+
+    opacity:0;
+
+    visibility:hidden;
+
+    transform:translateY(12px) scale(.98);
+
+    transition:
+        opacity .25s ease,
+        transform .25s ease,
+        visibility .25s;
+
 }
 
 .admin-menu:hover .admin-dropdown{
-    display:block;
+
+    opacity:1;
+
+    visibility:visible;
+
+    transform:translateY(0) scale(1);
+
 }
 
 .admin-dropdown p{
-    margin-bottom:15px;
-    font-weight:bold;
+
+    font-size:15px;
+
+    font-weight:700;
+
+    color:#222;
+
+    margin-bottom:18px;
+
+    word-break:break-word;
+
+    line-height:1.5;
+
 }
 
-.admin-dropdown button{
-    width:100%;
-    border:none;
-    padding:12px;
-    border-radius:10px;
-    background:#f4f4f4;
-    margin-bottom:10px;
-    cursor:pointer;
-    transition:.2s;
-}
-
-.admin-dropdown button:hover{
-    background:#16a34a;
-    color:white;
-}
+/* Links */
 
 .dropdown-link{
-    display:block;
-    width:100%;
-    padding:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:14px 16px;
+
     margin-bottom:10px;
-    border-radius:10px;
-    background:#f4f4f4;
-    color:#111;
+
+    border-radius:14px;
+
+    background:#f7f8fb;
+
     text-decoration:none;
-    box-sizing:border-box;
-    transition:.2s;
+
+    color:#222;
+
+    font-weight:600;
+
+    transition:all .25s ease;
+
 }
 
 .dropdown-link:hover{
+
     background:#16a34a;
+
     color:white;
+
+    transform:translateX(4px);
+
+}
+
+/* Botón */
+
+.admin-dropdown button{
+
+    width:100%;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    background:#f7f8fb;
+
+    color:#222;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:all .25s ease;
+
+}
+
+
+/* Mobile */
+
+@media (max-width:768px){
+
+    .admin-dropdown{
+
+        left:-10px;
+
+        width:240px;
+
+        padding:16px;
+
+    }
+
+}
+
+.admin-dropdown button:hover{
+
+    background:#16a34a;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 12px 28px rgba(22,163,74,.28);
+
+}
+
+/* ================= ANIMACIÓN ================= */
+
+@keyframes fadeHero{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-18px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width:768px){
+
+    .header{
+
+        grid-template-columns:52px 1fr 52px;
+
+        align-items:center;
+
+        gap:0;
+
+        padding:14px 12px 8px;
+
+        margin-bottom:8px;
+
+    }
+
+    .hero-logo{
+
+        width:100%;
+
+        display:flex;
+
+        justify-content:center;
+
+        align-items:center;
+
+    }
+
+    .logo{
+
+        width:240px;
+
+        max-width:100%;
+
+        margin:0 auto;
+
+    }
+
+    .header-space{
+
+        width:52px;
+
+    }
+
 }

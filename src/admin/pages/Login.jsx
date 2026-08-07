@@ -16,21 +16,26 @@ export default function Login() {
 
     try {
       await login(email, password);
-      navigate("/admin");
+
+      navigate("/admin", {
+        replace: true,
+      });
     } catch (err) {
-      setError("Email o contraseña incorrectos.");
       console.error(err);
+      setError("Email o contraseña incorrectos.");
     }
   }
 
   return (
     <div
       style={{
-        maxWidth: "400px",
+        maxWidth: "420px",
         margin: "80px auto",
-        padding: "30px",
-        border: "1px solid #ddd",
-        borderRadius: "10px",
+        padding: "35px",
+        background: "#fff",
+        borderRadius: "20px",
+        boxShadow: "0 15px 40px rgba(0,0,0,.12)",
+        textAlign: "center",
       }}
     >
       <h2>🔐 Iniciar sesión</h2>
@@ -73,7 +78,12 @@ export default function Login() {
       </form>
 
       {error && (
-        <p style={{ color: "red", marginTop: "15px" }}>
+        <p
+          style={{
+            color: "red",
+            marginTop: "15px",
+          }}
+        >
           {error}
         </p>
       )}

@@ -1,44 +1,56 @@
 import "./Header.css";
-import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
 
-import { useCart } from "../context/CartContext";
+import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
 
 function Header() {
-  const { carrito } = useCart();
   const { usuario, logout } = useAuth();
-
-  const cantidad = carrito.reduce(
-    (total, producto) => total + producto.cantidad,
-    0
-  );
 
   return (
     <header className="header">
       <div className="header-user">
         {!usuario ? (
-          <Link to="/admin/login" className="user-btn">
+          <Link
+            to="/admin/login"
+            className="user-btn"
+          >
             👤
           </Link>
         ) : (
           <div className="admin-menu">
-            <button className="user-btn">
+            <button
+              type="button"
+              className="user-btn"
+            >
               👤
             </button>
 
             <div className="admin-dropdown">
               <p>{usuario.email}</p>
 
-              <Link className="dropdown-link" to="/admin">
+              <Link
+                to="/admin"
+                className="dropdown-link"
+              >
                 📊 Panel Admin
               </Link>
 
-              <Link className="dropdown-link" to="/admin/productos">
+              <button
+                type="button"
+                className="dropdown-link"
+                onClick={() =>
+                  (window.location.href =
+                    "/admin/productos")
+                }
+              >
                 📦 Productos
-              </Link>
+              </button>
 
-              <button onClick={logout}>
+              <button
+                type="button"
+                onClick={logout}
+              >
                 🚪 Cerrar sesión
               </button>
             </div>
@@ -46,15 +58,15 @@ function Header() {
         )}
       </div>
 
-      <img
-        src={logo}
-        alt="Electro Hogar"
-        className="logo"
-      />
-
-      <div className="cart-icon">
-        🛒 <span>{cantidad}</span>
+      <div className="hero-logo">
+        <img
+          src={logo}
+          alt="Electro Hogar"
+          className="logo"
+        />
       </div>
+
+      <div className="header-space"></div>
     </header>
   );
 }

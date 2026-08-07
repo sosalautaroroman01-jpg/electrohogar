@@ -1,0 +1,181 @@
+.ticker{
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+
+    width: 100%;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+
+    background: rgba(10,15,28,.97);
+    backdrop-filter: blur(14px);
+
+    border-bottom: 1px solid rgba(255,255,255,.08);
+
+    overflow: hidden;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,.18);
+}
+
+/* ================= EN VIVO ================= */
+
+.live-box{
+
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    height:100%;
+
+    padding:0 14px;
+
+    flex-shrink:0;
+
+    color:#fff;
+
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.5px;
+
+    border-right:1px solid rgba(255,255,255,.08);
+
+    background:rgba(255,255,255,.03);
+}
+
+.live-dot{
+
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
+
+    background:#22c55e;
+
+    box-shadow:0 0 8px #22c55e;
+
+    animation:pulse 1.4s infinite;
+}
+
+@keyframes pulse{
+
+    0%{
+        transform:scale(.85);
+        opacity:.55;
+    }
+
+    50%{
+        transform:scale(1.25);
+        opacity:1;
+    }
+
+    100%{
+        transform:scale(.85);
+        opacity:.55;
+    }
+
+}
+
+/* ================= TICKER ================= */
+
+.ticker-wrapper{
+
+    flex:1;
+
+    overflow:hidden;
+
+    white-space:nowrap;
+}
+
+.ticker-track{
+
+    display:flex;
+    align-items:center;
+
+    width:max-content;
+
+    will-change:transform;
+
+    animation:scrollDesktop 34s linear infinite;
+}
+
+.ticker:hover .ticker-track{
+
+    animation-play-state:paused;
+}
+
+.ticker-track span{
+
+    display:flex;
+    align-items:center;
+
+    flex-shrink:0;
+
+    padding-right:90px;
+
+    color:#f3f4f6;
+
+    font-size:13px;
+    font-weight:500;
+}
+
+@keyframes scrollDesktop{
+
+    from{
+        transform:translateX(0);
+    }
+
+    to{
+        transform:translateX(-20%);
+    }
+
+}
+
+/* ================= CELULAR ================= */
+
+@media (max-width:768px){
+
+    .ticker{
+
+        height:36px;
+    }
+
+    .live-box{
+
+        padding:0 10px;
+
+        font-size:10px;
+    }
+
+    .live-dot{
+
+        width:7px;
+        height:7px;
+    }
+
+    .ticker-track{
+
+        animation:scrollMobile 48s linear infinite;
+    }
+
+    .ticker-track span{
+
+        font-size:11px;
+
+        padding-right:70px;
+    }
+
+}
+
+@keyframes scrollMobile{
+
+    from{
+        transform:translateX(0);
+    }
+
+    to{
+        transform:translateX(-20%);
+    }
+
+}

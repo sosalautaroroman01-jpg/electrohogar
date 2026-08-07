@@ -1,10 +1,20 @@
+import ProductInfo from "./ProductInfo";
+import ProductCategory from "./ProductCategory";
+import ProductPrices from "./ProductPrices";
+import ProductMedia from "./ProductMedia";
 import { useEffect, useState } from "react";
+import { obtenerProductos } from "../../services/productosService";
 import "../../styles/forms.css";
 
 const EMPTY_FORM = {
   nombre: "",
   categoria: "",
+  marca: "",
+  subcategoria: "",
+  medida: "",
+  moneda: "ARS",
   precio: "",
+  precio2: "",
   precio3: "",
   precio6: "",
   precio9: "",
@@ -12,6 +22,9 @@ const EMPTY_FORM = {
   stock: "",
   descripcion: "",
   imagen: "",
+  imagenes: [],
+  video: "",
+  videoFile: null,
   visible: true,
 };
 
@@ -21,37 +34,47 @@ export default function ProductForm({
   textoBoton = "Guardar Producto",
 }) {
   const [form, setForm] = useState(initialData || EMPTY_FORM);
-  const [preview, setPreview] = useState(initialData?.imagen || "");
+  const [preview, setPreview] = useState([]);
+  const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
-    if (initialData) {
-      setForm({
-        ...EMPTY_FORM,
-        ...initialData,
-      });
+    if (!initialData) return;
 
-      setPreview(initialData.imagen || "");
+    setForm({
+      ...EMPTY_FORM,
+      ...initialData,
+    });
+
+    if (initialData.imagenes?.length > 0) {
+      setPreview(initialData.imagenes);
+    } else if (initialData.imagen) {
+      setPreview([initialData.imagen]);
     }
   }, [initialData]);
 
+  useEffect(() => {
+    async function cargarCategorias() {
+      const productos = await obtenerProductos();
+
+      const lista = [
+        ...new Set(
+          productos
+            .map((p) => (p.categoria || "").trim())
+            .filter(Boolean)
+        ),
+      ].sort();
+
+      setCategorias(lista);
+    }
+
+    cargarCategorias();
+  }, []);
+
   function handleChange(e) {
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
-  }
-
-  function handleImagen(e) {
-    const file = e.target.files[0];
-
-    if (!file) return;
-
-    setForm({
-      ...form,
-      imagenFile: file,
-    });
-
-    setPreview(URL.createObjectURL(file));
+    }));
   }
 
   function handleSubmit(e) {
@@ -59,163 +82,45 @@ export default function ProductForm({
 
     onSubmit({
       ...form,
-
       precio: Number(form.precio),
-
-      // SOLO se convierten a número si el usuario escribió algo
-      precio3:
-        form.precio3 === ""
-          ? ""
-          : Number(form.precio3),
-
-      precio6:
-        form.precio6 === ""
-          ? ""
-          : Number(form.precio6),
-
-      precio9:
-        form.precio9 === ""
-          ? ""
-          : Number(form.precio9),
-
-      precio12:
-        form.precio12 === ""
-          ? ""
-          : Number(form.precio12),
-
-      stock:
-        form.stock === ""
-          ? ""
-          : Number(form.stock),
+      precio2: form.precio2 === "" ? "" : Number(form.precio2),
+      precio3: form.precio3 === "" ? "" : Number(form.precio3),
+      precio6: form.precio6 === "" ? "" : Number(form.precio6),
+      precio9: form.precio9 === "" ? "" : Number(form.precio9),
+      precio12: form.precio12 === "" ? "" : Number(form.precio12),
+      stock: form.stock === "" ? "" : Number(form.stock),
     });
   }
 
   return (
-    <form className="product-form" onSubmit={handleSubmit}>
-      <h2>📦 Datos del Producto</h2>
-
-      <label>Imagen</label>
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleImagen}
+    <form
+      className="product-form"
+      onSubmit={handleSubmit}
+    >
+      <ProductMedia
+        form={form}
+        setForm={setForm}
+        preview={preview}
+        setPreview={setPreview}
       />
 
-      {preview && (
-        <img
-          src={preview}
-          alt="Vista previa"
-          className="preview-image"
-        />
-      )}
-
-      <label>Nombre</label>
-
-      <input
-        name="nombre"
-        placeholder="Ej: Smart TV TCL 50"
-        value={form.nombre}
-        onChange={handleChange}
-        required
+      <ProductInfo
+        form={form}
+        setForm={setForm}
+        handleChange={handleChange}
       />
 
-      <label>Categoría</label>
-
-      <input
-        name="categoria"
-        placeholder="TV, Celulares, Cocina..."
-        value={form.categoria}
-        onChange={handleChange}
-        required
+      <ProductCategory
+        form={form}
+        setForm={setForm}
+        categorias={categorias}
+        handleChange={handleChange}
       />
 
-      <label>💰 Precio Unitario</label>
-
-      <input
-        type="number"
-        name="precio"
-        placeholder="$0"
-        value={form.precio}
-        onChange={handleChange}
-        required
+      <ProductPrices
+        form={form}
+        handleChange={handleChange}
       />
-
-      <label>🔥 Precio x3</label>
-
-      <input
-        type="number"
-        name="precio3"
-        placeholder="$0"
-        value={form.precio3}
-        onChange={handleChange}
-      />
-
-      <label>🔥 Precio x6</label>
-
-      <input
-        type="number"
-        name="precio6"
-        placeholder="$0"
-        value={form.precio6}
-        onChange={handleChange}
-      />
-
-      <label>🔥 Precio x9</label>
-
-      <input
-        type="number"
-        name="precio9"
-        placeholder="$0"
-        value={form.precio9}
-        onChange={handleChange}
-      />
-
-      <label>🔥 Precio x12</label>
-
-      <input
-        type="number"
-        name="precio12"
-        placeholder="$0"
-        value={form.precio12}
-        onChange={handleChange}
-      />
-
-      <label>📦 Stock</label>
-
-      <input
-        type="number"
-        name="stock"
-        placeholder="Cantidad disponible"
-        value={form.stock}
-        onChange={handleChange}
-      />
-
-      <label>👁 Estado</label>
-
-      <select
-        name="visible"
-        value={String(form.visible)}
-        onChange={(e) =>
-          setForm({
-            ...form,
-            visible: e.target.value === "true",
-          })
-        }
-      >
-        <option value="true">🟢 Visible</option>
-        <option value="false">🔴 Oculto</option>
-      </select>
-
-      <label>Descripción</label>
-
-      <textarea
-        name="descripcion"
-        rows="5"
-        placeholder="Descripción..."
-        value={form.descripcion}
-        onChange={handleChange}
-      ></textarea>
 
       <button type="submit">
         💾 {textoBoton}

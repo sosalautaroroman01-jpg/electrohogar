@@ -1,45 +1,131 @@
 .categories{
+
     display:flex;
-    flex-wrap:wrap;
-    gap:15px;
+
     justify-content:center;
-    margin:35px 0;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+
+    margin:18px auto 12px;
+
+    width:100%;
+
+    max-width:1200px;
+
 }
 
 .category-btn{
 
-    background:white;
-    border:2px solid #14963d;
-    color:#14963d;
+    display:flex;
 
-    padding:14px 24px;
+    align-items:center;
 
-    border-radius:50px;
+    justify-content:center;
 
-    font-size:16px;
-    font-weight:700;
+    gap:8px;
+
+    min-height:46px;
+
+    padding:0 20px;
+
+    border:none;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.94);
+
+    backdrop-filter:blur(14px);
+
+    -webkit-backdrop-filter:blur(14px);
+
+    color:#16a34a;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    white-space:nowrap;
 
     cursor:pointer;
 
     transition:.25s;
 
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    box-shadow:
+        0 8px 22px rgba(0,0,0,.08);
 
 }
 
 .category-btn:hover{
 
-    background:#14963d;
-    color:white;
+    transform:translateY(-2px);
 
-    transform:translateY(-4px);
+    background:#16a34a;
 
-    box-shadow:0 12px 25px rgba(20,150,61,.35);
+    color:#fff;
 
 }
 
-.category-btn:active{
+.category-btn.active{
 
-    transform:scale(.95);
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+
+    color:#fff;
+
+    box-shadow:
+        0 12px 28px rgba(22,163,74,.30);
+
+}
+
+/* ===================== CELULAR ===================== */
+
+@media (max-width:768px){
+
+.categories{
+
+    justify-content:flex-start;
+
+    flex-wrap:nowrap;
+
+    overflow-x:auto;
+
+    overflow-y:hidden;
+
+    gap:10px;
+
+    width:100%;
+
+    max-width:100%;
+
+    padding:0 12px 10px;
+
+    box-sizing:border-box;
+
+    -webkit-overflow-scrolling:touch;
+
+    scrollbar-width:none;
+
+}
+
+.categories::-webkit-scrollbar{
+
+    display:none;
+
+}
+
+.category-btn{
+
+    flex:0 0 auto;
+
+    min-height:42px;
+
+    padding:0 18px;
+
+    font-size:14px;
+
+}
 
 }

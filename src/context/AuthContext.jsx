@@ -33,6 +33,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         usuario,
+        loading,
         login,
         logout,
       }}

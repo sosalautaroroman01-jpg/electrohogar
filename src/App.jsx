@@ -2,6 +2,8 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
+import CalculadoraEnvios from "./pages/CalculadoraEnvios";
+import Local from "./pages/Local";
 
 import Login from "./admin/pages/Login";
 import Dashboard from "./admin/pages/Dashboard";
@@ -15,13 +17,35 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Catálogo */}
-        <Route path="/" element={<Home />} />
 
-        {/* Login */}
-        <Route path="/admin/login" element={<Login />} />
+        {/* ================= CATÁLOGO PÚBLICO ================= */}
 
-        {/* Dashboard */}
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+        <Route
+          path="/calculadora-envios"
+          element={<CalculadoraEnvios />}
+        />
+
+        {/* ================= MODO LOCAL ================= */}
+
+        <Route
+          path="/local"
+          element={<Local />}
+        />
+
+        {/* ================= LOGIN ADMIN ================= */}
+
+        <Route
+          path="/admin/login"
+          element={<Login />}
+        />
+
+        {/* ================= DASHBOARD ================= */}
+
         <Route
           path="/admin"
           element={
@@ -31,7 +55,8 @@ function App() {
           }
         />
 
-        {/* Productos */}
+        {/* ================= PRODUCTOS ================= */}
+
         <Route
           path="/admin/productos"
           element={
@@ -41,7 +66,6 @@ function App() {
           }
         />
 
-        {/* Nuevo */}
         <Route
           path="/admin/productos/nuevo"
           element={
@@ -51,7 +75,6 @@ function App() {
           }
         />
 
-        {/* Editar */}
         <Route
           path="/admin/productos/editar/:id"
           element={
@@ -60,6 +83,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
       </Routes>
     </BrowserRouter>
   );

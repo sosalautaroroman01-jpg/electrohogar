@@ -1,72 +1,154 @@
 import "./ProductCard.css";
-import { useCart } from "../context/CartContext";
+import { useState, useEffect } from "react";
+
+import AddToCartButton from "./AddToCartButton";
+import ProductGallery from "./ProductGallery";
+import ProductPrice from "./ProductPrice";
+import WholesalePrices from "./WholesalePrices";
+import DescriptionModal from "./DescriptionModal";
+import ImageModal from "./ImageModal";
 
 function ProductCard({ producto }) {
-  const { agregarAlCarrito } = useCart();
 
-  return (
-    <div className="card">
-      {producto.imagen && (
-        <img
-          src={producto.imagen}
-          alt={producto.nombre}
-          className="card-img"
+  const imagenes =
+    producto.imagenes?.length > 0
+      ? producto.imagenes
+      : producto.imagen
+      ? [producto.imagen]
+      : [];
+
+  const video = producto.video || "";
+
+  const total = imagenes.length + (video ? 1 : 0);
+
+  const [imagenActual, setImagenActual] =
+    useState(0);
+
+  const [imagenAbierta, setImagenAbierta] =
+    useState(false);
+
+  const [descripcionModal, setDescripcionModal] =
+    useState(false);
+
+  useEffect(() => {
+    function manejarTeclas(e) {
+      if (!imagenAbierta) return;
+
+      switch (e.key) {
+        case "Escape":
+          setImagenAbierta(false);
+          break;
+
+        case "ArrowRight":
+          if (total > 1) {
+            setImagenActual((prev) =>
+              prev === total - 1 ? 0 : prev + 1
+            );
+          }
+          break;
+
+        case "ArrowLeft":
+          if (total > 1) {
+            setImagenActual((prev) =>
+              prev === 0 ? total - 1 : prev - 1
+            );
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    window.addEventListener(
+      "keydown",
+      manejarTeclas
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        manejarTeclas
+      );
+    };
+  }, [imagenAbierta, total]);
+
+  function siguienteImagen(e) {
+    e?.stopPropagation();
+
+    if (total <= 1) return;
+
+    setImagenActual((prev) =>
+      prev === total - 1 ? 0 : prev + 1
+    );
+  }
+
+  function anteriorImagen(e) {
+    e?.stopPropagation();
+
+    if (total <= 1) return;
+
+    setImagenActual((prev) =>
+      prev === 0 ? total - 1 : prev - 1
+    );
+  }
+
+    return (
+    <>
+      <div className="card">
+        <ProductGallery
+          producto={producto}
+          imagenes={imagenes}
+          video={video}
+          total={total}
+          imagenActual={imagenActual}
+          setImagenActual={setImagenActual}
+          setImagenAbierta={setImagenAbierta}
+          siguienteImagen={siguienteImagen}
+          anteriorImagen={anteriorImagen}
         />
-      )}
 
-      <div className="card-body">
-        <h3>{producto.nombre}</h3>
+        <div className="card-body">
+          <h3>{producto.nombre}</h3>
 
-        <p className="precio">
-          💰 ${Number(producto.precio || 0).toLocaleString("es-AR")}
-        </p>
+<ProductPrice producto={producto} />
 
-        {(producto.precio3 || producto.precio6 || producto.precio9 || producto.precio12) && (
-          <div
-            style={{
-              marginBottom: "15px",
-              background: "#f3fff5",
-              border: "1px solid #16a34a",
-              borderRadius: "10px",
-              padding: "10px",
-              fontSize: "14px",
-            }}
-          >
-            {producto.precio3 > 0 && (
-              <div>
-                🔥 <strong>x3:</strong> $
-                {Number(producto.precio3).toLocaleString("es-AR")}
-              </div>
-            )}
+          <WholesalePrices
+            producto={producto}
+          />
 
-            {producto.precio6 > 0 && (
-              <div>
-                🔥 <strong>x6:</strong> $
-                {Number(producto.precio6).toLocaleString("es-AR")}
-              </div>
-            )}
+          {producto.descripcion?.trim() && (
+            <button
+              className="info-btn"
+              onClick={() => setDescripcionModal(true)}
+            >
+              ⓘ Info
+            </button>
+          )}
 
-            {producto.precio9 > 0 && (
-              <div>
-                🔥 <strong>x9:</strong> $
-                {Number(producto.precio9).toLocaleString("es-AR")}
-              </div>
-            )}
-
-            {producto.precio12 > 0 && (
-              <div>
-                🔥 <strong>x12:</strong> $
-                {Number(producto.precio12).toLocaleString("es-AR")}
-              </div>
-            )}
-          </div>
-        )}
-
-        <button onClick={() => agregarAlCarrito(producto)}>
-          🛒 Agregar al carrito
-        </button>
+          <AddToCartButton producto={producto} />
+        </div>
       </div>
-    </div>
+
+      <DescriptionModal
+        descripcionModal={descripcionModal}
+        setDescripcionModal={setDescripcionModal}
+        producto={producto}
+      />
+
+      <ImageModal
+        imagenAbierta={imagenAbierta}
+        setImagenAbierta={setImagenAbierta}
+        producto={producto}
+        imagenes={imagenes}
+        video={video}
+        imagenActual={imagenActual}
+        total={total}
+        anteriorImagen={anteriorImagen}
+        siguienteImagen={siguienteImagen}
+        setImagenActual={setImagenActual}
+      />
+    </>
   );
 }
 

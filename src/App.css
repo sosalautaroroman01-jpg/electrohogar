@@ -1,40 +1,110 @@
-*{
+.catalog-title{
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    width:100%;
+    max-width:900px;
+
+    margin:34px auto 28px;
+    padding:0 20px;
+
+}
+
+.catalog-badge{
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:9px 20px;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.14);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.18);
+
+    color:#fff;
+
+    font-size:12px;
+    font-weight:700;
+
+    letter-spacing:2px;
+    text-transform:uppercase;
+
+    margin-bottom:16px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+
+}
+
+.catalog-title h1{
+
     margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
-}
 
-body{
+    font-size:38px;
+    font-weight:800;
 
-    background:#f4f5f7;
+    line-height:1.15;
 
-}
+    color:#fff;
 
-.app{
-
-    max-width:1500px;
-    margin:auto;
-    padding:25px;
+    text-shadow:0 8px 24px rgba(0,0,0,.25);
 
 }
 
-h2{
+.catalog-title p{
 
-    margin:40px 0 30px;
-    font-size:32px;
-    color:#222;
+    margin-top:14px;
+
+    max-width:650px;
+
+    color:rgba(255,255,255,.90);
+
+    font-size:17px;
+    line-height:1.7;
 
 }
 
-button{
+/* ================= MOBILE ================= */
 
-    transition:.25s;
+@media (max-width:768px){
 
-}
+    .catalog-title{
 
-button:hover{
+        margin:22px auto 18px;
+        padding:0 18px;
 
-    transform:scale(1.03);
+    }
+
+    .catalog-badge{
+
+        font-size:11px;
+        padding:8px 16px;
+        letter-spacing:1.5px;
+
+    }
+
+    .catalog-title h1{
+
+        font-size:28px;
+        line-height:1.2;
+
+    }
+
+    .catalog-title p{
+
+        margin-top:12px;
+        font-size:15px;
+        line-height:1.6;
+
+    }
 
 }

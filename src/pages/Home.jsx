@@ -1,23 +1,38 @@
+import FloatingCart from "../components/FloatingCart";
 import AnimatedBackground from "../components/AnimatedBackground";
 import Header from "../components/Header";
 import SearchBar from "../components/SearchBar";
 import Categories from "../components/Categories";
 import ProductGrid from "../components/ProductGrid";
 import Cart from "../components/Cart";
+import DollarTicker from "../components/DollarTicker";
+import InfoBar from "../components/InfoBar";
 
-function Home() {
+function Home({ modoLocal = false }) {
   return (
     <>
       <AnimatedBackground />
-<Cart />
+
+      <Cart modoLocal={modoLocal} />
+      <FloatingCart />
+
       <div className="app">
+        <DollarTicker />
+
         <Header />
 
-        <SearchBar />
+        <section className="hero">
+          <div className="hero-search">
+            <SearchBar />
+          </div>
 
-        <Categories />
+          {/* Barra informativa */}
+          <InfoBar />
 
-        <h2>🔥 Productos destacados</h2>
+          <div className="hero-categories">
+            <Categories />
+          </div>
+        </section>
 
         <ProductGrid />
       </div>

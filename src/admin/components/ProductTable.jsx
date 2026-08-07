@@ -8,9 +8,9 @@ export default function ProductTable({
   return (
     <table
       style={{
-        width:"100%",
-        borderCollapse:"collapse",
-        background:"#fff",
+        width: "100%",
+        borderCollapse: "collapse",
+        background: "#fff",
       }}
     >
       <thead>
@@ -25,14 +25,29 @@ export default function ProductTable({
       </thead>
 
       <tbody>
-        {productos.map((producto)=>(
-          <ProductRow
-            key={producto.id}
-            producto={producto}
-            onDelete={onDelete}
-            onToggleVisible={onToggleVisible}
-          />
-        ))}
+        {productos.length === 0 ? (
+          <tr>
+            <td
+              colSpan={6}
+              style={{
+                textAlign: "center",
+                padding: "30px",
+                color: "#666",
+              }}
+            >
+              No se encontraron productos.
+            </td>
+          </tr>
+        ) : (
+          productos.map((producto) => (
+            <ProductRow
+              key={producto.id}
+              producto={producto}
+              onDelete={onDelete}
+              onToggleVisible={onToggleVisible}
+            />
+          ))
+        )}
       </tbody>
     </table>
   );

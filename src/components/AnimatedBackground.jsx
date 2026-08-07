@@ -2,18 +2,26 @@ import "./AnimatedBackground.css";
 
 function AnimatedBackground() {
   return (
-    <>
-      <div className="wave wave1"></div>
-      <div className="wave wave2"></div>
+    <div className="background-container">
 
-      <div className="ball">⚽</div>
+      {/* Luces */}
+      <div className="light light1"></div>
+      <div className="light light2"></div>
+      <div className="light light3"></div>
 
+      {/* Círculos de profundidad */}
+      <div className="blur-circle circle1"></div>
+      <div className="blur-circle circle2"></div>
+      <div className="blur-circle circle3"></div>
+
+      {/* Partículas */}
       <div className="particles">
-        {Array.from({ length: 40 }).map((_, i) => (
+        {Array.from({ length: 90 }).map((_, i) => (
           <span key={i}></span>
         ))}
       </div>
-    </>
+
+    </div>
   );
 }
 

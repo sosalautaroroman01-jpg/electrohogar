@@ -1,45 +1,102 @@
 import "./ProductGrid.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
+
 import { db } from "../firebase";
-import ProductCard from "./ProductCard";
 import { useFilter } from "../context/FilterContext";
+import ProductCard from "./ProductCard";
 
 function ProductGrid() {
   const [productos, setProductos] = useState([]);
 
-  const { busqueda, categoria } = useFilter();
+  const {
+    busqueda,
+    categoria,
+    marca,
+    subcategoria,
+    medida,
+  } = useFilter();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "productos"),
       (snapshot) => {
-        const lista = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setProductos(lista);
+        setProductos(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+        );
       }
     );
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-  const productosFiltrados = productos.filter((producto) => {
-    // 👁 Solo mostrar productos visibles
-    if (producto.visible === false) return false;
+  const productosFiltrados = useMemo(() => {
+    const texto = busqueda.toLowerCase();
 
-    const coincideBusqueda = producto.nombre
-      ?.toLowerCase()
-      .includes(busqueda.toLowerCase());
+    return productos.filter((producto) => {
+      if (producto.visible === false) return false;
 
-    const coincideCategoria =
-      categoria === "Todas" ||
-      producto.categoria === categoria;
+      if (
+        !producto.nombre
+          ?.toLowerCase()
+          .includes(texto)
+      ) {
+        return false;
+      }
 
-    return coincideBusqueda && coincideCategoria;
-  });
+      if (
+        categoria !== "Todas" &&
+        producto.categoria !== categoria
+      ) {
+        return false;
+      }
+
+      if (
+        categoria === "Celulares" &&
+        marca &&
+        marca !== "Todas" &&
+        producto.marca !== marca
+      ) {
+        return false;
+      }
+
+      if (
+        categoria === "Blanquería" &&
+        subcategoria &&
+        subcategoria !== "Todas" &&
+        producto.subcategoria !== subcategoria
+      ) {
+        return false;
+      }
+
+      const usaMedida =
+        categoria === "Blanquería" &&
+        ["Sábanas", "Frazadas", "Acolchados"].includes(
+          subcategoria
+        );
+
+      if (
+        usaMedida &&
+        medida &&
+        medida !== "Todas" &&
+        producto.medida !== medida
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    productos,
+    busqueda,
+    categoria,
+    marca,
+    subcategoria,
+    medida,
+  ]);
 
   return (
     <div className="productos">
