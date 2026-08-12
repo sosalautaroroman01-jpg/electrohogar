@@ -1,0 +1,110 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f4f4;
+}
+
+.mostrador {
+  padding: 30px;
+}
+
+.mostrador h1 {
+  margin: 0 0 30px;
+}
+
+/* =================================
+   CONTENEDOR DE PEDIDOS
+================================= */
+
+.pedidos-container {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fill, minmax(360px, 460px));
+
+  gap: 20px;
+
+  align-items: start;
+}
+
+/* =================================
+   TARJETA DEL PEDIDO
+================================= */
+
+.pedido-card {
+  background: white;
+
+  border-radius: 12px;
+
+  padding: 20px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+
+  box-sizing: border-box;
+
+  width: 100%;
+}
+
+/* =================================
+   PRODUCTOS
+================================= */
+
+.producto {
+  margin-bottom: 8px;
+}
+
+/* =================================
+   BOTON
+================================= */
+
+.pedido-card button {
+  margin-top: 20px;
+
+  background: #57B52A;
+
+  color: white;
+
+  border: none;
+
+  padding: 12px 18px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 16px;
+
+  width: 100%;
+}
+
+/* =================================
+   TABLET
+================================= */
+
+@media (max-width: 900px) {
+
+  .mostrador {
+    padding: 20px;
+  }
+
+  .pedidos-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+/* =================================
+   CELULAR
+================================= */
+
+@media (max-width: 650px) {
+
+  .mostrador {
+    padding: 15px;
+  }
+
+  .pedidos-container {
+    grid-template-columns: 1fr;
+  }
+
+}

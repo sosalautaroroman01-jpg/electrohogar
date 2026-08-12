@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import CalculadoraEnvios from "./pages/CalculadoraEnvios";
 import Local from "./pages/Local";
+import Pedido from "./pages/Pedido";
+import Mostrador from "./pages/Mostrador";
 
 import Login from "./admin/pages/Login";
 import Dashboard from "./admin/pages/Dashboard";
@@ -16,6 +18,7 @@ import ProtectedRoute from "./admin/components/ProtectedRoute";
 function App() {
   return (
     <BrowserRouter>
+
       <Routes>
 
         {/* ================= CATÁLOGO PÚBLICO ================= */}
@@ -35,6 +38,20 @@ function App() {
         <Route
           path="/local"
           element={<Local />}
+        />
+
+        {/* ================= MOSTRADOR ================= */}
+
+        <Route
+          path="/mostrador"
+          element={<Mostrador />}
+        />
+
+        {/* ================= ORDEN DE PEDIDO ================= */}
+
+        <Route
+          path="/pedido/:id"
+          element={<Pedido />}
         />
 
         {/* ================= LOGIN ADMIN ================= */}
@@ -85,6 +102,7 @@ function App() {
         />
 
       </Routes>
+
     </BrowserRouter>
   );
 }

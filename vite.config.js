@@ -15,6 +15,20 @@ export default defineConfig({
         "icon-512.png",
       ],
 
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+
+        navigateFallback: "/index.html",
+
+        navigateFallbackAllowlist: [
+          /^\/$/,
+          /^\/local/,
+          /^\/mostrador/,
+          /^\/calculadora-envios/,
+        ],
+      },
+
       manifest: {
         name: "Electro Hogar Local",
         short_name: "EH Local",
@@ -25,11 +39,9 @@ export default defineConfig({
         background_color: "#ffffff",
 
         display: "standalone",
-
         orientation: "portrait",
 
         start_url: "/local",
-
         scope: "/",
 
         icons: [
@@ -47,7 +59,6 @@ export default defineConfig({
             src: "icon-512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "maskable",
           },
         ],
       },

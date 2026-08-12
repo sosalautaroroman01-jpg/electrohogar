@@ -1,3 +1,5 @@
+import { imprimirRemito } from "../utils/imprimirRemito";
+import { crearPedido } from "../services/pedidosService";
 import logo from "../assets/logo.png";
 import "./Cart.css";
 import { useCart } from "../context/CartContext";
@@ -591,153 +593,345 @@ ventana.onload = () => {
 
 } // ← TERMINA imprimirPresupuesto()
 
-function enviarWhatsApp() {
+async function enviarAlMostrador() {
 
-    const saludos = {
-        Lautaro: "Hola Lauti! 👋",
-        Milagros: "Hola Mili! 👋",
-        Gonzalo: "Hola Gonza! 👋",
-        Camila: "Hola Cami! 👋",
-        Victoria: "Hola Vicky! 👋",
+  try {
+
+    const ahora = new Date();
+
+    const pedido = {
+
+      vendedor: vendedor.nombre,
+
+      vendedorCodigo: vendedor.codigo,
+
+      fecha: ahora.toLocaleDateString("es-AR"),
+
+      hora: ahora.toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+
+      total,
+
+      productos: carrito.map((producto) => {
+
+        const precio = obtenerPrecio(producto);
+
+        return {
+
+          id: producto.id,
+
+          nombre: producto.nombre,
+
+          cantidad: producto.cantidad,
+
+          precio,
+
+          subtotal: precio * producto.cantidad,
+
+          imagen:
+            producto.imagenes?.[0] ||
+            producto.imagen ||
+            "",
+
+        };
+
+      }),
+
     };
 
-  let mensaje =
-    `${saludos[vendedor.nombre] || `Hola ${vendedor.nombre}! 👋`}` +
-    `%0A%0AQuiero consultar por los siguientes productos:%0A%0A`;
+    console.log("Pedido a enviar:", pedido);
 
-  carrito.forEach((producto) => {
-    const precio = obtenerPrecio(producto);
+    const resultado = await crearPedido(pedido);
 
-    mensaje += `• ${producto.nombre}%0A`;
-    mensaje += `Cantidad: ${producto.cantidad}%0A`;
-    mensaje += `Precio Unitario: $${precio.toLocaleString("es-AR")}%0A`;
-    mensaje += `Subtotal: $${(
-      precio * producto.cantidad
-    ).toLocaleString("es-AR")}%0A%0A`;
-  });
+    console.log("Pedido creado:", resultado.id);
 
-  mensaje += `💰 Total: $${total.toLocaleString("es-AR")}%0A%0A`;
-  mensaje += "¡Muchas gracias! 😊";
+    alert("✅ Pedido enviado al mostrador.");
 
-  window.open(
-    `https://wa.me/${vendedor.numero}?text=${mensaje}`,
-    "_blank"
-  );
+    setAbierto(false);
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("❌ No se pudo enviar el pedido.");
+
+  }
+
 }
+  async function enviarWhatsApp() {
 
-return (
-  <div
-    className="cart-overlay"
-    onClick={() => setAbierto(false)}
-  >
+    try {
+
+      // =========================================
+      // CREAR ORDEN EN FIREBASE
+      // =========================================
+
+      const pedido = {
+
+        vendedor: vendedor.nombre,
+
+        vendedorCodigo: vendedor.codigo,
+
+        total,
+
+        productos: carrito.map((producto) => {
+
+          const precio = obtenerPrecio(producto);
+
+          return {
+
+            id: producto.id,
+
+            nombre: producto.nombre,
+
+            cantidad: producto.cantidad,
+
+            precio,
+
+            subtotal: precio * producto.cantidad,
+
+            imagen:
+              producto.imagenes?.[0] ||
+              producto.imagen ||
+              "",
+
+          };
+
+        }),
+
+      };
+
+      const resultado = await crearPedido(pedido);
+
+      const pedidoId = resultado.id;
+
+      // =========================================
+      // LINK DE LA ORDEN
+      // =========================================
+
+      const linkOrden =
+        `${window.location.origin}/pedido/${pedidoId}`;
+
+      // =========================================
+      // SALUDOS
+      // =========================================
+
+      const saludos = {
+
+        LAUTARO: "Hola Lauti! 👋",
+
+        MILAGROS: "Hola Mili! 👋",
+
+        GONZALO: "Hola Gonza! 👋",
+
+        CAMILA: "Hola Cami! 👋",
+
+        VICTORIA: "Hola Vicky! 👋",
+
+      };
+
+      // =========================================
+      // MENSAJE WHATSAPP
+      // =========================================
+
+      let mensaje =
+        `${saludos[vendedor.nombre] || `Hola ${vendedor.nombre}! 👋`}` +
+        `%0A%0AQuiero consultar por los siguientes productos:%0A%0A`;
+
+      carrito.forEach((producto) => {
+
+        const precio = obtenerPrecio(producto);
+
+        mensaje += `• ${producto.nombre}%0A`;
+
+        mensaje += `Cantidad: ${producto.cantidad}%0A`;
+
+        mensaje += `Precio Unitario: $${precio.toLocaleString("es-AR")}%0A`;
+
+        mensaje += `Subtotal: $${(
+          precio * producto.cantidad
+        ).toLocaleString("es-AR")}%0A%0A`;
+
+      });
+
+      mensaje +=
+        `💰 Total: $${total.toLocaleString("es-AR")}%0A%0A`;
+
+      mensaje +=
+        `📋 Orden de pedido:%0A${linkOrden}%0A%0A`;
+
+      mensaje +=
+        "¡Muchas gracias! 😊";
+
+      // =========================================
+      // ABRIR WHATSAPP
+      // =========================================
+
+      window.open(
+        `https://wa.me/${vendedor.numero}?text=${mensaje}`,
+        "_blank"
+      );
+
+    } catch (error) {
+
+      console.error("Error creando la orden:", error);
+
+      alert(
+        "❌ No se pudo generar la orden. Intentá nuevamente."
+      );
+
+    }
+
+  }
+
+  return (
+
     <div
-      className="cart-panel"
-      onClick={(e) => e.stopPropagation()}
+      className="cart-overlay"
+      onClick={() => setAbierto(false)}
     >
-      <div className="cart-header">
-        <h2>🛒 Mi carrito</h2>
 
-        <button onClick={() => setAbierto(false)}>
-          ✖
-        </button>
-      </div>
+      <div
+        className="cart-panel"
+        onClick={(e) => e.stopPropagation()}
+      >
 
-      {carrito.length === 0 ? (
-        <p>Tu carrito está vacío.</p>
-      ) : (
-        <>
-          {carrito.map((producto) => {
-            const precio = obtenerPrecio(producto);
+        <div className="cart-header">
 
-            let promo = "";
+          <h2>🛒 Mi carrito</h2>
 
-            if (producto.cantidad >= 12)
-              promo = "🔥 Precio x12 aplicado";
-            else if (producto.cantidad >= 9)
-              promo = "🔥 Precio x9 aplicado";
-            else if (producto.cantidad >= 6)
-              promo = "🔥 Precio x6 aplicado";
-            else if (producto.cantidad >= 3)
-              promo = "🔥 Precio x3 aplicado";
-            else if (producto.cantidad >= 2)
-              promo = "🔥 Precio x2 aplicado";
+          <button
+            onClick={() => setAbierto(false)}
+          >
+            ✖
+          </button>
 
-            return (
-              <div
-                key={producto.id}
-                className="cart-item"
-              >
-                <img
-                  src={
-                    producto.imagenes?.[0] ||
-                    producto.imagen
-                  }
-                  alt={producto.nombre}
-                />
+        </div>
 
-                <div className="cart-info">
-                  <h4>{producto.nombre}</h4>
+        {carrito.length === 0 ? (
 
-                  <p>
-                    ${precio.toLocaleString("es-AR")}
-                  </p>
+          <p>
+            Tu carrito está vacío.
+          </p>
 
-                  {promo && (
+        ) : (
+
+          <>
+
+            {carrito.map((producto) => {
+
+              const precio = obtenerPrecio(producto);
+
+              let promo = "";
+
+              if (producto.cantidad >= 12)
+                promo = "🔥 Precio x12 aplicado";
+
+              else if (producto.cantidad >= 9)
+                promo = "🔥 Precio x9 aplicado";
+
+              else if (producto.cantidad >= 6)
+                promo = "🔥 Precio x6 aplicado";
+
+              else if (producto.cantidad >= 3)
+                promo = "🔥 Precio x3 aplicado";
+
+              else if (producto.cantidad >= 2)
+                promo = "🔥 Precio x2 aplicado";
+
+              return (
+
+                <div
+                  key={producto.id}
+                  className="cart-item"
+                >
+
+                  <img
+                    src={
+                      producto.imagenes?.[0] ||
+                      producto.imagen
+                    }
+                    alt={producto.nombre}
+                  />
+
+                  <div className="cart-info">
+
+                    <h4>
+                      {producto.nombre}
+                    </h4>
+
+                    <p>
+                      ${precio.toLocaleString("es-AR")}
+                    </p>
+
+                    {promo && (
+
+                      <p
+                        style={{
+                          color: "#16a34a",
+                          fontWeight: "bold",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        {promo}
+                      </p>
+
+                    )}
+
+                    <div className="cart-controls">
+
+                      <button
+                        onClick={() =>
+                          disminuirCantidad(producto.id)
+                        }
+                      >
+                        −
+                      </button>
+
+                      <span>
+                        {producto.cantidad}
+                      </span>
+
+                      <button
+                        onClick={() =>
+                          aumentarCantidad(producto.id)
+                        }
+                      >
+                        +
+                      </button>
+
+                    </div>
+
                     <p
                       style={{
-                        color: "#16a34a",
                         fontWeight: "bold",
-                        marginBottom: "8px",
+                        marginTop: "8px",
                       }}
                     >
-                      {promo}
+                      Subtotal: $
+                      {(
+                        precio * producto.cantidad
+                      ).toLocaleString("es-AR")}
                     </p>
-                  )}
-
-                  <div className="cart-controls">
-                    <button
-                      onClick={() =>
-                        disminuirCantidad(producto.id)
-                      }
-                    >
-                      −
-                    </button>
-
-                    <span>{producto.cantidad}</span>
 
                     <button
+                      className="delete-btn"
                       onClick={() =>
-                        aumentarCantidad(producto.id)
+                        eliminarProducto(producto.id)
                       }
                     >
-                      +
+                      🗑 Eliminar
                     </button>
+
                   </div>
 
-                  <p
-                    style={{
-                      fontWeight: "bold",
-                      marginTop: "8px",
-                    }}
-                  >
-                    Subtotal: $
-                    {(
-                      precio * producto.cantidad
-                    ).toLocaleString("es-AR")}
-                  </p>
-
-                  <button
-                    className="delete-btn"
-                    onClick={() =>
-                      eliminarProducto(producto.id)
-                    }
-                  >
-                    🗑 Eliminar
-                  </button>
                 </div>
-              </div>
-            );
-          })}
+
+              );
+
+            })}
 
 {modoLocal && (
 
@@ -790,12 +984,21 @@ return (
 <div className="action-buttons">
 
   {modoLocal && (
-    <button
-      className="print-btn"
-      onClick={imprimirPresupuesto}
-    >
-      🖨️ Imprimir Remito
-    </button>
+    <>
+      <button
+        className="print-btn"
+        onClick={imprimirPresupuesto}
+      >
+        🖨️ Imprimir Remito
+      </button>
+
+      <button
+        className="print-btn"
+        onClick={enviarAlMostrador}
+      >
+        📤 Enviar al Mostrador
+      </button>
+    </>
   )}
 
   <button
