@@ -1,12 +1,12 @@
-import { imprimirRemito } from "../utils/imprimirRemito";
-import { crearPedido } from "../services/pedidosService";
+import { useEffect } from "react";
+import { useState } from "react";
+import { crearPedido, obtenerSiguienteNumeroBoleta } from "../services/pedidosService";
 import logo from "../assets/logo.png";
 import "./Cart.css";
 import { useCart } from "../context/CartContext";
 import { useVendedor } from "../context/VendedorContext";
 
 function Cart({ modoLocal = false }) {
-
   const {
     carrito,
     abierto,
@@ -14,9 +14,132 @@ function Cart({ modoLocal = false }) {
     aumentarCantidad,
     disminuirCantidad,
     eliminarProducto,
+    actualizarIMEI,
     obtenerPrecio,
     total,
+    activarModoLocal,
+    desactivarModoLocal,
+    numeroBoletaLocal,
+    guardarNumeroBoleta,
+    recuperarBoleta,
+    finalizarBoleta,
+    boletaRecuperada,
+    guardandoBoleta,
   } = useCart();
+
+  const numeroBoleta = numeroBoletaLocal;
+
+  const [numeroParaRecuperar, setNumeroParaRecuperar] =
+    useState("");
+
+  const [recuperandoBoleta, setRecuperandoBoleta] =
+    useState(false);
+
+  // =========================================================
+  // RECUPERAR BOLETA DESDE FIREBASE
+  // =========================================================
+
+  async function manejarRecuperarBoleta() {
+    if (!modoLocal) return;
+
+    const numero = String(
+      numeroParaRecuperar || ""
+    ).trim();
+
+    if (!numero) {
+      alert("⚠️ Escribí el número de boleta que querés recuperar.");
+      return;
+    }
+
+    try {
+      setRecuperandoBoleta(true);
+
+      const resultado =
+        await recuperarBoleta(numero);
+
+      if (!resultado?.ok) {
+        alert(
+          resultado?.mensaje ||
+            "❌ No se encontró la boleta."
+        );
+        return;
+      }
+
+      setNumeroParaRecuperar("");
+
+      alert(
+        `✅ Boleta N° ${resultado.boleta.numeroBoleta || numero} recuperada.`
+      );
+    } catch (error) {
+      console.error(
+        "❌ Error recuperando boleta:",
+        error
+      );
+
+      alert(
+        "❌ No se pudo recuperar la boleta."
+      );
+    } finally {
+      setRecuperandoBoleta(false);
+    }
+  }
+
+  // =========================================================
+  // CERRAR BOLETA ACTUAL
+  // =========================================================
+
+  async function manejarCerrarBoleta() {
+    if (!numeroBoleta) {
+      alert("⚠️ No hay una boleta activa para cerrar.");
+      return;
+    }
+
+    const confirmar = window.confirm(
+      `¿Cerrar definitivamente la boleta N° ${numeroBoleta}?\n\n` +
+        "La venta quedará guardada en Firebase y no se eliminará."
+    );
+
+    if (!confirmar) return;
+
+    try {
+      await finalizarBoleta();
+
+      alert(
+        `✅ Boleta N° ${numeroBoleta} cerrada correctamente.`
+      );
+    } catch (error) {
+      console.error(
+        "❌ Error cerrando boleta:",
+        error
+      );
+
+      alert(
+        "❌ No se pudo cerrar la boleta."
+      );
+    }
+  }
+
+  // =========================================================
+  // ACTIVAR / DESACTIVAR MODO LOCAL
+  // =========================================================
+  //
+  // Local.jsx -> Home.jsx -> Cart modoLocal={true}
+  //
+  // Esto conecta el Modo Local con el guardado automático
+  // del CartContext.
+  // =========================================================
+
+  useEffect(() => {
+    if (modoLocal) {
+      activarModoLocal();
+    } else {
+      desactivarModoLocal();
+    }
+  }, [
+    modoLocal,
+    activarModoLocal,
+    desactivarModoLocal,
+  ]);
 
   const {
     vendedor,
@@ -26,38 +149,96 @@ function Cart({ modoLocal = false }) {
 
   if (!abierto) return null;
 
-  function imprimirPresupuesto() {
+  // =========================================================
+  // IMPRIMIR REMITO
+  // =========================================================
 
-    const ventana = window.open("", "_blank", "width=1400,height=900");
+  async function imprimirPresupuesto() {
+    try {
+      let numeroActual = numeroBoleta;
+
+      if (numeroActual === null) {
+        numeroActual = await obtenerSiguienteNumeroBoleta();
+        guardarNumeroBoleta(numeroActual);
+      }
+
+    const ventana = window.open(
+      "",
+      "_blank",
+      "width=1400,height=900"
+    );
 
     const fecha = new Date();
 
-    const fechaFormateada = fecha.toLocaleDateString("es-AR");
+    const fechaFormateada =
+      fecha.toLocaleDateString("es-AR");
 
-    const horaFormateada = fecha.toLocaleTimeString("es-AR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const horaFormateada =
+      fecha.toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
-    const logoUrl = new URL(logo, window.location.href).href;
+    const logoUrl =
+      new URL(logo, window.location.href).href;
 
     let productosHTML = "";
 
     carrito.forEach((producto) => {
-
       const precio = obtenerPrecio(producto);
+
+      const esCelular =
+        producto.categoria === "Celulares";
+
+      let imeiHTML = "";
+
+      if (esCelular && producto.imeis?.length) {
+        const imeisValidos = producto.imeis.filter(
+          (imei) => imei?.trim()
+        );
+
+        if (imeisValidos.length > 0) {
+          imeiHTML = `
+            <div class="imeis-impresion">
+              ${imeisValidos
+                .map(
+                  (imei, index) => `
+                    <div>
+                      IMEI ${index + 1}: ${imei}
+                    </div>
+                  `
+                )
+                .join("")}
+            </div>
+          `;
+        }
+      }
 
       productosHTML += `
         <tr>
-            <td class="cantidad">${producto.cantidad}</td>
-            <td class="producto">${producto.nombre}</td>
-            <td class="precio">$${precio.toLocaleString("es-AR")}</td>
-            <td class="subtotal">$${(
+          <td class="cantidad">
+            ${producto.cantidad}
+          </td>
+
+          <td class="producto">
+            <div class="nombre-producto">
+              ${producto.nombre}
+            </div>
+
+            ${imeiHTML}
+          </td>
+
+          <td class="precio">
+            $${precio.toLocaleString("es-AR")}
+          </td>
+
+          <td class="subtotal">
+            $${(
               precio * producto.cantidad
-            ).toLocaleString("es-AR")}</td>
+            ).toLocaleString("es-AR")}
+          </td>
         </tr>
       `;
-
     });
 
     // ===================================
@@ -75,7 +256,6 @@ function Cart({ modoLocal = false }) {
     let infoHeight = "30px";
 
     if (cantidadProductos >= 12) {
-
       fontTabla = "7.5px";
       paddingTabla = "3px";
       altoFila = "20px";
@@ -83,11 +263,9 @@ function Cart({ modoLocal = false }) {
       tituloSize = "15px";
       infoFont = "8.5px";
       infoHeight = "28px";
-
     }
 
     if (cantidadProductos >= 18) {
-
       fontTabla = "7px";
       paddingTabla = "2px";
       altoFila = "18px";
@@ -95,11 +273,9 @@ function Cart({ modoLocal = false }) {
       tituloSize = "14px";
       infoFont = "8px";
       infoHeight = "26px";
-
     }
 
     if (cantidadProductos >= 24) {
-
       fontTabla = "6.5px";
       paddingTabla = "2px";
       altoFila = "16px";
@@ -107,11 +283,9 @@ function Cart({ modoLocal = false }) {
       tituloSize = "13px";
       infoFont = "7.5px";
       infoHeight = "24px";
-
     }
 
     if (cantidadProductos >= 30) {
-
       fontTabla = "6px";
       paddingTabla = "1px";
       altoFila = "14px";
@@ -119,11 +293,10 @@ function Cart({ modoLocal = false }) {
       tituloSize = "12px";
       infoFont = "7px";
       infoHeight = "22px";
-
     }
 
     const remitoHTML = `
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -199,17 +372,21 @@ body{
 }
 
 .logo img{
-    width:145px;
+    width:${logoWidth};
     height:auto;
     display:block;
 }
 
 .titulo{
-    border:2px solid #111;
-    padding:5px 12px;
-    font-size:15px;
-    font-weight:bold;
-    letter-spacing:.5px;
+    border:2.5px solid #111;
+    padding:6px 16px;
+    min-width:110px;
+    text-align:center;
+    font-size:${tituloSize};
+    font-weight:900;
+    letter-spacing:.8px;
+    line-height:1.1;
+    box-sizing:border-box;
 }
 
 .info{
@@ -226,9 +403,9 @@ body{
 
     padding:4px 6px;
 
-    min-height:24px;
+    min-height:${infoHeight};
 
-    font-size:8px;
+    font-size:${infoFont};
 
     line-height:1.2;
 }
@@ -251,63 +428,88 @@ table{
 th{
     background:#111;
     color:#fff;
-    padding:2px;
-    font-size:8px;
+
+    padding:${paddingTabla};
+
+    font-size:${fontTabla};
+
     font-weight:bold;
+
     white-space:nowrap;
 }
 
 td{
     border:1px solid #ddd;
-    padding:2px;
-    font-size:7px;
-    height:14px;
+
+    padding:${paddingTabla};
+
+    font-size:${fontTabla};
+
+    min-height:${altoFila};
+
     vertical-align:middle;
 }
 
-.codigo{
-    display:none;
-}
-
-/* CANTIDAD */
 .cantidad{
     width:20px;
     min-width:20px;
     max-width:20px;
+
     text-align:center;
 }
 
-/* PRODUCTO */
 .producto{
     width:auto;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+
     padding-left:4px;
 }
 
-/* PRECIO */
+.nombre-producto{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-weight:normal;
+}
+
+.imeis-impresion{
+    margin-top:2px;
+    font-size:calc(${fontTabla} - 1px);
+    line-height:1.2;
+    color:#333;
+    white-space:normal;
+}
+
+.imeis-impresion div{
+    margin-top:1px;
+}
+
 .precio{
     width:52px;
     min-width:52px;
     max-width:52px;
+
     text-align:right;
+
     padding-right:3px;
 }
 
-/* SUBTOTAL */
 .subtotal{
     width:58px;
     min-width:58px;
     max-width:58px;
+
     text-align:right;
+
     padding-right:3px;
 }
+
 .inferior{
     margin-top:auto;
 
     display:flex;
+
     justify-content:space-between;
+
     align-items:flex-end;
 
     gap:6px;
@@ -317,6 +519,7 @@ td{
     flex:1;
 
     display:flex;
+
     flex-direction:column;
 
     gap:4px;
@@ -324,6 +527,7 @@ td{
 
 .pago{
     display:grid;
+
     grid-template-columns:26mm 1fr;
 
     border:1px solid #111;
@@ -333,7 +537,9 @@ td{
 
 .pago span{
     display:flex;
+
     justify-content:center;
+
     align-items:center;
 
     border-right:1px solid #111;
@@ -347,6 +553,7 @@ td{
 
 .linea{
     display:flex;
+
     align-items:center;
 
     padding:0 6px;
@@ -368,8 +575,11 @@ td{
     border:2px solid #111;
 
     display:flex;
+
     flex-direction:column;
+
     justify-content:center;
+
     align-items:center;
 
     text-align:center;
@@ -413,45 +623,51 @@ td{
 
     body{
         display:flex;
+
         justify-content:center;
+
         align-items:center;
     }
 
-.hoja{
-    width:287mm;
-    height:200mm;
+    .hoja{
+        width:287mm;
+        height:200mm;
 
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
+        display:flex;
 
-    gap:4mm;
+        justify-content:space-between;
 
-    padding:0;
-}
+        align-items:flex-start;
 
-.remito{
+        gap:4mm;
 
-    width:139mm;
-    height:194mm;
+        padding:0;
+    }
 
-    border:2px solid #111;
+    .remito{
+        width:139mm;
+        height:194mm;
 
-    padding:5px;
+        border:2px solid #111;
 
-    display:flex;
-    flex-direction:column;
+        padding:5px;
 
-    overflow:hidden;
+        display:flex;
 
-    flex-shrink:0;
+        flex-direction:column;
 
-    page-break-inside:avoid;
-    break-inside:avoid;
-}
+        overflow:hidden;
+
+        flex-shrink:0;
+
+        page-break-inside:avoid;
+
+        break-inside:avoid;
+    }
+
     *{
-    box-sizing:border-box;
-}
+        box-sizing:border-box;
+    }
 
 }
 
@@ -462,18 +678,24 @@ td{
 <body>
 
 <div class="hoja">
-${[1, 2].map(() => `
+
+${[1, 2]
+  .map(
+    () => `
 
 <div class="remito">
 
     <div class="header">
 
         <div class="logo">
-            <img src="${logoUrl}" alt="Electro Hogar">
+            <img
+                src="${logoUrl}"
+                alt="Electro Hogar"
+            >
         </div>
 
         <div class="titulo">
-            REMITO X
+            N° ${numeroActual}
         </div>
 
     </div>
@@ -516,10 +738,23 @@ ${[1, 2].map(() => `
         <thead>
 
             <tr>
-                <th class="cantidad">C.</th>
-                <th class="producto">Producto</th>
-                <th class="precio">$</th>
-                <th class="subtotal">Total</th>
+
+                <th class="cantidad">
+                    C.
+                </th>
+
+                <th class="producto">
+                    Producto
+                </th>
+
+                <th class="precio">
+                    $
+                </th>
+
+                <th class="subtotal">
+                    Total
+                </th>
+
             </tr>
 
         </thead>
@@ -537,17 +772,27 @@ ${[1, 2].map(() => `
         <div class="forma-pago">
 
             <div class="pago">
-                <span>EFECTIVO</span>
+
+                <span>
+                    EFECTIVO
+                </span>
+
                 <div class="linea">
                     ____________________________________
                 </div>
+
             </div>
 
             <div class="pago">
-                <span>TRANSFERENCIA</span>
+
+                <span>
+                    TRANSFERENCIA
+                </span>
+
                 <div class="linea">
                     ____________________________________
                 </div>
+
             </div>
 
         </div>
@@ -555,9 +800,13 @@ ${[1, 2].map(() => `
         <div class="total">
 
             <div>
+
                 TOTAL
+
                 <br>
+
                 $${total.toLocaleString("es-AR")}
+
             </div>
 
         </div>
@@ -570,7 +819,9 @@ ${[1, 2].map(() => `
 
 </div>
 
-`).join("")}
+`
+  )
+  .join("")}
 
 </div>
 
@@ -579,96 +830,141 @@ ${[1, 2].map(() => `
 </html>
 `;
 
-ventana.document.write(remitoHTML);
-ventana.document.close();
+    ventana.document.write(remitoHTML);
 
-ventana.onload = () => {
-    ventana.focus();
-    ventana.print();
+    ventana.document.close();
 
-    ventana.onafterprint = () => {
+    ventana.onload = () => {
+      ventana.focus();
+
+      ventana.print();
+
+      ventana.onafterprint = () => {
         ventana.close();
+      };
     };
-};
-
-} // ← TERMINA imprimirPresupuesto()
-
-async function enviarAlMostrador() {
-
-  try {
-
-    const ahora = new Date();
-
-    const pedido = {
-
-      vendedor: vendedor.nombre,
-
-      vendedorCodigo: vendedor.codigo,
-
-      fecha: ahora.toLocaleDateString("es-AR"),
-
-      hora: ahora.toLocaleTimeString("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-
-      total,
-
-      productos: carrito.map((producto) => {
-
-        const precio = obtenerPrecio(producto);
-
-        return {
-
-          id: producto.id,
-
-          nombre: producto.nombre,
-
-          cantidad: producto.cantidad,
-
-          precio,
-
-          subtotal: precio * producto.cantidad,
-
-          imagen:
-            producto.imagenes?.[0] ||
-            producto.imagen ||
-            "",
-
-        };
-
-      }),
-
-    };
-
-    console.log("Pedido a enviar:", pedido);
-
-    const resultado = await crearPedido(pedido);
-
-    console.log("Pedido creado:", resultado.id);
-
-    alert("✅ Pedido enviado al mostrador.");
-
-    setAbierto(false);
-
   } catch (error) {
-
-    console.error(error);
-
-    alert("❌ No se pudo enviar el pedido.");
-
+      console.error("Error generando número de boleta:", error);
+      alert("❌ No se pudo obtener el número de boleta. No se imprimió nada.");
+    }
   }
 
-}
-  async function enviarWhatsApp() {
+  // =========================================================
+  // ENVIAR AL MOSTRADOR
+  // =========================================================
 
+  async function enviarAlMostrador() {
     try {
+      const ahora = new Date();
 
-      // =========================================
-      // CREAR ORDEN EN FIREBASE
-      // =========================================
+      // =======================================================
+      // ASEGURAR NÚMERO DE BOLETA
+      // =======================================================
+      // Si todavía no tiene número, lo obtenemos ahora.
+      // Así el mismo número viaja al Mostrador y luego
+      // se utiliza al imprimir el remito.
+      let numeroActual = numeroBoleta;
+
+      if (numeroActual === null) {
+        numeroActual = await obtenerSiguienteNumeroBoleta();
+        guardarNumeroBoleta(numeroActual);
+      }
 
       const pedido = {
+        estado: "Pendiente",
+
+        numeroBoleta: numeroActual,
+
+        vendedor: vendedor.nombre,
+
+        vendedorCodigo: vendedor.codigo,
+
+        fecha:
+          ahora.toLocaleDateString("es-AR"),
+
+        hora:
+          ahora.toLocaleTimeString("es-AR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+
+        total,
+
+        productos: carrito.map((producto) => {
+          const precio =
+            obtenerPrecio(producto);
+
+          return {
+            id: producto.id,
+
+            nombre: producto.nombre,
+
+            cantidad: producto.cantidad,
+
+            precio,
+
+            subtotal:
+              precio * producto.cantidad,
+
+            categoria:
+              producto.categoria || "",
+
+            imeis:
+              producto.categoria === "Celulares"
+                ? (producto.imeis || []).filter(
+                    (imei) => imei?.trim()
+                  )
+                : [],
+
+            imagen:
+              producto.imagenes?.[0] ||
+              producto.imagen ||
+              "",
+          };
+        }),
+      };
+
+      console.log(
+        "Pedido a enviar al mostrador:",
+        pedido
+      );
+
+      const resultado =
+        await crearPedido(pedido);
+
+      console.log(
+        "Pedido creado:",
+        resultado.id
+      );
+
+      alert(
+        "✅ Pedido enviado al mostrador."
+      );
+
+      setAbierto(false);
+    } catch (error) {
+      console.error(
+        "Error enviando al mostrador:",
+        error
+      );
+
+      alert(
+        "❌ No se pudo enviar el pedido."
+      );
+    }
+  }
+
+  // =========================================================
+  // ENVIAR POR WHATSAPP
+  // =========================================================
+
+  async function enviarWhatsApp() {
+    try {
+      // =======================================================
+      // CREAR ORDEN EN FIREBASE
+      // =======================================================
+      const pedido = {
+        estado: "Creada",
 
         vendedor: vendedor.nombre,
 
@@ -677,11 +973,9 @@ async function enviarAlMostrador() {
         total,
 
         productos: carrito.map((producto) => {
-
           const precio = obtenerPrecio(producto);
 
           return {
-
             id: producto.id,
 
             nombre: producto.nombre,
@@ -692,102 +986,167 @@ async function enviarAlMostrador() {
 
             subtotal: precio * producto.cantidad,
 
+            categoria: producto.categoria || "",
+
+            imeis:
+              producto.categoria === "Celulares"
+                ? (producto.imeis || []).filter((imei) => imei?.trim())
+                : [],
+
             imagen:
               producto.imagenes?.[0] ||
               producto.imagen ||
               "",
-
           };
-
         }),
-
       };
+
+      console.log("Pedido para WhatsApp:", pedido);
 
       const resultado = await crearPedido(pedido);
-
       const pedidoId = resultado.id;
 
-      // =========================================
+      // =======================================================
       // LINK DE LA ORDEN
-      // =========================================
+      // =======================================================
+      // Se mantiene exactamente la lógica actual:
+      // /pedido/ID -> abrir la orden -> imprimirla.
+      const linkOrden = `${window.location.origin}/pedido/${pedidoId}`;
 
-      const linkOrden =
-        `${window.location.origin}/pedido/${pedidoId}`;
-
-      // =========================================
-      // SALUDOS
-      // =========================================
-
+      // =======================================================
+      // SALUDO SEGÚN VENDEDOR
+      // =======================================================
       const saludos = {
-
         LAUTARO: "Hola Lauti! 👋",
-
         MILAGROS: "Hola Mili! 👋",
-
         GONZALO: "Hola Gonza! 👋",
-
         CAMILA: "Hola Cami! 👋",
-
         VICTORIA: "Hola Vicky! 👋",
-
       };
 
-      // =========================================
-      // MENSAJE WHATSAPP
-      // =========================================
-
       let mensaje =
-        `${saludos[vendedor.nombre] || `Hola ${vendedor.nombre}! 👋`}` +
-        `%0A%0AQuiero consultar por los siguientes productos:%0A%0A`;
+        `${saludos[vendedor.nombre.toUpperCase()] || `Hola ${vendedor.nombre}! 👋`}` +
+        `\n\nQuiero consultar por los siguientes productos:\n\n`;
 
       carrito.forEach((producto) => {
-
         const precio = obtenerPrecio(producto);
 
-        mensaje += `• ${producto.nombre}%0A`;
-
-        mensaje += `Cantidad: ${producto.cantidad}%0A`;
-
-        mensaje += `Precio Unitario: $${precio.toLocaleString("es-AR")}%0A`;
-
+        mensaje += `• ${producto.nombre}\n`;
+        mensaje += `Cantidad: ${producto.cantidad}\n`;
+        mensaje += `Precio Unitario: $${precio.toLocaleString("es-AR")}\n`;
         mensaje += `Subtotal: $${(
           precio * producto.cantidad
-        ).toLocaleString("es-AR")}%0A%0A`;
-
+        ).toLocaleString("es-AR")}\n\n`;
       });
 
-      mensaje +=
-        `💰 Total: $${total.toLocaleString("es-AR")}%0A%0A`;
+      mensaje += `💰 Total: $${total.toLocaleString("es-AR")}\n\n`;
+      mensaje += `📋 Orden de pedido:\n${linkOrden}\n\n`;
+      mensaje += "¡Muchas gracias! 😊";
 
-      mensaje +=
-        `📋 Orden de pedido:%0A${linkOrden}%0A%0A`;
+      // =======================================================
+      // NÚMERO DE WHATSAPP DEL VENDEDOR
+      // =======================================================
+      // Acepta números guardados como:
+      // +54 9 11 1234-5678
+      // 5491112345678
+      // 541112345678
+      // 1112345678
+      //
+      // Los convertimos siempre al formato internacional que
+      // necesita WhatsApp: 549 + código de área + número.
+      let numeroWhatsApp = String(vendedor.numero || "").replace(/\D/g, "");
 
-      mensaje +=
-        "¡Muchas gracias! 😊";
+      if (!numeroWhatsApp) {
+        throw new Error("El vendedor no tiene un número de WhatsApp válido.");
+      }
 
-      // =========================================
+      if (numeroWhatsApp.startsWith("00")) {
+        numeroWhatsApp = numeroWhatsApp.slice(2);
+      }
+
+      // Número argentino ya completo: 549...
+      if (numeroWhatsApp.startsWith("549")) {
+        // No tocar.
+      }
+      // Argentina con 54 pero sin el 9 de celular: 54...
+      else if (numeroWhatsApp.startsWith("54")) {
+        numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
+      }
+      // Número local argentino de 10 dígitos: 11xxxxxxxx
+      else if (numeroWhatsApp.length === 10) {
+        numeroWhatsApp = `549${numeroWhatsApp}`;
+      }
+      // Número local con 0 adelante: 011xxxxxxxx
+      else if (
+        numeroWhatsApp.length === 11 &&
+        numeroWhatsApp.startsWith("0")
+      ) {
+        numeroWhatsApp = `549${numeroWhatsApp.slice(1)}`;
+      }
+
+      if (!numeroWhatsApp.startsWith("549")) {
+        throw new Error(
+          `Número de WhatsApp inválido para el vendedor ${vendedor.nombre}: ${vendedor.numero}`
+        );
+      }
+
+      // =======================================================
       // ABRIR WHATSAPP
-      // =========================================
+      // =======================================================
+      // Usamos wa.me porque es el enlace oficial de apertura
+      // de WhatsApp y evita problemas de redirección de
+      // api.whatsapp.com en algunos celulares/navegadores.
+      const urlWhatsApp =
+        `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(
+          mensaje
+        )}`;
 
-      window.open(
-        `https://wa.me/${vendedor.numero}?text=${mensaje}`,
-        "_blank"
-      );
+      console.log("WhatsApp URL:", urlWhatsApp);
+      console.log("Vendedor:", vendedor.nombre);
+      console.log("Número WhatsApp normalizado:", numeroWhatsApp);
 
+      // Navegación directa para que funcione tanto en celular
+      // como en PC y no dependa de ventanas emergentes.
+      window.location.assign(urlWhatsApp);
     } catch (error) {
-
       console.error("Error creando la orden:", error);
 
       alert(
-        "❌ No se pudo generar la orden. Intentá nuevamente."
+        "❌ No se pudo generar la orden. Verificá tu conexión e intentá nuevamente."
       );
-
     }
-
   }
 
-  return (
 
+  // =========================================================
+  // MANEJAR ENTER DEL LECTOR DE CÓDIGO
+  // =========================================================
+
+  function manejarEnterIMEI(
+    e,
+    productoId,
+    indice
+  ) {
+    if (e.key !== "Enter") return;
+
+    e.preventDefault();
+
+    const siguiente =
+      document.querySelector(
+        `[data-imei-index="${productoId}-${indice + 1}"]`
+      );
+
+    if (siguiente) {
+      siguiente.focus();
+      siguiente.select();
+    }
+  }
+
+  // =========================================================
+  // RENDER
+  // =========================================================
+
+  return (
     <div
       className="cart-overlay"
       onClick={() => setAbierto(false)}
@@ -795,20 +1154,126 @@ async function enviarAlMostrador() {
 
       <div
         className="cart-panel"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) =>
+          e.stopPropagation()
+        }
       >
 
         <div className="cart-header">
 
-          <h2>🛒 Mi carrito</h2>
+          <h2>
+            🛒 Mi carrito
+          </h2>
 
           <button
-            onClick={() => setAbierto(false)}
+            onClick={() =>
+              setAbierto(false)
+            }
           >
             ✖
           </button>
 
         </div>
+
+{modoLocal && (
+  <div
+    style={{
+      marginBottom: "12px",
+      padding: "10px 12px",
+      border: "1px solid #ddd",
+      borderRadius: "10px",
+      background: "#f8f8f8",
+    }}
+  >
+    <div
+      style={{
+        fontWeight: "bold",
+        fontSize: "16px",
+        marginBottom: "7px",
+      }}
+    >
+      🔎 Recuperar boleta
+    </div>
+
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        width: "100%",
+      }}
+    >
+      <input
+        type="number"
+        inputMode="numeric"
+        placeholder="71499"
+        value={numeroParaRecuperar}
+        onChange={(e) =>
+          setNumeroParaRecuperar(
+            e.target.value
+          )
+        }
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            manejarRecuperarBoleta();
+          }
+        }}
+        style={{
+          width: "110px",
+          height: "42px",
+          padding: "6px 10px",
+          border: "1px solid #bbb",
+          borderRadius: "7px",
+          fontSize: "16px",
+          fontWeight: "bold",
+          boxSizing: "border-box",
+          outline: "none",
+        }}
+      />
+
+      <button
+        type="button"
+        className="print-btn"
+        onClick={manejarRecuperarBoleta}
+        disabled={recuperandoBoleta}
+        style={{
+          height: "42px",
+          padding: "0 16px",
+          whiteSpace: "nowrap",
+          fontSize: "15px",
+          opacity: recuperandoBoleta
+            ? 0.7
+            : 1,
+        }}
+      >
+        {recuperandoBoleta
+          ? "Buscando..."
+          : "🔎 Recuperar"}
+      </button>
+    </div>
+
+    {numeroBoleta && (
+      <div
+        style={{
+          marginTop: "7px",
+          fontSize: "13px",
+          fontWeight: "bold",
+        }}
+      >
+        🧾 Boleta activa: N°{" "}
+        {numeroBoleta}
+
+        {boletaRecuperada
+          ? " · Recuperada"
+          : ""}
+
+        {guardandoBoleta
+          ? " · Guardando..."
+          : ""}
+      </div>
+    )}
+  </div>
+)}
 
         {carrito.length === 0 ? (
 
@@ -822,24 +1287,43 @@ async function enviarAlMostrador() {
 
             {carrito.map((producto) => {
 
-              const precio = obtenerPrecio(producto);
+              const precio =
+                obtenerPrecio(producto);
 
               let promo = "";
 
-              if (producto.cantidad >= 12)
-                promo = "🔥 Precio x12 aplicado";
+              if (
+                producto.cantidad >= 12
+              )
+                promo =
+                  "🔥 Precio x12 aplicado";
 
-              else if (producto.cantidad >= 9)
-                promo = "🔥 Precio x9 aplicado";
+              else if (
+                producto.cantidad >= 9
+              )
+                promo =
+                  "🔥 Precio x9 aplicado";
 
-              else if (producto.cantidad >= 6)
-                promo = "🔥 Precio x6 aplicado";
+              else if (
+                producto.cantidad >= 6
+              )
+                promo =
+                  "🔥 Precio x6 aplicado";
 
-              else if (producto.cantidad >= 3)
-                promo = "🔥 Precio x3 aplicado";
+              else if (
+                producto.cantidad >= 3
+              )
+                promo =
+                  "🔥 Precio x3 aplicado";
 
-              else if (producto.cantidad >= 2)
-                promo = "🔥 Precio x2 aplicado";
+              else if (
+                producto.cantidad >= 2
+              )
+                promo =
+                  "🔥 Precio x2 aplicado";
+
+              const esCelular =
+                producto.categoria === "Celulares";
 
               return (
 
@@ -863,11 +1347,13 @@ async function enviarAlMostrador() {
                     </h4>
 
                     <p>
-                      ${precio.toLocaleString("es-AR")}
+                      $
+                      {precio.toLocaleString(
+                        "es-AR"
+                      )}
                     </p>
 
                     {promo && (
-
                       <p
                         style={{
                           color: "#16a34a",
@@ -877,14 +1363,15 @@ async function enviarAlMostrador() {
                       >
                         {promo}
                       </p>
-
                     )}
 
                     <div className="cart-controls">
 
                       <button
                         onClick={() =>
-                          disminuirCantidad(producto.id)
+                          disminuirCantidad(
+                            producto.id
+                          )
                         }
                       >
                         −
@@ -896,13 +1383,110 @@ async function enviarAlMostrador() {
 
                       <button
                         onClick={() =>
-                          aumentarCantidad(producto.id)
+                          aumentarCantidad(
+                            producto.id
+                          )
                         }
                       >
                         +
                       </button>
 
                     </div>
+
+                    {/* =====================================================
+                        IMEI PARA CELULARES
+                    ====================================================== */}
+
+                    {esCelular && modoLocal && (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                          padding: "10px",
+                          border: "1px solid #ddd",
+                          borderRadius: "8px",
+                          background: "#f8f8f8",
+                        }}
+                      >
+
+                        <div
+                          style={{
+                            fontWeight: "bold",
+                            marginBottom: "8px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          📱 IMEI
+                        </div>
+
+                        {Array.from({
+                          length: producto.cantidad,
+                        }).map((_, indice) => (
+
+                          <div
+                            key={`${producto.id}-imei-${indice}`}
+                            style={{
+                              marginBottom:
+                                indice <
+                                producto.cantidad - 1
+                                  ? "8px"
+                                  : "0",
+                            }}
+                          >
+
+                            <label
+                              style={{
+                                display: "block",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              IMEI {indice + 1}
+                            </label>
+
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              autoComplete="off"
+                              placeholder="Escaneá el IMEI con la pistola"
+                              value={
+                                producto.imeis?.[
+                                  indice
+                                ] || ""
+                              }
+                              data-imei-index={`${producto.id}-${indice}`}
+                              onChange={(e) =>
+                                actualizarIMEI(
+                                  producto.id,
+                                  indice,
+                                  e.target.value
+                                )
+                              }
+                              onKeyDown={(e) =>
+                                manejarEnterIMEI(
+                                  e,
+                                  producto.id,
+                                  indice
+                                )
+                              }
+                              style={{
+                                width: "100%",
+                                padding: "9px",
+                                border:
+                                  "1px solid #bbb",
+                                borderRadius: "6px",
+                                fontSize: "14px",
+                                boxSizing:
+                                  "border-box",
+                              }}
+                            />
+
+                          </div>
+
+                        ))}
+
+                      </div>
+                    )}
 
                     <p
                       style={{
@@ -911,15 +1495,22 @@ async function enviarAlMostrador() {
                       }}
                     >
                       Subtotal: $
+
                       {(
-                        precio * producto.cantidad
-                      ).toLocaleString("es-AR")}
+                        precio *
+                        producto.cantidad
+                      ).toLocaleString(
+                        "es-AR"
+                      )}
+
                     </p>
 
                     <button
                       className="delete-btn"
                       onClick={() =>
-                        eliminarProducto(producto.id)
+                        eliminarProducto(
+                          producto.id
+                        )
                       }
                     >
                       🗑 Eliminar
@@ -933,89 +1524,151 @@ async function enviarAlMostrador() {
 
             })}
 
-{modoLocal && (
+            {modoLocal && (
 
-  <div
-    style={{
-      marginBottom: "15px",
-    }}
-  >
+              <div
+                style={{
+                  marginBottom: "15px",
+                }}
+              >
 
-    <label
-      style={{
-        display: "block",
-        fontWeight: "bold",
-        marginBottom: "6px",
-      }}
-    >
-      👤 Vendedor
-    </label>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "bold",
+                    marginBottom: "6px",
+                  }}
+                >
+                  👤 Vendedor
+                </label>
 
-<select
-  value={vendedor.codigo}
-  onChange={(e) =>
-    setVendedor(vendedores[e.target.value])
-  }
-  style={{
-    width: "100%",
-    padding: "10px",
-    fontSize: "15px",
-    borderRadius: "8px",
-  }}
->
-  {Object.values(vendedores).map((v) => (
-    <option
-      key={v.codigo}
-      value={v.codigo}
-    >
-      {v.nombre}
-    </option>
-  ))}
-</select>
+                <select
+                  value={vendedor.codigo}
+                  onChange={(e) =>
+                    setVendedor(
+                      vendedores[
+                        e.target.value
+                      ]
+                    )
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    fontSize: "15px",
+                    borderRadius: "8px",
+                  }}
+                >
 
-</div>
+                  {Object.values(
+                    vendedores
+                  ).map((v) => (
 
-)}
+                    <option
+                      key={v.codigo}
+                      value={v.codigo}
+                    >
+                      {v.nombre}
+                    </option>
 
-<h2 className="cart-total">
-  Total: ${total.toLocaleString("es-AR")}
-</h2>
+                  ))}
 
-<div className="action-buttons">
+                </select>
 
-  {modoLocal && (
-    <>
-      <button
-        className="print-btn"
-        onClick={imprimirPresupuesto}
-      >
-        🖨️ Imprimir Remito
-      </button>
+              </div>
 
-      <button
-        className="print-btn"
-        onClick={enviarAlMostrador}
-      >
-        📤 Enviar al Mostrador
-      </button>
-    </>
-  )}
+            )}
 
-  <button
-    className="whatsapp-btn"
-    onClick={enviarWhatsApp}
-  >
-    🟢 Enviar pedido a {vendedor.nombre}
-  </button>
+            <h2 className="cart-total">
 
-</div>
+              Total: $
 
-</>
-)}
-</div>
-</div>
-);
+              {total.toLocaleString(
+                "es-AR"
+              )}
 
+            </h2>
+
+            <div className="action-buttons">
+
+              {modoLocal && (
+
+                <>
+
+                  <button
+                    className="print-btn"
+                    onClick={imprimirPresupuesto}
+                    style={{
+                      padding: "14px 18px",
+                      fontSize: "18px",
+                    }}
+                  >
+                    🖨️ {numeroBoleta
+                      ? `Reimprimir N° ${numeroBoleta}`
+                      : "Imprimir Remito"}
+                  </button>
+
+                  <button
+                    className="print-btn"
+                    onClick={
+                      enviarAlMostrador
+                    }
+                    style={{
+                      padding: "14px 18px",
+                      fontSize: "18px",
+                    }}
+                  >
+                    📤 Enviar al Mostrador
+                  </button>
+
+                  {numeroBoleta && (
+                    <div
+                      style={{
+                        marginTop: "8px",
+                        paddingTop: "10px",
+                        borderTop: "1px solid #ddd",
+                      }}
+                    >
+                      <button
+                        className="print-btn"
+                        onClick={
+                          manejarCerrarBoleta
+                        }
+                        style={{
+                          padding: "12px 18px",
+                          fontSize: "17px",
+                        }}
+                      >
+                        ✅ Cerrar boleta N° {numeroBoleta}
+                      </button>
+                    </div>
+                  )}
+
+                </>
+
+              )}
+
+              {!modoLocal && (
+                <button
+                  className="whatsapp-btn"
+                  onClick={
+                    enviarWhatsApp
+                  }
+                >
+                  🟢 Enviar pedido a{" "}
+                  {vendedor.nombre}
+                </button>
+              )}
+
+            </div>
+
+          </>
+
+        )}
+
+      </div>
+
+    </div>
+  );
 }
 
 export default Cart;

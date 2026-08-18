@@ -9,19 +9,21 @@ import {
 import { db } from "../firebase";
 
 function Pedido() {
-
   const { id } = useParams();
 
   const [pedido, setPedido] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
+
+  // =========================================================
+  // CARGAR PEDIDO
+  // =========================================================
 
   useEffect(() => {
-
     async function cargarPedido() {
-
       try {
-
         if (!id) {
           setError("Orden no encontrada.");
           setCargando(false);
@@ -37,11 +39,8 @@ function Pedido() {
         const snapshot = await getDoc(pedidoRef);
 
         if (!snapshot.exists()) {
-
           setError("Esta orden no existe.");
-
           setCargando(false);
-
           return;
         }
 
@@ -52,25 +51,17 @@ function Pedido() {
 
         setPedido(datos);
 
-        // =========================================
-        // ENVIAR AUTOMÁTICAMENTE AL MOSTRADOR
-        // =========================================
+        // =====================================================
+        // IMPORTANTE:
+        // AL ABRIR EL LINK NO SE ENVÍA AL MOSTRADOR.
+        // SOLAMENTE CARGAMOS LA ORDEN.
+        // =====================================================
 
-        if (datos.estado === "Creada") {
-
-          await updateDoc(pedidoRef, {
-            estado: "Pendiente",
-          });
-
-          setPedido((actual) => ({
-            ...actual,
-            estado: "Pendiente",
-          }));
-
+        if (datos.estado === "Pendiente") {
+          setEnviado(true);
         }
 
       } catch (error) {
-
         console.error(
           "Error cargando la orden:",
           error
@@ -79,27 +70,61 @@ function Pedido() {
         setError(
           "No se pudo cargar la orden."
         );
-
       } finally {
-
         setCargando(false);
-
       }
-
     }
 
     cargarPedido();
-
   }, [id]);
 
-  // =========================================
+  // =========================================================
+  // ENVIAR AL MOSTRADOR
+  // =========================================================
+
+  async function enviarAlMostrador() {
+    if (!pedido || enviando || enviado) return;
+
+    try {
+      setEnviando(true);
+
+      const pedidoRef = doc(
+        db,
+        "pedidosPendientes",
+        pedido.id
+      );
+
+      await updateDoc(pedidoRef, {
+        estado: "Pendiente",
+      });
+
+      setPedido((actual) => ({
+        ...actual,
+        estado: "Pendiente",
+      }));
+
+      setEnviado(true);
+
+    } catch (error) {
+      console.error(
+        "Error enviando pedido al mostrador:",
+        error
+      );
+
+      alert(
+        "❌ No se pudo enviar el pedido al mostrador."
+      );
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  // =========================================================
   // CARGANDO
-  // =========================================
+  // =========================================================
 
   if (cargando) {
-
     return (
-
       <div
         style={{
           minHeight: "100vh",
@@ -110,25 +135,19 @@ function Pedido() {
           background: "#f4f4f4",
         }}
       >
-
         <h2>
           📋 Cargando orden...
         </h2>
-
       </div>
-
     );
-
   }
 
-  // =========================================
+  // =========================================================
   // ERROR
-  // =========================================
+  // =========================================================
 
   if (error) {
-
     return (
-
       <div
         style={{
           minHeight: "100vh",
@@ -141,31 +160,22 @@ function Pedido() {
           textAlign: "center",
         }}
       >
-
         <div>
-
-          <h1>
-            ❌
-          </h1>
+          <h1>❌</h1>
 
           <h2>
             {error}
           </h2>
-
         </div>
-
       </div>
-
     );
-
   }
 
-  // =========================================
+  // =========================================================
   // ORDEN
-  // =========================================
+  // =========================================================
 
   return (
-
     <div
       style={{
         minHeight: "100vh",
@@ -175,7 +185,6 @@ function Pedido() {
         fontFamily: "Arial, Helvetica, sans-serif",
       }}
     >
-
       <div
         style={{
           maxWidth: "650px",
@@ -199,7 +208,6 @@ function Pedido() {
             marginBottom: "25px",
           }}
         >
-
           <h1
             style={{
               margin: 0,
@@ -217,7 +225,6 @@ function Pedido() {
           >
             Orden #{pedido.id}
           </p>
-
         </div>
 
         {/* =================================
@@ -232,7 +239,6 @@ function Pedido() {
             marginBottom: "20px",
           }}
         >
-
           <strong>
             VENDEDOR
           </strong>
@@ -246,7 +252,6 @@ function Pedido() {
           >
             {pedido.vendedor}
           </div>
-
         </div>
 
         {/* =================================
@@ -258,10 +263,8 @@ function Pedido() {
         </h3>
 
         <div>
-
           {pedido.productos?.map(
             (producto, index) => (
-
               <div
                 key={index}
                 style={{
@@ -271,7 +274,6 @@ function Pedido() {
                     "12px 0",
                 }}
               >
-
                 <div
                   style={{
                     display: "flex",
@@ -280,15 +282,12 @@ function Pedido() {
                     gap: "15px",
                   }}
                 >
-
                   <div>
-
                     <strong>
                       {producto.cantidad}x
                     </strong>{" "}
 
                     {producto.nombre}
-
                   </div>
 
                   <strong>
@@ -297,7 +296,6 @@ function Pedido() {
                       "es-AR"
                     )}
                   </strong>
-
                 </div>
 
                 <div
@@ -312,12 +310,9 @@ function Pedido() {
                     "es-AR"
                   )}
                 </div>
-
               </div>
-
             )
           )}
-
         </div>
 
         {/* =================================
@@ -334,7 +329,6 @@ function Pedido() {
             textAlign: "center",
           }}
         >
-
           <div
             style={{
               fontSize: "14px",
@@ -356,35 +350,74 @@ function Pedido() {
               "es-AR"
             )}
           </div>
-
         </div>
 
         {/* =================================
-            ESTADO
+            BOTÓN ENVIAR AL MOSTRADOR
         ================================= */}
 
-        <div
-          style={{
-            marginTop: "20px",
-            background: "#e8f7df",
-            color: "#3d7d1d",
-            padding: "15px",
-            borderRadius: "10px",
-            textAlign: "center",
-            fontWeight: "bold",
-          }}
-        >
+        {!enviado ? (
+          <div
+            style={{
+              marginTop: "25px",
+            }}
+          >
+            <button
+              onClick={enviarAlMostrador}
+              disabled={enviando}
+              style={{
+                width: "100%",
+                padding: "17px",
+                border: "none",
+                borderRadius: "12px",
+                background: enviando
+                  ? "#999"
+                  : "#16a34a",
+                color: "#fff",
+                fontSize: "18px",
+                fontWeight: "bold",
+                cursor: enviando
+                  ? "not-allowed"
+                  : "pointer",
+                boxShadow:
+                  "0 4px 10px rgba(0,0,0,.15)",
+              }}
+            >
+              {enviando
+                ? "⏳ ENVIANDO..."
+                : "🟢 ENVIAR AL MOSTRADOR"}
+            </button>
 
-          ✅ Pedido enviado al mostrador
-
-        </div>
+            <div
+              style={{
+                marginTop: "10px",
+                textAlign: "center",
+                fontSize: "13px",
+                color: "#777",
+              }}
+            >
+              La orden todavía no fue enviada al mostrador.
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              marginTop: "20px",
+              background: "#e8f7df",
+              color: "#3d7d1d",
+              padding: "15px",
+              borderRadius: "10px",
+              textAlign: "center",
+              fontWeight: "bold",
+            }}
+          >
+            ✅ Pedido enviado al mostrador
+          </div>
+        )}
 
       </div>
-
     </div>
-
   );
-
 }
 
 export default Pedido;
