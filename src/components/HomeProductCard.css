@@ -1,0 +1,298 @@
+/* =========================================================
+   ELECTROHOGAR
+   TARJETA COMPACTA DE LAS VITRINAS DEL HOME
+   ========================================================= */
+
+.home-card {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.home-card:hover {
+  transform: translateY(-2px);
+  border-color: #dedede;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================================================
+   IMAGEN
+   ========================================================= */
+
+.home-card-imagen {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 178px;
+
+  overflow: hidden;
+  background: #f7f7f7;
+}
+
+.home-card-imagen img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  padding: 10px;
+  box-sizing: border-box;
+
+  object-fit: contain;
+
+  transition: transform 0.22s ease;
+}
+
+.home-card:hover .home-card-imagen img {
+  transform: scale(1.025);
+}
+
+.home-card-sin-imagen {
+  color: #999;
+  font-size: 12px;
+}
+
+/* =========================================================
+   ETIQUETAS
+   ========================================================= */
+
+.home-card-badge {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  z-index: 2;
+
+  padding: 4px 7px;
+
+  border-radius: 4px;
+
+  background: #00a650;
+  color: #fff;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.35px;
+}
+
+.home-card-badge-nuevo {
+  background: #00a650;
+}
+
+.home-card-badge-popular {
+  background: #7b61ff;
+}
+
+/* =========================================================
+   INFORMACIÓN
+   ========================================================= */
+
+.home-card-contenido {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+  min-height: 128px;
+
+  padding: 12px 12px 14px;
+  box-sizing: border-box;
+}
+
+/* Nombre:
+   siempre ocupa exactamente dos líneas para que
+   precio y resto de información queden alineados. */
+
+.home-card-contenido h3 {
+  display: -webkit-box;
+
+  height: 36px;
+  min-height: 36px;
+
+  margin: 0 0 9px;
+
+  overflow: hidden;
+
+  color: #333;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+
+  text-align: left;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* =========================================================
+   PRECIO
+   ProductPrice mantiene la lógica real de ARS/USD.
+   ========================================================= */
+
+.home-card-precio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  min-height: 30px;
+  margin: 0;
+
+  text-align: left;
+}
+
+.home-card-precio .precio {
+  margin: 0;
+
+  color: #222;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 500;
+
+  text-align: left;
+}
+
+.home-card-precio .precio-ars {
+  width: auto;
+  max-width: 100%;
+
+  margin: 5px 0 0;
+  padding: 4px 7px;
+
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+
+  background: #fff;
+  color: #333;
+
+  font-size: 12px;
+  line-height: 17px;
+  font-weight: 600;
+
+  box-shadow: none;
+  text-align: left;
+}
+
+.home-card-precio .precio-ars span {
+  margin-left: 2px;
+  margin-right: 0;
+
+  font-size: 10px;
+}
+
+/* =========================================================
+   CUOTAS / BENEFICIOS
+   ========================================================= */
+
+.home-card-cuotas,
+.home-card-beneficio {
+  margin: 5px 0 0;
+
+  overflow: hidden;
+
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.home-card-cuotas {
+  color: #00a650;
+  font-weight: 600;
+}
+
+.home-card-beneficio {
+  color: #777;
+  font-weight: 500;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .home-card-imagen {
+    height: 168px;
+  }
+}
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .home-card {
+    border-radius: 9px;
+  }
+
+  .home-card-imagen {
+    height: 142px;
+  }
+
+  .home-card-imagen img {
+    padding: 8px;
+  }
+
+  .home-card-contenido {
+    min-height: 112px;
+    padding: 9px 9px 11px;
+  }
+
+  .home-card-contenido h3 {
+    height: 32px;
+    min-height: 32px;
+
+    margin-bottom: 7px;
+
+    font-size: 11.5px;
+    line-height: 16px;
+  }
+
+  .home-card-precio {
+    min-height: 26px;
+  }
+
+  .home-card-precio .precio {
+    font-size: 19px;
+    line-height: 25px;
+  }
+
+  .home-card-precio .precio-ars {
+    margin-top: 4px;
+    padding: 3px 6px;
+
+    font-size: 10px;
+    line-height: 15px;
+  }
+
+  .home-card-cuotas,
+  .home-card-beneficio {
+    margin-top: 4px;
+
+    font-size: 9.5px;
+    line-height: 14px;
+  }
+
+  .home-card-badge {
+    top: 7px;
+    left: 7px;
+
+    padding: 3px 5px;
+    font-size: 8px;
+  }
+}

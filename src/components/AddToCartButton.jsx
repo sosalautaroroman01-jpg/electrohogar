@@ -1,15 +1,32 @@
 import { useCart } from "../context/CartContext";
 import { useDollar } from "../context/DollarContext";
 import { convertirPrecio } from "../utils/calcularPrecios";
+import { useRevendedorPublico } from "../context/RevendedorPublicoContext";
 
 export default function AddToCartButton({ producto }) {
   const { agregarAlCarrito } = useCart();
   const blue = useDollar();
 
+  const {
+    activo: modoRevendedor,
+    revendedorId,
+    porcentaje,
+  } = useRevendedorPublico();
+
   function agregar() {
-    agregarAlCarrito({
+    const productoParaCarrito = {
       ...producto,
 
+      /*
+       * Precios convertidos a la moneda final
+       * que utiliza actualmente el carrito.
+       *
+       * IMPORTANTE:
+       * Todavía NO aplicamos el margen acá.
+       *
+       * El margen queda guardado como metadata
+       * del producto para evitar aplicarlo dos veces.
+       */
       precio: convertirPrecio(
         producto.precio,
         producto,
@@ -45,7 +62,24 @@ export default function AddToCartButton({ producto }) {
         producto,
         blue
       ),
-    });
+
+      /*
+       * Información interna del modo revendedor.
+       *
+       * No se muestra al cliente.
+       */
+      esRevendedor: modoRevendedor,
+
+      revendedorId: modoRevendedor
+        ? revendedorId
+        : null,
+
+      revendedorPorcentaje: modoRevendedor
+        ? porcentaje
+        : 0,
+    };
+
+    agregarAlCarrito(productoParaCarrito);
   }
 
   return (

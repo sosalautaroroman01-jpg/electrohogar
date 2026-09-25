@@ -2,22 +2,38 @@ import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
 
 function ProductItem({ producto, actualizar }) {
-
+  // =========================================================
+  // ELIMINAR PRODUCTO
+  // =========================================================
   async function eliminarProducto() {
-
     const confirmar = window.confirm(
       `¿Eliminar ${producto.nombre}?`
     );
 
     if (!confirmar) return;
 
-    await deleteDoc(doc(db, "productos", producto.id));
+    try {
+      await deleteDoc(
+        doc(db, "productos", producto.id)
+      );
 
-    actualizar();
+      actualizar();
+    } catch (error) {
+      console.error(
+        "Error al eliminar el producto:",
+        error
+      );
+
+      alert(
+        "No se pudo eliminar el producto. Intentá nuevamente."
+      );
+    }
   }
 
+  // =========================================================
+  // RENDER
+  // =========================================================
   return (
-
     <div
       style={{
         border: "1px solid #ddd",
@@ -27,49 +43,73 @@ function ProductItem({ producto, actualizar }) {
         display: "flex",
         gap: "20px",
         alignItems: "center",
-        boxShadow: "0 4px 12px rgba(0,0,0,.08)"
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
       }}
     >
-
+      {/* =====================================================
+          IMAGEN
+      ===================================================== */}
       {producto.imagen && (
         <img
           src={producto.imagen}
-          alt={producto.nombre}
+          alt={producto.nombre || "Producto"}
+          loading="lazy"
+          decoding="async"
+          width="120"
+          height="120"
           style={{
             width: "120px",
             height: "120px",
             objectFit: "cover",
-            borderRadius: "10px"
+            borderRadius: "10px",
+            display: "block",
           }}
         />
       )}
 
-      <div style={{ flex: 1 }}>
-
+      {/* =====================================================
+          INFORMACIÓN
+      ===================================================== */}
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+        }}
+      >
         <h3>{producto.nombre}</h3>
 
         <p>
-          <strong>$ {producto.precio.toLocaleString()}</strong>
+          <strong>
+            ${" "}
+            {Number(producto.precio || 0).toLocaleString()}
+          </strong>
         </p>
 
         <p>{producto.descripcion}</p>
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
-
-          <button>
+        {/* ===================================================
+            ACCIONES
+        =================================================== */}
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            marginTop: "15px",
+          }}
+        >
+          <button type="button">
             ✏️ Editar
           </button>
 
-          <button onClick={eliminarProducto}>
+          <button
+            type="button"
+            onClick={eliminarProducto}
+          >
             🗑 Eliminar
           </button>
-
         </div>
-
       </div>
-
     </div>
-
   );
 }
 

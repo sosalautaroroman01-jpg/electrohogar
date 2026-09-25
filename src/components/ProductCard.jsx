@@ -8,7 +8,12 @@ import WholesalePrices from "./WholesalePrices";
 import DescriptionModal from "./DescriptionModal";
 import ImageModal from "./ImageModal";
 
+import { useRevendedorPublico } from "../context/RevendedorPublicoContext";
+
 function ProductCard({ producto }) {
+  const {
+    activo: modoRevendedor,
+  } = useRevendedorPublico();
 
   const imagenes =
     producto.imagenes?.length > 0
@@ -19,7 +24,8 @@ function ProductCard({ producto }) {
 
   const video = producto.video || "";
 
-  const total = imagenes.length + (video ? 1 : 0);
+  const total =
+    imagenes.length + (video ? 1 : 0);
 
   const [imagenActual, setImagenActual] =
     useState(0);
@@ -42,7 +48,9 @@ function ProductCard({ producto }) {
         case "ArrowRight":
           if (total > 1) {
             setImagenActual((prev) =>
-              prev === total - 1 ? 0 : prev + 1
+              prev === total - 1
+                ? 0
+                : prev + 1
             );
           }
           break;
@@ -50,7 +58,9 @@ function ProductCard({ producto }) {
         case "ArrowLeft":
           if (total > 1) {
             setImagenActual((prev) =>
-              prev === 0 ? total - 1 : prev - 1
+              prev === 0
+                ? total - 1
+                : prev - 1
             );
           }
           break;
@@ -79,7 +89,9 @@ function ProductCard({ producto }) {
     if (total <= 1) return;
 
     setImagenActual((prev) =>
-      prev === total - 1 ? 0 : prev + 1
+      prev === total - 1
+        ? 0
+        : prev + 1
     );
   }
 
@@ -89,11 +101,13 @@ function ProductCard({ producto }) {
     if (total <= 1) return;
 
     setImagenActual((prev) =>
-      prev === 0 ? total - 1 : prev - 1
+      prev === 0
+        ? total - 1
+        : prev - 1
     );
   }
 
-    return (
+  return (
     <>
       <div className="card">
         <ProductGallery
@@ -111,28 +125,40 @@ function ProductCard({ producto }) {
         <div className="card-body">
           <h3>{producto.nombre}</h3>
 
-<ProductPrice producto={producto} />
-
-          <WholesalePrices
+          <ProductPrice
             producto={producto}
           />
+
+          {!modoRevendedor && (
+            <WholesalePrices
+              producto={producto}
+            />
+          )}
 
           {producto.descripcion?.trim() && (
             <button
               className="info-btn"
-              onClick={() => setDescripcionModal(true)}
+              onClick={() =>
+                setDescripcionModal(true)
+              }
             >
               ⓘ Info
             </button>
           )}
 
-          <AddToCartButton producto={producto} />
+          <AddToCartButton
+            producto={producto}
+          />
         </div>
       </div>
 
       <DescriptionModal
-        descripcionModal={descripcionModal}
-        setDescripcionModal={setDescripcionModal}
+        descripcionModal={
+          descripcionModal
+        }
+        setDescripcionModal={
+          setDescripcionModal
+        }
         producto={producto}
       />
 

@@ -1,181 +1,336 @@
-.info-bar{
+/* =========================================================
+   INFO BAR — ELECTRO HOGAR QUILMES
+   ESTILO GRAFITO + VERDE
+========================================================= */
 
-    display:flex;
+.info-bar {
+    width: 100%;
+    max-width: 1120px;
 
-    align-items:center;
+    margin: 4px auto 18px;
+    padding: 10px 24px;
 
-    justify-content:center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    gap:10px;
+    box-sizing: border-box;
 
-    width:100%;
+    background:
+        linear-gradient(
+            135deg,
+            #202428 0%,
+            #292E33 52%,
+            #202428 100%
+        );
 
-    max-width:1080px;
-
-    margin:0 auto 20px;
-
-    padding:12px 22px;
-
-    border-radius:16px;
-
-    background:rgba(255,255,255,.90);
-
-    backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.35);
+    border: 1px solid rgba(34, 197, 94, .55);
+    border-radius: 15px;
 
     box-shadow:
-        0 10px 24px rgba(0,0,0,.08);
+        0 12px 28px rgba(0,0,0,.20),
+        0 0 20px rgba(22,163,74,.07);
 
-    box-sizing:border-box;
-
-    transition:.25s;
-
-}
-
-.info-item{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:6px;
-
-    color:#333;
-
-    font-size:14px;
-
-    font-weight:600;
-
-    white-space:nowrap;
-
-    transition:.25s;
-
-}
-
-.info-icon{
-
-    font-size:17px;
-
-}
-
-.divider{
-
-    color:#d8d8d8;
-
-    font-size:18px;
-
-    user-select:none;
-
+    overflow: hidden;
+    position: relative;
 }
 
 
-/* ================= LINK CALCULAR ENVÍO ================= */
+/* =========================================================
+   DETALLE SUPERIOR
+========================================================= */
 
-.info-link{
+.info-bar::before {
+    content: "";
 
-    text-decoration:none;
+    position: absolute;
 
-    color:#16a34a;
+    top: 0;
+    left: 0;
 
-    font-weight:700;
+    width: 100%;
+    height: 2px;
 
-    padding:6px 10px;
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #16A34A 25%,
+            #22C55E 50%,
+            #16A34A 75%,
+            transparent
+        );
 
-    border-radius:999px;
-
-    transition:all .25s ease;
-
-}
-
-.info-link:hover{
-
-    background:#16a34a;
-
-    color:#fff;
-
-    transform:translateY(-2px);
-
-    box-shadow:0 6px 18px rgba(22,163,74,.25);
-
-}
-
-.info-link .info-icon{
-
-    transition:.25s;
-
-}
-
-.info-link:hover .info-icon{
-
-    transform:translateX(2px);
-
+    pointer-events: none;
 }
 
 
-/* ================= CELULAR ================= */
+/* =========================================================
+   ITEM
+========================================================= */
 
-@media (max-width:768px){
+.info-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.info-bar{
+    gap: 10px;
 
-    justify-content:flex-start;
+    padding: 3px 28px;
 
-    overflow-x:auto;
+    color: #FFFFFF;
 
-    overflow-y:hidden;
+    text-decoration: none;
 
-    padding:10px 14px;
+    position: relative;
+    z-index: 1;
 
-    gap:10px;
-
-    border-radius:14px;
-
-    scrollbar-width:none;
-
-    -ms-overflow-style:none;
-
-    -webkit-overflow-scrolling:touch;
-
+    transition:
+        transform .2s ease,
+        background .2s ease,
+        color .2s ease;
 }
 
-.info-bar::-webkit-scrollbar{
 
-    display:none;
+/* =========================================================
+   ICONO
+========================================================= */
 
+.info-icon {
+    width: 42px;
+    height: 42px;
+
+    flex: 0 0 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #22C55E;
+
+    background: rgba(255,255,255,.045);
+
+    border: 1.5px solid rgba(34,197,94,.58);
+
+    border-radius: 50%;
+
+    transition:
+        transform .2s ease,
+        background .2s ease,
+        color .2s ease,
+        box-shadow .2s ease;
 }
 
-.info-item{
 
-    flex:0 0 auto;
+.info-svg {
+    width: 24px;
+    height: 24px;
 
-    font-size:13px;
+    display: block;
 
-    gap:5px;
+    fill: none;
+    stroke: currentColor;
 
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-.info-icon{
 
-    font-size:16px;
+/* Compatibilidad con iconos antiguos */
 
+.info-icon:not(:has(svg)) {
+    font-size: 20px;
+    line-height: 1;
 }
 
-.info-link{
 
-    padding:6px 10px;
+/* =========================================================
+   TEXTO
+========================================================= */
 
-    font-size:13px;
+.info-text {
+    display: block;
 
+    color: #F4F4F4;
+
+    font-size: 14px;
+    font-weight: 650;
+
+    line-height: 1.15;
+
+    white-space: nowrap;
 }
 
-.divider{
 
-    flex:0 0 auto;
+/* =========================================================
+   SEPARADORES
+========================================================= */
 
-    font-size:16px;
+.divider {
+    width: 1px;
+    height: 38px;
 
+    flex: 0 0 1px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            rgba(34,197,94,.55),
+            transparent
+        );
+
+    user-select: none;
 }
 
+
+/* =========================================================
+   LINK — CALCULAR ENVÍO
+========================================================= */
+
+.info-link {
+    border-radius: 12px;
+}
+
+.info-link .info-text {
+    color: #4ADE80;
+    font-weight: 700;
+}
+
+.info-link:hover {
+    background: rgba(34,197,94,.09);
+    transform: translateY(-1px);
+}
+
+.info-link:hover .info-icon {
+    background: #16A34A;
+
+    color: #FFFFFF;
+
+    border-color: #22C55E;
+
+    transform: scale(1.04);
+
+    box-shadow:
+        0 0 18px rgba(34,197,94,.22);
+}
+
+
+/* =========================================================
+   HOVER GENERAL
+========================================================= */
+
+.info-item:not(.info-link):hover .info-icon {
+    background: rgba(34,197,94,.08);
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .info-bar {
+        padding: 9px 12px;
+        max-width: 100%;
+    }
+
+    .info-item {
+        gap: 8px;
+        padding: 3px 17px;
+    }
+
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+    }
+
+    .info-svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .info-text {
+        font-size: 13px;
+    }
+
+    .divider {
+        height: 36px;
+    }
+}
+
+
+/* =========================================================
+   CELULAR
+========================================================= */
+
+@media (max-width: 650px) {
+
+    .info-bar {
+        justify-content: flex-start;
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        padding: 8px 9px;
+
+        margin-bottom: 14px;
+
+        border-radius: 13px;
+
+        -webkit-overflow-scrolling: touch;
+
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .info-bar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .info-item {
+        flex: 0 0 auto;
+
+        gap: 7px;
+
+        padding: 2px 11px;
+    }
+
+    .info-icon {
+        width: 37px;
+        height: 37px;
+
+        flex-basis: 37px;
+    }
+
+    .info-svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .info-text {
+        font-size: 12px;
+    }
+
+    .divider {
+        height: 34px;
+    }
+}
+
+
+@media (max-width: 390px) {
+
+    .info-bar {
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+
+    .info-item {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
 }

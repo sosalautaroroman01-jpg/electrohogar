@@ -11,38 +11,58 @@ import {
 
 import { db } from "../firebase";
 
-const productosRef = collection(db, "productos");
+const productosRef =
+  collection(db, "productos");
 
-// ===============================
-// Escuchar productos en tiempo real
-// ===============================
+
+// =====================================================
+// ESCUCHAR PRODUCTOS EN TIEMPO REAL
+// =====================================================
+
 export function escucharProductos(callback) {
+
   return onSnapshot(
     productosRef,
+
     (snapshot) => {
-      const productos = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .sort((a, b) =>
-          (a.nombre || "").localeCompare(b.nombre || "")
-        );
+
+      const productos =
+        snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .sort((a, b) =>
+            (a.nombre || "")
+              .localeCompare(
+                b.nombre || ""
+              )
+          );
 
       callback(productos);
     },
+
     (error) => {
-      console.error("Error escuchando productos:", error);
+
+      console.error(
+        "Error escuchando productos:",
+        error
+      );
+
       callback([]);
     }
   );
 }
 
-// ===============================
-// Obtener todos
-// ===============================
+
+// =====================================================
+// OBTENER TODOS
+// =====================================================
+
 export async function obtenerProductos() {
-  const snapshot = await getDocs(productosRef);
+
+  const snapshot =
+    await getDocs(productosRef);
 
   return snapshot.docs
     .map((doc) => ({
@@ -50,17 +70,28 @@ export async function obtenerProductos() {
       ...doc.data(),
     }))
     .sort((a, b) =>
-      (a.nombre || "").localeCompare(b.nombre || "")
+      (a.nombre || "")
+        .localeCompare(
+          b.nombre || ""
+        )
     );
 }
 
-// ===============================
-// Obtener uno
-// ===============================
-export async function obtenerProductoPorId(id) {
-  const snapshot = await getDoc(doc(db, "productos", id));
 
-  if (!snapshot.exists()) return null;
+// =====================================================
+// OBTENER UNO
+// =====================================================
+
+export async function obtenerProductoPorId(id) {
+
+  const snapshot =
+    await getDoc(
+      doc(db, "productos", id)
+    );
+
+  if (!snapshot.exists()) {
+    return null;
+  }
 
   return {
     id: snapshot.id,
@@ -68,32 +99,79 @@ export async function obtenerProductoPorId(id) {
   };
 }
 
-// ===============================
-// Crear
-// ===============================
+
+// =====================================================
+// CREAR PRODUCTO
+// =====================================================
+
 export function crearProducto(data) {
-  return addDoc(productosRef, data);
+
+  return addDoc(
+    productosRef,
+    data
+  );
 }
 
-// ===============================
-// Editar
-// ===============================
-export function editarProducto(id, data) {
-  return updateDoc(doc(db, "productos", id), data);
+
+// =====================================================
+// EDITAR PRODUCTO
+// =====================================================
+
+export function editarProducto(
+  id,
+  data
+) {
+
+  return updateDoc(
+    doc(db, "productos", id),
+    data
+  );
 }
 
-// ===============================
-// Cambiar visibilidad
-// ===============================
-export function cambiarVisibilidad(id, visible) {
-  return updateDoc(doc(db, "productos", id), {
-    visible,
-  });
+
+// =====================================================
+// CAMBIAR VISIBILIDAD
+// =====================================================
+
+export function cambiarVisibilidad(
+  id,
+  visible
+) {
+
+  return updateDoc(
+    doc(db, "productos", id),
+    {
+      visible,
+    }
+  );
 }
 
-// ===============================
-// Eliminar
-// ===============================
+
+// =====================================================
+// DESCUBRÍ LO NUEVO
+// =====================================================
+
+export function cambiarNuevoIngreso(
+  id,
+  nuevoIngreso
+) {
+
+  return updateDoc(
+    doc(db, "productos", id),
+    {
+      nuevoIngreso,
+    }
+  );
+}
+
+
+// =====================================================
+// ELIMINAR PRODUCTO
+// =====================================================
+
 export function eliminarProducto(id) {
-  return deleteDoc(doc(db, "productos", id));
+
+  return deleteDoc(
+    doc(db, "productos", id)
+  );
 }

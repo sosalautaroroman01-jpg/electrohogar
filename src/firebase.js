@@ -4,7 +4,7 @@ import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC3psULE4DgO9I-wKcMYyYVSQLnCyhpafU",
+  apiKey: "AIzaSyCdzZIkl-Uo7bbw1vld9fyQIxDGk6OHqZQ",
   authDomain: "catalogo-ca9be.firebaseapp.com",
   projectId: "catalogo-ca9be",
   storageBucket: "catalogo-ca9be.firebasestorage.app",
@@ -13,8 +13,66 @@ const firebaseConfig = {
   measurementId: "G-7GGM3B8ZCD",
 };
 
+/*
+|--------------------------------------------------------------------------
+| FIREBASE PRINCIPAL
+|--------------------------------------------------------------------------
+|
+| Este Firebase sigue siendo el principal del sistema:
+|
+| - Admin
+| - Dashboard
+| - Productos
+| - Modo Local
+| - Mostrador
+| - Pedidos normales
+| - Catálogo principal
+|
+*/
+
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
+
+/*
+|--------------------------------------------------------------------------
+| PRUEBA TEMPORAL - API KEY LOCAL
+|--------------------------------------------------------------------------
+*/
+
+console.log(
+  "🔥 FIREBASE LOCAL API KEY:",
+  auth.app.options.apiKey
+);
+
+/*
+|--------------------------------------------------------------------------
+| FIREBASE PARA REVENDEDORES
+|--------------------------------------------------------------------------
+|
+| Usamos una segunda Firebase App para mantener separada
+| la sesión del revendedor de la sesión del administrador.
+|
+| Así:
+|
+| revendedorAuth
+|       ↓
+| revendedorDb
+|
+| Las consultas de Mis Ventas quedan autenticadas
+| con la sesión del revendedor.
+|
+*/
+
+const revendedorApp = initializeApp(
+  firebaseConfig,
+  "revendedores-auth"
+);
+
+export const revendedorAuth =
+  getAuth(revendedorApp);
+
+export const revendedorDb =
+  getFirestore(revendedorApp);

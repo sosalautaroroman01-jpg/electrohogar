@@ -54,6 +54,7 @@ export default function ProductGallery({
             className="card-img"
             controls
             playsInline
+            preload="none"
           >
             <source
               src={video}
@@ -66,6 +67,8 @@ export default function ProductGallery({
             alt={producto.nombre}
             className="card-img"
             onClick={() => setImagenAbierta(true)}
+            loading="lazy"
+            decoding="async"
           />
         )}
       </div>
@@ -75,6 +78,7 @@ export default function ProductGallery({
           <button
             className="image-arrow left"
             onClick={anteriorImagen}
+            type="button"
           >
             ❮
           </button>
@@ -82,6 +86,7 @@ export default function ProductGallery({
           <button
             className="image-arrow right"
             onClick={siguienteImagen}
+            type="button"
           >
             ❯
           </button>
@@ -96,6 +101,8 @@ export default function ProductGallery({
                 key={index}
                 src={img}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className={
                   imagenActual === index
                     ? "thumbnail active"

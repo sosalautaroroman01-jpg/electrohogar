@@ -8,6 +8,8 @@ import {
   runTransaction,
   setDoc,
   getDoc,
+  query,
+  where,
 } from "firebase/firestore";
 
 import { db } from "../firebase";
@@ -24,26 +26,6 @@ const pedidosRef = collection(
 // =====================================================
 // COLECCIÓN DE BOLETAS
 // =====================================================
-//
-// Acá vamos a guardar TODAS las boletas locales.
-//
-// Ejemplo:
-//
-// boletas
-//   └── 71910
-//        ├── numeroBoleta: 71910
-//        ├── estado: "Abierta"
-//        ├── vendedor: "Lautaro"
-//        ├── productos: [...]
-//        └── total: 150000
-//
-// El número de boleta será también el ID del documento.
-//
-// Esto permite buscar directamente:
-//
-// boletas / 71910
-//
-// =====================================================
 
 const boletasRef = collection(
   db,
@@ -52,18 +34,6 @@ const boletasRef = collection(
 
 // =====================================================
 // NUMERACIÓN CORRELATIVA DE BOLETAS
-// =====================================================
-//
-// ÚLTIMA BOLETA REAL:
-//
-//     N° 71909
-//
-// PRÓXIMA:
-//
-//     N° 71910
-//
-// Firebase guarda el contador para que nunca se repita.
-//
 // =====================================================
 
 const NUMERO_INICIAL_BOLETA = 71909;
@@ -76,17 +46,6 @@ const contadorBoletasRef = doc(
 
 // =====================================================
 // OBTENER SIGUIENTE NÚMERO DE BOLETA
-// =====================================================
-//
-// Se utiliza una transacción para evitar que dos
-// computadoras obtengan el mismo número al mismo tiempo.
-//
-// Ejemplo:
-//
-// Tablet    → 71910
-// Notebook  → 71911
-// Otra PC   → 71912
-//
 // =====================================================
 
 export async function obtenerSiguienteNumeroBoleta() {
@@ -104,8 +63,6 @@ export async function obtenerSiguienteNumeroBoleta() {
               snapshot.data().ultimoNumero || 0
             )
           : 0;
-
-      // Nunca permitimos retroceder de 71909.
 
       const ultimoNumero = Math.max(
         numeroGuardado,
@@ -135,17 +92,261 @@ export async function obtenerSiguienteNumeroBoleta() {
 }
 
 // =====================================================
-// GUARDAR BOLETA
+// ENVIAR PEDIDO AL MOSTRADOR + ASIGNAR BOLETA
 // =====================================================
-//
-// Guarda una venta completa en Firebase.
-//
-// IMPORTANTE:
-//
-// Si la boleta ya existe, NO crea otra.
-//
-// Actualiza el mismo documento.
-//
+
+export async function enviarPedidoAlMostrador(
+  pedidoId
+) {
+  if (!pedidoId) {
+    throw new Error(
+      "No se indicó el ID del pedido."
+    );
+  }
+
+  const pedidoRef = doc(
+    db,
+    "pedidosPendientes",
+    pedidoId
+  );
+
+  const resultado = await runTransaction(
+    db,
+    async (transaction) => {
+
+      // =================================================
+      // LEER PEDIDO
+      // =================================================
+
+      const pedidoSnapshot =
+        await transaction.get(
+          pedidoRef
+        );
+
+      if (!pedidoSnapshot.exists()) {
+        throw new Error(
+          "El pedido no existe."
+        );
+      }
+
+      const pedidoData =
+        pedidoSnapshot.data();
+
+      // =================================================
+      // SI YA TIENE NÚMERO DE BOLETA
+      // =================================================
+
+      if (
+        pedidoData.numeroBoleta !==
+          undefined &&
+        pedidoData.numeroBoleta !== null
+      ) {
+        const numeroExistente =
+          Number(
+            pedidoData.numeroBoleta
+          );
+
+        const boletaRef = doc(
+          db,
+          "boletas",
+          String(numeroExistente)
+        );
+
+        const boletaSnapshot =
+          await transaction.get(
+            boletaRef
+          );
+
+        if (!boletaSnapshot.exists()) {
+
+          const productos =
+            Array.isArray(
+              pedidoData.productos
+            )
+              ? pedidoData.productos
+              : [];
+
+          transaction.set(
+            boletaRef,
+            {
+              ...pedidoData,
+
+              pedidoId,
+
+              numeroBoleta:
+                numeroExistente,
+
+              carrito:
+                productos,
+
+              productos,
+
+              total:
+                Number(
+                  pedidoData.total || 0
+                ),
+
+              estado:
+                "Abierta",
+
+              origen:
+                pedidoData.origen ||
+                "WhatsApp",
+
+              actualizadoEn:
+                serverTimestamp(),
+            },
+            {
+              merge: true,
+            }
+          );
+        }
+
+        if (
+          pedidoData.estado !==
+          "Pendiente"
+        ) {
+          transaction.update(
+            pedidoRef,
+            {
+              estado:
+                "Pendiente",
+
+              actualizadoEn:
+                serverTimestamp(),
+            }
+          );
+        }
+
+        return numeroExistente;
+      }
+
+      // =================================================
+      // LEER CONTADOR
+      // =================================================
+
+      const contadorSnapshot =
+        await transaction.get(
+          contadorBoletasRef
+        );
+
+      const numeroGuardado =
+        contadorSnapshot.exists()
+          ? Number(
+              contadorSnapshot.data()
+                .ultimoNumero || 0
+            )
+          : 0;
+
+      const ultimoNumero =
+        Math.max(
+          numeroGuardado,
+          NUMERO_INICIAL_BOLETA
+        );
+
+      const siguienteNumero =
+        ultimoNumero + 1;
+
+      // =================================================
+      // REFERENCIA BOLETA
+      // =================================================
+
+      const boletaRef = doc(
+        db,
+        "boletas",
+        String(siguienteNumero)
+      );
+
+      // =================================================
+      // ACTUALIZAR CONTADOR
+      // =================================================
+
+      transaction.set(
+        contadorBoletasRef,
+        {
+          ultimoNumero:
+            siguienteNumero,
+
+          actualizadoEn:
+            serverTimestamp(),
+        },
+        {
+          merge: true,
+        }
+      );
+
+      // =================================================
+      // ACTUALIZAR PEDIDO
+      // =================================================
+
+      transaction.update(
+        pedidoRef,
+        {
+          numeroBoleta:
+            siguienteNumero,
+
+          estado:
+            "Pendiente",
+
+          actualizadoEn:
+            serverTimestamp(),
+        }
+      );
+
+      // =================================================
+      // GUARDAR BOLETA
+      // =================================================
+
+      const productos =
+        Array.isArray(
+          pedidoData.productos
+        )
+          ? pedidoData.productos
+          : [];
+
+      transaction.set(
+        boletaRef,
+        {
+          ...pedidoData,
+
+          pedidoId,
+
+          numeroBoleta:
+            siguienteNumero,
+
+          carrito:
+            productos,
+
+          productos,
+
+          total:
+            Number(
+              pedidoData.total || 0
+            ),
+
+          estado:
+            "Abierta",
+
+          origen:
+            "WhatsApp",
+
+          actualizadoEn:
+            serverTimestamp(),
+        },
+        {
+          merge: true,
+        }
+      );
+
+      return siguienteNumero;
+    }
+  );
+
+  return resultado;
+}
+
+// =====================================================
+// GUARDAR BOLETA
 // =====================================================
 
 export async function guardarBoleta(
@@ -175,10 +376,13 @@ export async function guardarBoleta(
       ...data,
 
       numeroBoleta:
-        Number(data.numeroBoleta),
+        Number(
+          data.numeroBoleta
+        ),
 
       estado:
-        data.estado || "Abierta",
+        data.estado ||
+        "Abierta",
 
       actualizadoEn:
         serverTimestamp(),
@@ -216,7 +420,9 @@ export async function buscarBoletaPorNumero(
   );
 
   const snapshot =
-    await getDoc(boletaRef);
+    await getDoc(
+      boletaRef
+    );
 
   if (!snapshot.exists()) {
     return null;
@@ -230,18 +436,6 @@ export async function buscarBoletaPorNumero(
 
 // =====================================================
 // ACTUALIZAR BOLETA
-// =====================================================
-//
-// NO genera un número nuevo.
-//
-// Si estamos trabajando con:
-//
-//     N° 71910
-//
-// seguirá siendo:
-//
-//     N° 71910
-//
 // =====================================================
 
 export async function actualizarBoleta(
@@ -289,19 +483,21 @@ export async function actualizarBoleta(
 // CERRAR BOLETA
 // =====================================================
 //
-// Cuando la venta terminó definitivamente:
+// ACÁ ESTÁ LA PARTE NUEVA:
 //
-//     71910 → Cerrada
+// Cuando la venta termina:
 //
-// Esto NO elimina la boleta.
+//     Boleta → Cerrada
 //
-// Queda guardada en Firebase como historial.
+// también registramos las cantidades vendidas.
 //
-// Tampoco cambia el número.
+// El contador queda dentro de cada producto:
 //
-// La próxima venta nueva será:
+//     ventas: 1
+//     ventas: 2
+//     ventas: 15
 //
-//     71911
+// No se crea ninguna colección nueva.
 //
 // =====================================================
 
@@ -326,13 +522,207 @@ export async function cerrarBoleta(
     numero
   );
 
-  await updateDoc(
-    boletaRef,
-    {
-      estado: "Cerrada",
+  await runTransaction(
+    db,
+    async (transaction) => {
 
-      cerradoEn:
-        serverTimestamp(),
+      // =================================================
+      // 1. LEER BOLETA
+      // =================================================
+
+      const boletaSnapshot =
+        await transaction.get(
+          boletaRef
+        );
+
+      if (!boletaSnapshot.exists()) {
+        throw new Error(
+          `La boleta ${numero} no existe.`
+        );
+      }
+
+      const boletaData =
+        boletaSnapshot.data();
+
+      // =================================================
+      // 2. EVITAR DUPLICAR VENTAS
+      // =================================================
+
+      if (
+        boletaData.ventasRegistradas === true
+      ) {
+        transaction.update(
+          boletaRef,
+          {
+            estado:
+              "Cerrada",
+
+            cerradoEn:
+              serverTimestamp(),
+          }
+        );
+
+        return;
+      }
+
+      // =================================================
+      // 3. OBTENER PRODUCTOS DE LA BOLETA
+      // =================================================
+
+      const productos =
+        Array.isArray(
+          boletaData.productos
+        )
+          ? boletaData.productos
+          : Array.isArray(
+              boletaData.carrito
+            )
+              ? boletaData.carrito
+              : [];
+
+      // =================================================
+      // 4. AGRUPAR CANTIDADES
+      // =================================================
+
+      const ventasPorProducto =
+        new Map();
+
+      productos.forEach(
+        (producto) => {
+
+          if (!producto) {
+            return;
+          }
+
+          const productoId =
+            producto.id ??
+            producto.productoId ??
+            producto.productId;
+
+          const cantidad =
+            Number(
+              producto.cantidad
+            ) || 0;
+
+          if (
+            !productoId ||
+            cantidad <= 0
+          ) {
+            return;
+          }
+
+          const id =
+            String(
+              productoId
+            );
+
+          ventasPorProducto.set(
+            id,
+            (
+              ventasPorProducto.get(
+                id
+              ) || 0
+            ) + cantidad
+          );
+        }
+      );
+
+      // =================================================
+      // 5. LEER PRODUCTOS
+      // =================================================
+
+      const productosParaActualizar =
+        [];
+
+      for (
+        const [
+          productoId,
+          cantidad
+        ]
+        of ventasPorProducto.entries()
+      ) {
+
+        const productoRef =
+          doc(
+            db,
+            "productos",
+            productoId
+          );
+
+        const productoSnapshot =
+          await transaction.get(
+            productoRef
+          );
+
+        if (
+          !productoSnapshot.exists()
+        ) {
+          console.warn(
+            `⚠️ No se encontró el producto ${productoId} para registrar ventas.`
+          );
+
+          continue;
+        }
+
+        const productoData =
+          productoSnapshot.data();
+
+        const ventasActuales =
+          Number(
+            productoData.ventas
+          ) || 0;
+
+        productosParaActualizar.push(
+          {
+            ref:
+              productoRef,
+
+            ventas:
+              ventasActuales +
+              cantidad,
+          }
+        );
+      }
+
+      // =================================================
+      // 6. ACTUALIZAR CONTADORES
+      // =================================================
+
+      productosParaActualizar.forEach(
+        ({
+          ref,
+          ventas
+        }) => {
+
+          transaction.update(
+            ref,
+            {
+              ventas,
+
+              ventasActualizadasEn:
+                serverTimestamp(),
+            }
+          );
+        }
+      );
+
+      // =================================================
+      // 7. CERRAR BOLETA
+      // =================================================
+
+      transaction.update(
+        boletaRef,
+        {
+          estado:
+            "Cerrada",
+
+          ventasRegistradas:
+            true,
+
+          cerradoEn:
+            serverTimestamp(),
+        }
+      );
     }
   );
 
@@ -342,26 +732,18 @@ export async function cerrarBoleta(
 // =====================================================
 // CREAR PEDIDO
 // =====================================================
-//
-// Si no se indica estado:
-//
-// → La orden queda "Creada"
-// → NO aparece en Mostrador
-//
-// Si se indica estado "Pendiente":
-//
-// → Aparece en Mostrador
-//
-// =====================================================
 
-export function crearPedido(data) {
+export function crearPedido(
+  data
+) {
   return addDoc(
     pedidosRef,
     {
       ...data,
 
       estado:
-        data.estado || "Creada",
+        data.estado ||
+        "Creada",
 
       fecha:
         serverTimestamp(),
@@ -376,35 +758,54 @@ export function crearPedido(data) {
 export function escucharPedidos(
   callback
 ) {
+  const pedidosPendientesQuery =
+    query(
+      pedidosRef,
+      where(
+        "estado",
+        "==",
+        "Pendiente"
+      )
+    );
+
   return onSnapshot(
-    pedidosRef,
+    pedidosPendientesQuery,
     (snapshot) => {
+
       const pedidos =
         snapshot.docs
-          .map((documento) => ({
-            id: documento.id,
-            ...documento.data(),
-          }))
-          .filter(
-            (pedido) =>
-              pedido.estado ===
-              "Pendiente"
+          .map(
+            (documento) => ({
+              id:
+                documento.id,
+
+              ...documento.data(),
+            })
           )
-          .sort((a, b) => {
-            const fechaA =
-              a.fecha?.seconds || 0;
+          .sort(
+            (a, b) => {
 
-            const fechaB =
-              b.fecha?.seconds || 0;
+              const fechaA =
+                a.fecha?.seconds ||
+                0;
 
-            return (
-              fechaA - fechaB
-            );
-          });
+              const fechaB =
+                b.fecha?.seconds ||
+                0;
 
-      callback(pedidos);
+              return (
+                fechaA -
+                fechaB
+              );
+            }
+          );
+
+      callback(
+        pedidos
+      );
     },
     (error) => {
+
       console.error(
         "❌ Error escuchando pedidos:",
         error
@@ -427,7 +828,8 @@ export function marcarComoImpreso(
       id
     ),
     {
-      estado: "Impreso",
+      estado:
+        "Impreso",
     }
   );
 }

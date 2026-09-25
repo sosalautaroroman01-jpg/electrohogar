@@ -106,11 +106,15 @@ export function imprimirRemito({
 
   const cantidadProductos = carrito.length;
 
-  let fontTabla = "8px";
-  let paddingTabla = "4px";
-  let altoFila = "22px";
-  let logoWidth = "150px";
-  let tituloSize = "16px";
+let fontTabla = "8px";
+let paddingTabla = "4px";
+let altoFila = "22px";
+
+let imeiFont = "8px";
+let imeiLineHeight = "1.2";
+
+let logoWidth = "150px";
+  let tituloSize = "22px";
   let infoFont = "9px";
   let infoHeight = "30px";
 
@@ -119,7 +123,7 @@ export function imprimirRemito({
     paddingTabla = "3px";
     altoFila = "20px";
     logoWidth = "145px";
-    tituloSize = "15px";
+    tituloSize = "21px";
     infoFont = "8.5px";
     infoHeight = "28px";
   }
@@ -129,7 +133,7 @@ export function imprimirRemito({
     paddingTabla = "2px";
     altoFila = "18px";
     logoWidth = "140px";
-    tituloSize = "14px";
+    tituloSize = "20px";
     infoFont = "8px";
     infoHeight = "26px";
   }
@@ -139,7 +143,7 @@ export function imprimirRemito({
     paddingTabla = "2px";
     altoFila = "16px";
     logoWidth = "135px";
-    tituloSize = "13px";
+    tituloSize = "19px";
     infoFont = "7.5px";
     infoHeight = "24px";
   }
@@ -149,7 +153,7 @@ export function imprimirRemito({
     paddingTabla = "1px";
     altoFila = "14px";
     logoWidth = "130px";
-    tituloSize = "12px";
+    tituloSize = "18px";
     infoFont = "7px";
     infoHeight = "22px";
   }
@@ -285,22 +289,31 @@ body {
 }
 
 .titulo {
-  border: 2px solid #111;
-  padding: 6px 12px;
+  border: 2.5px solid #111;
+  padding: 5px 10px;
 
-  font-size: 16px;
-  font-weight: bold;
+  font-size: ${tituloSize};
+  font-weight: 900;
 
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   text-align: center;
 
-  min-width: 28mm;
+  min-width: 31mm;
+  margin-right: 10px;
+
+  line-height: 1;
+  box-sizing: border-box;
+
+  white-space: nowrap;
 }
 
 .numero-boleta {
   display: inline-block;
   min-width: 20mm;
-  height: 16px;
+  height: auto;
+  font-size: inherit;
+  font-weight: 900;
+  line-height: 1;
 }
 
 /* =========================================================
@@ -346,9 +359,9 @@ th {
   background: #111;
   color: #fff;
 
-  padding: 3px;
+  padding: ${paddingTabla};
 
-  font-size: 9px;
+  font-size: ${fontTabla};
   font-weight: bold;
 
   white-space: nowrap;
@@ -357,10 +370,12 @@ th {
 td {
   border: 1px solid #ddd;
 
-  padding: 3px;
+  padding: ${paddingTabla};
 
-  font-size: 9px;
-  height: 16px;
+  font-size: ${fontTabla};
+  height: ${altoFila};
+
+  line-height: 1.05;
 
   vertical-align: middle;
 
@@ -399,18 +414,30 @@ td {
 .imei-impresion {
   margin-top: 2px;
 
-  font-size: 8px;
-  line-height: 1.2;
+  font-size: ${imeiFont};
+  line-height: ${imeiLineHeight};
 
   font-weight: bold;
 
   color: #222;
 
-  white-space: normal;
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  column-gap: 6px;
+  row-gap: 1px;
+
+  white-space: nowrap;
 }
 
 .imei-impresion div {
-  margin-top: 1px;
+  margin-top: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
 }
 
 /* =========================================================
@@ -711,12 +738,12 @@ ${[1, 2]
       X
     </div>
 
-<div className="titulo">
-  N°
-  <span className="numero-boleta">
-    ${numeroBoleta || ""}
-  </span>
-</div>
+    <div class="titulo">
+      N°
+      <span class="numero-boleta">
+        ${numeroBoleta || ""}
+      </span>
+    </div>
 
   </div>
 
@@ -854,17 +881,17 @@ ${[1, 2]
 </html>
 `;
 
-  ventana.document.write(remitoHTML);
+ventana.document.write(remitoHTML);
 
-  ventana.document.close();
+ventana.document.close();
 
-  ventana.onload = () => {
-    ventana.focus();
+ventana.onload = () => {
+  ventana.focus();
 
-    ventana.print();
+  ventana.print();
 
-    ventana.onafterprint = () => {
-      ventana.close();
-    };
+  ventana.onafterprint = () => {
+    ventana.close();
   };
+};
 }

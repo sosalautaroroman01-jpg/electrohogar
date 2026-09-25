@@ -3,10 +3,13 @@ import { useParams } from "react-router-dom";
 import {
   doc,
   getDoc,
-  updateDoc,
 } from "firebase/firestore";
 
 import { db } from "../firebase";
+
+import {
+  enviarPedidoAlMostrador,
+} from "../services/pedidosService";
 
 function Pedido() {
   const { id } = useParams();
@@ -36,7 +39,8 @@ function Pedido() {
           id
         );
 
-        const snapshot = await getDoc(pedidoRef);
+        const snapshot =
+          await getDoc(pedidoRef);
 
         if (!snapshot.exists()) {
           setError("Esta orden no existe.");
@@ -53,11 +57,13 @@ function Pedido() {
 
         // =====================================================
         // IMPORTANTE:
-        // AL ABRIR EL LINK NO SE ENVÍA AL MOSTRADOR.
+        // AL ABRIR EL LINK NO SE GENERA NINGÚN NÚMERO.
         // SOLAMENTE CARGAMOS LA ORDEN.
         // =====================================================
 
-        if (datos.estado === "Pendiente") {
+        if (
+          datos.estado === "Pendiente"
+        ) {
           setEnviado(true);
         }
 
@@ -83,23 +89,40 @@ function Pedido() {
   // =========================================================
 
   async function enviarAlMostrador() {
-    if (!pedido || enviando || enviado) return;
+    if (
+      !pedido ||
+      enviando ||
+      enviado
+    ) {
+      return;
+    }
 
     try {
       setEnviando(true);
 
-      const pedidoRef = doc(
-        db,
-        "pedidosPendientes",
-        pedido.id
-      );
+      // =====================================================
+      // IMPORTANTE:
+      //
+      // ACÁ RECIÉN SE ASIGNA EL NÚMERO DE BOLETA.
+      //
+      // La función hace todo de manera atómica:
+      //
+      // 1. Obtiene el siguiente número.
+      // 2. Lo guarda en este pedido.
+      // 3. Cambia el estado a "Pendiente".
+      //
+      // =====================================================
 
-      await updateDoc(pedidoRef, {
-        estado: "Pendiente",
-      });
+      const numeroBoleta =
+        await enviarPedidoAlMostrador(
+          pedido.id
+        );
 
       setPedido((actual) => ({
         ...actual,
+
+        numeroBoleta,
+
         estado: "Pendiente",
       }));
 
@@ -114,6 +137,7 @@ function Pedido() {
       alert(
         "❌ No se pudo enviar el pedido al mostrador."
       );
+
     } finally {
       setEnviando(false);
     }
@@ -182,7 +206,8 @@ function Pedido() {
         background: "#f4f4f4",
         padding: "30px 15px",
         boxSizing: "border-box",
-        fontFamily: "Arial, Helvetica, sans-serif",
+        fontFamily:
+          "Arial, Helvetica, sans-serif",
       }}
     >
       <div
@@ -225,6 +250,28 @@ function Pedido() {
           >
             Orden #{pedido.id}
           </p>
+
+          {/* =================================
+              NÚMERO DE BOLETA
+          ================================= */}
+
+          {pedido.numeroBoleta && (
+            <div
+              style={{
+                marginTop: "10px",
+                fontSize: "18px",
+                fontWeight: "bold",
+                color: "#16a34a",
+              }}
+            >
+              Boleta N°{" "}
+              {Number(
+                pedido.numeroBoleta
+              ).toLocaleString(
+                "es-AR"
+              )}
+            </div>
+          )}
         </div>
 
         {/* =================================
@@ -363,22 +410,26 @@ function Pedido() {
             }}
           >
             <button
-              onClick={enviarAlMostrador}
+              onClick={
+                enviarAlMostrador
+              }
               disabled={enviando}
               style={{
                 width: "100%",
                 padding: "17px",
                 border: "none",
                 borderRadius: "12px",
-                background: enviando
-                  ? "#999"
-                  : "#16a34a",
+                background:
+                  enviando
+                    ? "#999"
+                    : "#16a34a",
                 color: "#fff",
                 fontSize: "18px",
                 fontWeight: "bold",
-                cursor: enviando
-                  ? "not-allowed"
-                  : "pointer",
+                cursor:
+                  enviando
+                    ? "not-allowed"
+                    : "pointer",
                 boxShadow:
                   "0 4px 10px rgba(0,0,0,.15)",
               }}
@@ -412,6 +463,22 @@ function Pedido() {
             }}
           >
             ✅ Pedido enviado al mostrador
+
+            {pedido.numeroBoleta && (
+              <div
+                style={{
+                  marginTop: "6px",
+                  fontSize: "18px",
+                }}
+              >
+                Boleta N°{" "}
+                {Number(
+                  pedido.numeroBoleta
+                ).toLocaleString(
+                  "es-AR"
+                )}
+              </div>
+            )}
           </div>
         )}
 

@@ -1,0 +1,326 @@
+/* =========================================================
+   ELECTROHOGAR - HOME
+   Home comercial / ecommerce
+   ========================================================= */
+
+.home-contenido {
+  width: 100%;
+  max-width: 1740px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   VITRINAS
+   ========================================================= */
+
+.home-vitrina {
+  position: relative;
+  width: 100%;
+  margin: 28px 0 34px;
+  padding: 22px 24px 18px;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.035);
+}
+
+.home-vitrina-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.home-vitrina-title {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.home-vitrina-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background: #f5f5f5;
+  font-size: 22px;
+}
+
+.home-vitrina-header h2 {
+  margin: 0;
+  color: #222;
+  font-size: 23px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.home-vitrina-header p {
+  margin: 5px 0 0;
+  color: #777;
+  font-size: 13px;
+}
+
+.home-ver-todos {
+  border: 0;
+  padding: 8px 0;
+  background: transparent;
+  color: #3483fa;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.home-ver-todos:hover {
+  text-decoration: underline;
+}
+
+.home-vitrina-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.home-vitrina-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 8px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.home-vitrina-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.home-vitrina-item {
+  flex: 0 0 218px;
+  width: 218px;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.home-flecha {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e2e2e2;
+  border-radius: 50%;
+  background: #fff;
+  color: #3483fa;
+  font-size: 34px;
+  line-height: 34px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.13);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-flecha:hover {
+  transform: translateY(-50%) scale(1.04);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.17);
+}
+
+.home-flecha-izquierda {
+  left: -17px;
+}
+
+.home-flecha-derecha {
+  right: -17px;
+}
+
+.home-vitrina-indicadores {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  margin-top: 9px;
+}
+
+.home-vitrina-indicadores span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ddd;
+}
+
+.home-vitrina-indicadores span.activo {
+  width: 7px;
+  height: 7px;
+  background: #3483fa;
+}
+
+/* =========================================================
+   CATÁLOGO
+   ========================================================= */
+
+.home-catalogo {
+  margin-top: 48px;
+}
+
+.home-catalogo-header {
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.home-catalogo-header span {
+  display: inline-block;
+  margin-bottom: 6px;
+  color: #777;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.home-catalogo-header h2 {
+  margin: 0;
+  color: #222;
+  font-size: 27px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.home-catalogo-header p {
+  margin: 7px 0 0;
+  color: #777;
+  font-size: 14px;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .home-contenido {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .home-vitrina {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .home-vitrina-item {
+    flex-basis: 205px;
+    width: 205px;
+  }
+}
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .home-contenido {
+    padding: 0 8px 42px;
+  }
+
+  .home-vitrina {
+    margin: 18px 0 22px;
+    padding: 16px 10px 13px;
+    border-radius: 12px;
+  }
+
+  .home-vitrina-header {
+    margin-bottom: 12px;
+    gap: 10px;
+  }
+
+  .home-vitrina-icon {
+    width: 34px;
+    height: 34px;
+    margin-right: 8px;
+    border-radius: 9px;
+    font-size: 18px;
+  }
+
+  .home-vitrina-header h2 {
+    font-size: 18px;
+  }
+
+  .home-vitrina-header p {
+    display: none;
+  }
+
+  .home-ver-todos {
+    font-size: 12px;
+  }
+
+  .home-vitrina-scroll {
+    gap: 10px;
+    padding: 1px 1px 7px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .home-vitrina-item {
+    flex: 0 0 46vw;
+    width: 46vw;
+    max-width: 215px;
+    scroll-snap-align: start;
+  }
+
+  .home-flecha {
+    display: none;
+  }
+
+  .home-vitrina-indicadores {
+    margin-top: 7px;
+  }
+
+  .home-catalogo {
+    margin-top: 32px;
+  }
+
+  .home-catalogo-header {
+    padding: 0 5px;
+  }
+
+  .home-catalogo-header h2 {
+    font-size: 23px;
+  }
+}
+
+/* =========================================================
+   CELULARES PEQUEÑOS
+   ========================================================= */
+
+@media (max-width: 430px) {
+  .home-vitrina-item {
+    flex-basis: 47vw;
+    width: 47vw;
+  }
+
+  .home-vitrina {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+
+/* =========================================================
+   VITRINA SIN ICONO
+   ========================================================= */
+
+.home-vitrina-title > div {
+  min-width: 0;
+}
+
+.home-vitrina-title:not(:has(.home-vitrina-icon)) {
+  padding-left: 2px;
+}

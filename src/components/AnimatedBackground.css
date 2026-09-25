@@ -6,13 +6,11 @@
     pointer-events:none;
 
     background:
-        radial-gradient(circle at 20% 15%,
-            #f8f8f8 0%,
-            #efefef 18%,
-            #e5e5e5 35%,
-            #dcdcdc 55%,
-            #d3d3d3 75%,
-            #c9c9c9 100%);
+        radial-gradient(circle at 18% 12%,
+            #26313d 0%,
+            #18222d 28%,
+            #111a24 58%,
+            #0c131b 100%);
 }
 
 /* ================= Luces ================= */
@@ -36,7 +34,7 @@
     width:520px;
     height:520px;
 
-    background:#ffffff;
+    background:#20c96b;
 
     top:-180px;
     left:-180px;
@@ -48,7 +46,7 @@
     width:650px;
     height:650px;
 
-    background:#d9d9d9;
+    background:#0b3b2a;
 
     bottom:-250px;
     right:-200px;
@@ -62,9 +60,9 @@
     width:400px;
     height:400px;
 
-    background:#ffffff;
+    background:#38e07d;
 
-    opacity:.12;
+    opacity:.08;
 
     top:35%;
     left:42%;
@@ -94,7 +92,7 @@
     width:260px;
     height:260px;
 
-    background:#ececec;
+    background:#1d8f57;
 
     top:10%;
     right:18%;
@@ -106,7 +104,7 @@
     width:420px;
     height:420px;
 
-    background:#d5d5d5;
+    background:#0a2c22;
 
     bottom:5%;
     left:8%;
@@ -120,7 +118,7 @@
     width:220px;
     height:220px;
 
-    background:#ffffff;
+    background:#32d675;
 
     top:55%;
     right:35%;
@@ -149,9 +147,9 @@
 
     border-radius:50%;
 
-    background:#ffffff;
+    background:#9ff5c4;
 
-    opacity:.25;
+    opacity:.16;
 
     animation:particleUp linear infinite;
 

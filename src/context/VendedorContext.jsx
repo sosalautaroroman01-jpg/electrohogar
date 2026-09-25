@@ -11,32 +11,47 @@ const vendedores = {
     nombre: "Lautaro",
     numero: "5491131631518",
   },
+
   milagros: {
     codigo: "milagros",
     nombre: "Milagros",
     numero: "5491144207460",
   },
+
   gonzalo: {
     codigo: "gonzalo",
     nombre: "Gonzalo",
     numero: "5491136469206",
   },
+
   camila: {
     codigo: "camila",
     nombre: "Camila",
     numero: "5491139324748",
   },
+
   victoria: {
     codigo: "victoria",
     nombre: "Victoria",
     numero: "5491136552538",
+  },
+
+  axel: {
+    codigo: "axel",
+    nombre: "Axel",
+    numero: "5491128953531",
+  },
+
+  yamila: {
+    codigo: "yamila",
+    nombre: "Yamila",
+    numero: "5491157712104",
   },
 };
 
 const VendedorContext = createContext();
 
 export function VendedorProvider({ children }) {
-
   const params = new URLSearchParams(window.location.search);
 
   const codigoInicial = (

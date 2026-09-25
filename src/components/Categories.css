@@ -1,131 +1,314 @@
-.categories{
+/* =========================================================
+   CATEGORÍAS — ELECTRO HOGAR QUILMES
+   CORRECCIÓN DE TEXTO Y PROPORCIONES
+========================================================= */
 
-    display:flex;
+.categories {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
 
-    justify-content:center;
+    gap: 10px;
 
-    align-items:center;
+    margin: 16px auto 12px;
+    padding: 0 10px;
 
-    flex-wrap:wrap;
+    width: 100%;
+    max-width: 1500px;
 
-    gap:12px;
-
-    margin:18px auto 12px;
-
-    width:100%;
-
-    max-width:1200px;
-
+    box-sizing: border-box;
 }
 
-.category-btn{
 
-    display:flex;
+/* =========================================================
+   TARJETA
+   La tarjeta se adapta al nombre para que no corte palabras.
+========================================================= */
 
-    align-items:center;
+.category-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    justify-content:center;
+    text-align: center;
+    vertical-align: top;
 
-    gap:8px;
+    box-sizing: border-box;
 
-    min-height:46px;
+    /* Base compacta, pero permite crecer por el texto */
+    width: max-content;
+    min-width: 96px;
+    max-width: 170px;
 
-    padding:0 20px;
+    height: 76px;
+    min-height: 76px;
 
-    border:none;
+    padding: 8px 12px;
 
-    border-radius:999px;
+    border: none;
+    border-radius: 16px;
 
-    background:rgba(255,255,255,.94);
+    background: rgba(255, 255, 255, 0.94);
 
-    backdrop-filter:blur(14px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 
-    -webkit-backdrop-filter:blur(14px);
+    color: #16a34a;
 
-    color:#16a34a;
+    font-size: 13px;
+    font-weight: 600;
 
-    font-size:15px;
+    cursor: pointer;
 
-    font-weight:600;
-
-    white-space:nowrap;
-
-    cursor:pointer;
-
-    transition:.25s;
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
 
     box-shadow:
-        0 8px 22px rgba(0,0,0,.08);
+        0 8px 22px rgba(0, 0, 0, 0.08);
 
+    flex: 0 0 auto;
 }
 
-.category-btn:hover{
 
-    transform:translateY(-2px);
+/* =========================================================
+   CONTENIDO
+========================================================= */
 
-    background:#16a34a;
+.category-btn .category-content {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
 
-    color:#fff;
+    display: flex;
+    flex-direction: column;
 
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    line-height: 1;
 }
 
-.category-btn.active{
 
-    background:linear-gradient(135deg,#16a34a,#22c55e);
+/* =========================================================
+   ÍCONO
+========================================================= */
 
-    color:#fff;
+.category-btn .category-icon {
+    width: 27px;
+    height: 27px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 27px;
+
+    color: currentColor;
+}
+
+.category-btn .category-icon svg {
+    width: 23px;
+    height: 23px;
+
+    display: block;
+}
+
+
+/* =========================================================
+   NOMBRE
+   IMPORTANTE:
+   - No corta palabras.
+   - Solo salta de línea entre palabras.
+========================================================= */
+
+.category-btn .category-name {
+    display: block;
+
+    width: auto;
+    max-width: 145px;
+
+    margin: 0;
+    padding: 0;
+
+    text-align: center;
+
+    line-height: 1.12;
+
+    white-space: normal;
+
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+}
+
+
+/* =========================================================
+   HOVER
+========================================================= */
+
+.category-btn:hover {
+    transform: translateY(-2px);
+
+    background: #16a34a;
+
+    color: #fff;
 
     box-shadow:
-        0 12px 28px rgba(22,163,74,.30);
-
+        0 12px 26px rgba(22, 163, 74, 0.22);
 }
 
-/* ===================== CELULAR ===================== */
 
-@media (max-width:768px){
+/* =========================================================
+   ACTIVO
+========================================================= */
 
-.categories{
+.category-btn.active {
+    background:
+        linear-gradient(
+            135deg,
+            #16a34a,
+            #22c55e
+        );
 
-    justify-content:flex-start;
+    color: #fff;
 
-    flex-wrap:nowrap;
-
-    overflow-x:auto;
-
-    overflow-y:hidden;
-
-    gap:10px;
-
-    width:100%;
-
-    max-width:100%;
-
-    padding:0 12px 10px;
-
-    box-sizing:border-box;
-
-    -webkit-overflow-scrolling:touch;
-
-    scrollbar-width:none;
-
+    box-shadow:
+        0 12px 28px rgba(22, 163, 74, 0.30);
 }
 
-.categories::-webkit-scrollbar{
 
-    display:none;
+/* =========================================================
+   TABLET / DESKTOP MEDIO
+========================================================= */
 
+@media (max-width: 1100px) and (min-width: 769px) {
+
+    .categories {
+        gap: 8px;
+        padding: 0 8px;
+    }
+
+    .category-btn {
+        min-width: 92px;
+        max-width: 150px;
+
+        height: 72px;
+        min-height: 72px;
+
+        padding: 8px 10px;
+
+        font-size: 12px;
+    }
+
+    .category-btn .category-icon {
+        width: 25px;
+        height: 25px;
+
+        flex-basis: 25px;
+    }
+
+    .category-btn .category-icon svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .category-btn .category-name {
+        max-width: 128px;
+    }
 }
 
-.category-btn{
 
-    flex:0 0 auto;
+/* =========================================================
+   CELULAR
+========================================================= */
 
-    min-height:42px;
+@media (max-width: 768px) {
 
-    padding:0 18px;
+    .categories {
+        justify-content: flex-start;
 
-    font-size:14px;
+        flex-wrap: nowrap;
 
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        gap: 10px;
+
+        width: 100%;
+        max-width: 100%;
+
+        padding: 0 12px 10px;
+
+        box-sizing: border-box;
+
+        -webkit-overflow-scrolling: touch;
+
+        scrollbar-width: none;
+    }
+
+    .categories::-webkit-scrollbar {
+        display: none;
+    }
+
+    .category-btn {
+        flex: 0 0 auto;
+
+        min-width: 88px;
+        max-width: 145px;
+
+        height: 70px;
+        min-height: 70px;
+
+        padding: 7px 9px;
+
+        font-size: 12px;
+    }
+
+    .category-btn .category-icon {
+        width: 25px;
+        height: 25px;
+
+        flex-basis: 25px;
+    }
+
+    .category-btn .category-icon svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .category-btn .category-content {
+        gap: 4px;
+    }
+
+    .category-btn .category-name {
+        max-width: 125px;
+
+        line-height: 1.1;
+    }
 }
 
+
+/* =========================================================
+   CELULAR MUY CHICO
+========================================================= */
+
+@media (max-width: 390px) {
+
+    .category-btn {
+        min-width: 84px;
+        max-width: 135px;
+
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .category-btn .category-name {
+        max-width: 118px;
+    }
 }

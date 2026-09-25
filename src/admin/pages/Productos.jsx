@@ -8,11 +8,15 @@ import {
   escucharProductos,
   eliminarProducto,
   cambiarVisibilidad,
+  cambiarNuevoIngreso,
 } from "../../services/productosService";
+
+import { useAuth } from "../../context/AuthContext";
 
 export default function Productos() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { perfil } = useAuth();
 
   const [productos, setProductos] = useState([]);
   const [busqueda, setBusqueda] = useState("");
@@ -27,8 +31,6 @@ export default function Productos() {
     return () => unsubscribe();
   }, []);
 
-  // ... resto del código
-
   async function handleDelete(id) {
     if (!window.confirm("¿Eliminar producto?")) return;
     await eliminarProducto(id);
@@ -40,6 +42,18 @@ export default function Productos() {
     } catch (error) {
       console.error(error);
       alert("Error al cambiar la visibilidad");
+    }
+  }
+
+  async function handleToggleNuevoIngreso(producto) {
+    try {
+      await cambiarNuevoIngreso(
+        producto.id,
+        producto.nuevoIngreso !== true
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Error al cambiar Nuevo ingreso");
     }
   }
 
@@ -93,191 +107,341 @@ export default function Productos() {
     busqueda,
     categoria,
   ]);
-  
-return (
-  <Layout key={location.pathname}>
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "25px",
-      }}
-    >
-      <button onClick={() => navigate("/admin/productos/nuevo")}>
-        ➕ Nuevo Producto
-      </button>
-    </div>
 
-    <div
-      style={{
-        display: "flex",
-        gap: "15px",
-        marginBottom: "20px",
-        flexWrap: "wrap",
-      }}
-    >
-      <input
-        type="text"
-        placeholder="🔍 Buscar producto..."
-        value={busqueda}
-        onChange={(e) => setBusqueda(e.target.value)}
+  return (
+    <Layout key={location.pathname}>
+      <div
         style={{
-          flex: 1,
           width: "100%",
-          minWidth: "350px",
-          padding: "12px 16px",
-          borderRadius: "10px",
-          border: "1px solid #ddd",
-          fontSize: "15px",
-          outline: "none",
-          boxSizing: "border-box",
-        }}
-      />
-
-      <select
-        value={categoria}
-        onChange={(e) => setCategoria(e.target.value)}
-        style={{
-          padding: "12px",
-          borderRadius: "10px",
-          border: "1px solid #ddd",
-          minWidth: "220px",
+          maxWidth: "1400px",
+          margin: "0 auto",
+          paddingBottom: "30px",
         }}
       >
-        {categorias.map((cat) => (
-          <option key={cat} value={cat}>
-            {cat}
-          </option>
-        ))}
-      </select>
-    </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "20px",
+            marginBottom: "24px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: "13px",
+                fontWeight: 700,
+                color: "#64748b",
+                textTransform: "uppercase",
+                letterSpacing: ".08em",
+                marginBottom: "5px",
+              }}
+            >
+              Administración
+            </div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: "30px",
+                lineHeight: 1.15,
+                fontWeight: 800,
+                color: "#0f172a",
+              }}
+            >
+              Productos
+            </h1>
+            <p
+              style={{
+                margin: "7px 0 0",
+                color: "#64748b",
+                fontSize: "14px",
+              }}
+            >
+              Gestioná tu catálogo, disponibilidad y publicaciones.
+            </p>
+          </div>
 
-    <div
-      style={{
-        display: "flex",
-        gap: "15px",
-        marginBottom: "20px",
-        flexWrap: "wrap",
-      }}
-    >
-      {/* TODOS */}
-      <div
-        onClick={() => setEstado("todos")}
-        style={{
-          flex: 1,
-          minWidth: "180px",
-          padding: "20px",
-          borderRadius: "14px",
-          cursor: "pointer",
-          backgroundColor: estado === "todos" ? "#2563eb" : "#fff",
-          color: estado === "todos" ? "#fff" : "#111",
-          border:
-            estado === "todos"
-              ? "2px solid #2563eb"
-              : "1px solid #ddd",
-          boxShadow:
-            estado === "todos"
-              ? "0 8px 20px rgba(37,99,235,.25)"
-              : "0 2px 8px rgba(0,0,0,.08)",
-          transition: "all .2s",
-        }}
-      >
-        <div style={{ fontSize: "14px", opacity: 0.85 }}>
-          📦 Todos
+          <button
+            onClick={() => navigate("/admin/productos/nuevo")}
+            style={{
+              border: "none",
+              borderRadius: "12px",
+              background: "#0f172a",
+              color: "#fff",
+              padding: "12px 18px",
+              fontSize: "14px",
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 8px 18px rgba(15,23,42,.16)",
+              transition: "transform .18s, box-shadow .18s",
+            }}
+          >
+            + Nuevo producto
+          </button>
         </div>
 
         <div
           style={{
-            fontSize: "34px",
-            fontWeight: "bold",
-            marginTop: "8px",
+            background: "#fff",
+            border: "1px solid #e2e8f0",
+            borderRadius: "16px",
+            padding: "16px",
+            marginBottom: "20px",
+            boxShadow: "0 4px 14px rgba(15,23,42,.05)",
           }}
         >
-          {productos.length}
-        </div>
-      </div>
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ position: "relative", flex: "1 1 320px" }}>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "14px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#94a3b8",
+                  fontSize: "15px",
+                  pointerEvents: "none",
+                }}
+              >
+                🔎
+              </span>
+              <input
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                style={{
+                  width: "100%",
+                  height: "46px",
+                  padding: "0 14px 0 40px",
+                  borderRadius: "11px",
+                  border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
+                  color: "#0f172a",
+                  fontSize: "14px",
+                  outline: "none",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
 
-      {/* EN STOCK */}
-      <div
-        onClick={() => setEstado("stock")}
-        style={{
-          flex: 1,
-          minWidth: "180px",
-          padding: "20px",
-          borderRadius: "14px",
-          cursor: "pointer",
-          backgroundColor: estado === "stock" ? "#16a34a" : "#fff",
-          color: estado === "stock" ? "#fff" : "#111",
-          border:
-            estado === "stock"
-              ? "2px solid #16a34a"
-              : "1px solid #ddd",
-          boxShadow:
-            estado === "stock"
-              ? "0 8px 20px rgba(22,163,74,.25)"
-              : "0 2px 8px rgba(0,0,0,.08)",
-          transition: "all .2s",
-        }}
-      >
-        <div style={{ fontSize: "14px", opacity: 0.85 }}>
-          ✅ En stock
+            <select
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+              style={{
+                flex: "0 1 230px",
+                height: "46px",
+                padding: "0 14px",
+                borderRadius: "11px",
+                border: "1px solid #cbd5e1",
+                background: "#f8fafc",
+                color: "#0f172a",
+                fontSize: "14px",
+                outline: "none",
+                cursor: "pointer",
+              }}
+            >
+              {categorias.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat === "Todas" ? "Todas las categorías" : cat}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div
           style={{
-            fontSize: "34px",
-            fontWeight: "bold",
-            marginTop: "8px",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+            gap: "14px",
+            marginBottom: "20px",
           }}
         >
-          {publicados.length}
-        </div>
-      </div>
+          {[
+            {
+              key: "todos",
+              label: "Total de productos",
+              count: productos.length,
+              icon: "▦",
+              active: "#0f172a",
+            },
+            {
+              key: "stock",
+              label: "Publicados",
+              count: publicados.length,
+              icon: "✓",
+              active: "#65a30d",
+            },
+            {
+              key: "reponer",
+              label: "Hay que reponer",
+              count: ocultos.length,
+              icon: "!",
+              active: "#dc2626",
+            },
+          ].map((item) => {
+            const active = estado === item.key;
 
-      {/* HAY QUE REPONER */}
-      <div
-        onClick={() => setEstado("reponer")}
-        style={{
-          flex: 1,
-          minWidth: "180px",
-          padding: "20px",
-          borderRadius: "14px",
-          cursor: "pointer",
-          backgroundColor: estado === "reponer" ? "#dc2626" : "#fff",
-          color: estado === "reponer" ? "#fff" : "#111",
-          border:
-            estado === "reponer"
-              ? "2px solid #dc2626"
-              : "1px solid #ddd",
-          boxShadow:
-            estado === "reponer"
-              ? "0 8px 20px rgba(220,38,38,.25)"
-              : "0 2px 8px rgba(0,0,0,.08)",
-          transition: "all .2s",
-        }}
-      >
-        <div style={{ fontSize: "14px", opacity: 0.85 }}>
-          🚫 Hay que reponer
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setEstado(item.key)}
+                style={{
+                  textAlign: "left",
+                  border: active
+                    ? `1px solid ${item.active}`
+                    : "1px solid #e2e8f0",
+                  borderRadius: "15px",
+                  padding: "17px 18px",
+                  background: active ? item.active : "#fff",
+                  color: active ? "#fff" : "#0f172a",
+                  cursor: "pointer",
+                  boxShadow: active
+                    ? `0 9px 22px ${item.active}33`
+                    : "0 4px 14px rgba(15,23,42,.05)",
+                  transition: "all .18s",
+                  minHeight: "105px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      opacity: active ? 0.9 : 0.65,
+                    }}
+                  >
+                    {item.label}
+                  </span>
+
+                  <span
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "8px",
+                      display: "grid",
+                      placeItems: "center",
+                      background: active
+                        ? "rgba(255,255,255,.16)"
+                        : "#f1f5f9",
+                      color: active ? "#fff" : item.active,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {item.icon}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "30px",
+                    lineHeight: 1,
+                    fontWeight: 800,
+                    marginTop: "15px",
+                    letterSpacing: "-.03em",
+                  }}
+                >
+                  {item.count}
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         <div
           style={{
-            fontSize: "34px",
-            fontWeight: "bold",
-            marginTop: "8px",
+            background: "#fff",
+            border: "1px solid #e2e8f0",
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow: "0 4px 14px rgba(15,23,42,.05)",
           }}
         >
-          {ocultos.length}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "12px",
+              padding: "16px 18px",
+              borderBottom: "1px solid #e2e8f0",
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 800,
+                  color: "#0f172a",
+                }}
+              >
+                Catálogo
+              </div>
+              <div
+                style={{
+                  marginTop: "3px",
+                  fontSize: "12px",
+                  color: "#64748b",
+                }}
+              >
+                {productosFiltrados.length} producto
+                {productosFiltrados.length === 1 ? "" : "s"} mostrado
+                {productosFiltrados.length === 1 ? "" : "s"}
+              </div>
+            </div>
+
+            {(busqueda || categoria !== "Todas" || estado !== "todos") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setBusqueda("");
+                  setCategoria("Todas");
+                  setEstado("todos");
+                }}
+                style={{
+                  border: "1px solid #cbd5e1",
+                  background: "#fff",
+                  color: "#475569",
+                  borderRadius: "9px",
+                  padding: "8px 11px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Limpiar filtros
+              </button>
+            )}
+          </div>
+
+          <ProductTable
+            productos={productosFiltrados}
+            onDelete={handleDelete}
+            onToggleVisible={handleToggleVisible}
+            onToggleNuevoIngreso={handleToggleNuevoIngreso}
+            perfil={perfil}
+          />
         </div>
       </div>
-    </div>
-
-    <ProductTable
-      productos={productosFiltrados}
-      onDelete={handleDelete}
-      onToggleVisible={handleToggleVisible}
-    />
-  </Layout>
-);
+    </Layout>
+  );
 }

@@ -1,8 +1,19 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-export default function ProtectedRoute({ children }) {
-  const { usuario, loading } = useAuth();
+const ADMIN_UIDS = [
+  "IikuPLqrxAPdX2HEzKZOmNkI4QP2",
+  "P2MNgJIg14O1pfh5tupsIL9Lg823",
+  "I85kPwtwELbnVonup6RijCM522q1",
+];
+
+export default function ProtectedRoute({
+  children,
+}) {
+  const {
+    usuario,
+    loading,
+  } = useAuth();
 
   if (loading) {
     return (
@@ -20,8 +31,34 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
+  /*
+   * No hay sesión administrativa.
+   */
   if (!usuario) {
-    return <Navigate to="/admin/login" replace />;
+    return (
+      <Navigate
+        to="/admin/login"
+        replace
+      />
+    );
+  }
+
+  /*
+   * La cuenta está autenticada pero
+   * NO pertenece a un administrador oficial.
+   */
+  const esAdministrador =
+    ADMIN_UIDS.includes(
+      usuario.uid
+    );
+
+  if (!esAdministrador) {
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
   }
 
   return children;
