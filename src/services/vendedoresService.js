@@ -7,6 +7,7 @@ import {
   getDoc,
   onSnapshot,
   query,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -20,6 +21,7 @@ import {
 import {
   createUserWithEmailAndPassword,
   signOut,
+  signInAnonymously,
 } from "firebase/auth";
 
 /*
@@ -29,6 +31,10 @@ import {
 */
 
 const vendedoresRef = collection(db, "revendedores");
+const vendedoresPublicosRef = collection(
+  db,
+  "revendedoresPublicos"
+);
 const clientesRef = collection(db, "clientesRevendedores");
 const ventasRef = collection(db, "ventasRevendedores");
 const pedidosRef = collection(db, "pedidosRevendedores");
@@ -50,6 +56,53 @@ function limpiarTexto(valor = "") {
 function convertirNumero(valor) {
   const numero = Number(valor);
   return Number.isFinite(numero) ? numero : 0;
+}
+async function guardarRevendedorPublico(revendedor) {
+  if (!revendedor?.id) return;
+
+  const referencia = doc(
+    db,
+    "revendedoresPublicos",
+    revendedor.id
+  );
+
+  await setDoc(referencia, {
+    revendedorId: revendedor.id,
+    slug: limpiarTexto(revendedor.slug).toLowerCase(),
+    activo: revendedor.activo !== false,
+    nombre: limpiarTexto(revendedor.nombre),
+    apellido: limpiarTexto(revendedor.apellido),
+    nombreCompleto: limpiarTexto(
+      revendedor.nombreCompleto ||
+        `${revendedor.nombre || ""} ${revendedor.apellido || ""}`.trim()
+    ),
+    whatsapp: limpiarTexto(revendedor.whatsapp),
+    porcentaje: convertirNumero(revendedor.porcentaje),
+    actualizadoEn: ahoraISO(),
+  });
+}
+
+async function sincronizarRevendedoresPublicos(lista = []) {
+  if (!Array.isArray(lista) || lista.length === 0) return;
+
+  await Promise.all(
+    lista.map((revendedor) =>
+      guardarRevendedorPublico(revendedor)
+    )
+  );
+}
+
+export async function sincronizarTodosLosRevendedoresPublicos() {
+  const snapshot = await getDocs(vendedoresRef);
+
+  const lista = snapshot.docs.map((documento) => ({
+    id: documento.id,
+    ...documento.data(),
+  }));
+
+  await sincronizarRevendedoresPublicos(lista);
+
+  return lista.length;
 }
 
 function validarPorcentaje(valor) {
@@ -221,12 +274,60 @@ export function escucharRevendedores(callback) {
       });
 
       callback(lista);
+
+sincronizarRevendedoresPublicos(lista).catch((error) => {
+  console.error(
+    "Error sincronizando revendedores públicos:",
+    error
+  );
+});
     },
     (error) => {
       console.error(
         "Error escuchando revendedores:",
         error
       );
+    }
+  );
+}
+
+export async function incrementarConsultasRevendedor(
+  revendedorId
+) {
+  if (!revendedorId) {
+    throw new Error(
+      "Falta el ID del revendedor."
+    );
+  }
+
+  const referencia = doc(
+    db,
+    "revendedores",
+    revendedorId
+  );
+
+  const snapshot =
+    await getDoc(referencia);
+
+  if (!snapshot.exists()) {
+    throw new Error(
+      "No se encontró el revendedor."
+    );
+  }
+
+  const datos = snapshot.data();
+
+  const consultasActuales =
+    convertirNumero(datos.consultas);
+
+  await updateDoc(
+    referencia,
+    {
+      consultas:
+        consultasActuales + 1,
+
+      actualizadoEn:
+        ahoraISO(),
     }
   );
 }
@@ -241,41 +342,28 @@ export async function crearRevendedor({
   vendedorOficialCodigo = "",
   vendedorOficialNombre = "",
 }) {
-  const nombreLimpio =
-    limpiarTexto(nombre);
-
-  const apellidoLimpio =
-    limpiarTexto(apellido);
-
-  const whatsappLimpio =
-    limpiarTexto(whatsapp);
+  const nombreLimpio = limpiarTexto(nombre);
+  const apellidoLimpio = limpiarTexto(apellido);
+  const whatsappLimpio = limpiarTexto(whatsapp);
 
   if (!nombreLimpio) {
-    throw new Error(
-      "El nombre es obligatorio."
-    );
+    throw new Error("El nombre es obligatorio.");
   }
 
   if (!apellidoLimpio) {
-    throw new Error(
-      "El apellido es obligatorio."
-    );
+    throw new Error("El apellido es obligatorio.");
   }
 
   if (!whatsappLimpio) {
-    throw new Error(
-      "El WhatsApp es obligatorio."
-    );
+    throw new Error("El WhatsApp es obligatorio.");
   }
 
-  const porcentajeNumero =
-    validarPorcentaje(porcentaje);
+  const porcentajeNumero = validarPorcentaje(porcentaje);
 
-  const slug =
-    await generarSlugUnico(
-      nombreLimpio,
-      apellidoLimpio
-    );
+  const slug = await generarSlugUnico(
+    nombreLimpio,
+    apellidoLimpio
+  );
 
   const ahora = ahoraISO();
 
@@ -296,8 +384,11 @@ export async function crearRevendedor({
     vendedorOficialNombre:
       limpiarTexto(vendedorOficialNombre),
 
-    email: limpiarTexto(email).toLowerCase(),
-    authUid: limpiarTexto(authUid),
+    email:
+      limpiarTexto(email).toLowerCase(),
+
+    authUid:
+      limpiarTexto(authUid),
 
     slug,
 
@@ -312,11 +403,15 @@ export async function crearRevendedor({
     comisionPagada: 0,
   };
 
-  const referencia =
-    await addDoc(
-      vendedoresRef,
-      nuevoRevendedor
-    );
+  const referencia = await addDoc(
+    vendedoresRef,
+    nuevoRevendedor
+  );
+
+  await guardarRevendedorPublico({
+    id: referencia.id,
+    ...nuevoRevendedor,
+  });
 
   return {
     id: referencia.id,
@@ -324,26 +419,42 @@ export async function crearRevendedor({
   };
 }
 
-export async function crearCuentaRevendedor({ email, password }) {
-  const emailLimpio = limpiarTexto(email).toLowerCase();
-  const passwordLimpia = password?.toString() || "";
+
+export async function crearCuentaRevendedor({
+  email,
+  password,
+}) {
+  const emailLimpio =
+    limpiarTexto(email).toLowerCase();
+
+  const passwordLimpia =
+    password?.toString() || "";
 
   if (!emailLimpio) {
-    throw new Error("El email es obligatorio.");
+    throw new Error(
+      "El email es obligatorio."
+    );
   }
 
-  if (!passwordLimpia || passwordLimpia.length < 6) {
-    throw new Error("La contraseña debe tener al menos 6 caracteres.");
+  if (
+    !passwordLimpia ||
+    passwordLimpia.length < 6
+  ) {
+    throw new Error(
+      "La contraseña debe tener al menos 6 caracteres."
+    );
   }
 
   try {
-    const credencial = await createUserWithEmailAndPassword(
-      revendedorAuth,
-      emailLimpio,
-      passwordLimpia
-    );
+    const credencial =
+      await createUserWithEmailAndPassword(
+        revendedorAuth,
+        emailLimpio,
+        passwordLimpia
+      );
 
-    const authUid = credencial.user.uid;
+    const authUid =
+      credencial.user.uid;
 
     await signOut(revendedorAuth);
 
@@ -351,46 +462,151 @@ export async function crearCuentaRevendedor({ email, password }) {
       authUid,
       email: emailLimpio,
     };
+
   } catch (error) {
+
     try {
       await signOut(revendedorAuth);
-    } catch (_) {}
-
-    if (error?.code === "auth/email-already-in-use") {
-      throw new Error("Ese email ya está registrado.");
+    } catch (_) {
+      // Ignorar error al cerrar sesión
     }
 
-    if (error?.code === "auth/invalid-email") {
-      throw new Error("El email no es válido.");
+    if (
+      error?.code ===
+      "auth/email-already-in-use"
+    ) {
+      throw new Error(
+        "Ese email ya está registrado."
+      );
     }
 
-    if (error?.code === "auth/weak-password") {
-      throw new Error("La contraseña es demasiado débil.");
+    if (
+      error?.code ===
+      "auth/invalid-email"
+    ) {
+      throw new Error(
+        "El email no es válido."
+      );
+    }
+
+    if (
+      error?.code ===
+      "auth/weak-password"
+    ) {
+      throw new Error(
+        "La contraseña es demasiado débil."
+      );
     }
 
     throw new Error(
-      error?.message || "No se pudo crear la cuenta del revendedor."
+      error?.message ||
+      "No se pudo crear la cuenta del revendedor."
     );
   }
 }
+
 
 export async function cambiarEstadoRevendedor(
   id,
   activo
 ) {
-  if (!id) {
-    throw new Error(
-      "Falta el ID del revendedor."
-    );
-  }
+  try {
+    if (!id) {
+      throw new Error(
+        "ID de revendedor requerido"
+      );
+    }
 
-  await updateDoc(
-    doc(db, "revendedores", id),
-    {
+    const referencia = doc(
+      db,
+      "revendedores",
+      id
+    );
+
+    await updateDoc(referencia, {
       activo: Boolean(activo),
       actualizadoEn: ahoraISO(),
+    });
+
+    // Sincronizar también la versión pública
+    const snapshot =
+      await getDoc(referencia);
+
+    if (snapshot.exists()) {
+      await guardarRevendedorPublico({
+        id: snapshot.id,
+        ...snapshot.data(),
+      });
     }
+
+    return {
+      ok: true,
+      mensaje:
+        "Estado del revendedor actualizado correctamente",
+    };
+
+  } catch (error) {
+    console.error(
+      "Error al cambiar estado del revendedor:",
+      error
+    );
+
+    return {
+      ok: false,
+      error: error.message,
+      mensaje:
+        "No se pudo actualizar el estado del revendedor",
+    };
+  }
+}
+
+export async function eliminarRevendedorCompleto(id) {
+  if (!id) {
+    throw new Error("Falta el ID del revendedor.");
+  }
+
+  const referencia = doc(db, "revendedores", id);
+  const snapshot = await getDoc(referencia);
+
+  if (!snapshot.exists()) {
+    throw new Error("No se encontró el revendedor.");
+  }
+
+  // Obtener todos los documentos vinculados.
+  const [clientes, ventas, pedidos] = await Promise.all([
+    getDocs(
+      query(clientesRef, where("revendedorId", "==", id))
+    ),
+    getDocs(
+      query(ventasRef, where("revendedorId", "==", id))
+    ),
+    getDocs(
+      query(pedidosRef, where("revendedorId", "==", id))
+    ),
+  ]);
+
+  // Eliminar documentos asociados.
+  const documentos = [
+    ...clientes.docs,
+    ...ventas.docs,
+    ...pedidos.docs,
+  ];
+
+  for (const documento of documentos) {
+    await deleteDoc(documento.ref);
+  }
+
+  // Eliminar el acceso público y la ficha principal.
+  await deleteDoc(
+    doc(db, "revendedoresPublicos", id)
   );
+
+  await deleteDoc(referencia);
+
+  return {
+    ok: true,
+    mensaje: "Revendedor eliminado correctamente.",
+  };
 }
 
 export async function editarRevendedor(
@@ -433,8 +649,11 @@ export async function editarRevendedor(
   const porcentajeNumero =
     validarPorcentaje(porcentaje);
 
+  const referencia =
+    doc(db, "revendedores", id);
+
   await updateDoc(
-    doc(db, "revendedores", id),
+    referencia,
     {
       nombre: nombreLimpio,
       apellido: apellidoLimpio,
@@ -454,6 +673,18 @@ export async function editarRevendedor(
       actualizadoEn: ahoraISO(),
     }
   );
+
+  // Sincronizar los datos actualizados
+  // con la colección pública
+  const snapshot =
+    await getDoc(referencia);
+
+  if (snapshot.exists()) {
+    await guardarRevendedorPublico({
+      id: snapshot.id,
+      ...snapshot.data(),
+    });
+  }
 }
 
 export async function obtenerRevendedorPorId(
@@ -477,120 +708,141 @@ export async function obtenerRevendedorPorId(
     ...snapshot.data(),
   };
 }
-
-export async function obtenerRevendedorPorSlug(
-  slug
-) {
-  if (!slug) {
-    return null;
-  }
-
-  const slugLimpio =
-    slug
-      .toString()
-      .trim()
-      .toLowerCase();
-
-  const q = query(
-    vendedoresRef,
-    where("slug", "==", slugLimpio)
-  );
-
-  const snapshot =
-    await getDocs(q);
-
-  if (snapshot.empty) {
-    return null;
-  }
-
-  const documento =
-    snapshot.docs[0];
-
-  return {
-    id: documento.id,
-    ...documento.data(),
-  };
-}
 /*
 |--------------------------------------------------------------------------
 | OBTENER REVENDEDOR POR AUTH UID
 |--------------------------------------------------------------------------
 */
 
-export async function obtenerRevendedorPorAuthUid(
-  authUid
-) {
+export async function obtenerRevendedorPorAuthUid(authUid) {
   if (!authUid) {
     return null;
   }
 
-  const revendedoresAuthRef =
-    collection(
+  try {
+    const revendedoresAuthRef = collection(
       revendedorDb,
       "revendedores"
     );
 
-  const q =
-    query(
+    const q = query(
       revendedoresAuthRef,
-      where(
-        "authUid",
-        "==",
-        authUid
-      )
+      where("authUid", "==", authUid)
     );
 
-  const snapshot =
-    await getDocs(q);
+    const snapshot = await getDocs(q);
 
-  if (snapshot.empty) {
-    return null;
+    if (snapshot.empty) {
+      return null;
+    }
+
+    const documento = snapshot.docs[0];
+
+    return {
+      id: documento.id,
+      ...documento.data(),
+    };
+  } catch (error) {
+    console.error(
+      "Error obteniendo revendedor por Auth UID:",
+      error
+    );
+
+    throw error;
   }
-
-  const documento =
-    snapshot.docs[0];
-
-  return {
-    id: documento.id,
-    ...documento.data(),
-  };
 }
-
 /*
 |--------------------------------------------------------------------------
-| CONSULTAS
+| ACCESO PÚBLICO PARA LINKS DE REVENDEDORES
+|--------------------------------------------------------------------------
+|
+| Permite que una persona abra el link del revendedor
+| desde cualquier celular sin tener que iniciar sesión.
+|
+| Ejemplo:
+|
+| https://ar-lovat.vercel.app/?revendedor=gonzalo-alfonsin
+|
+| El visitante recibe una sesión ANÓNIMA.
+|
+| IMPORTANTE:
+| Esta sesión NO es la cuenta de Gonzalo.
+| Es solamente una sesión temporal para permitir
+| la lectura pública del catálogo.
+|
+*/
+
+async function asegurarAccesoPublicoRevendedor() {
+  try {
+    // Si ya existe una sesión anónima, la reutilizamos.
+    if (revendedorAuth.currentUser) {
+      return revendedorAuth.currentUser;
+    }
+
+    // Creamos una sesión anónima para el visitante.
+    const credencial =
+      await signInAnonymously(revendedorAuth);
+
+    return credencial.user;
+
+  } catch (error) {
+    console.error(
+      "Error creando acceso público del revendedor:",
+      error
+    );
+
+    throw error;
+  }
+}
+/*
+|--------------------------------------------------------------------------
+| OBTENER REVENDEDOR POR SLUG
 |--------------------------------------------------------------------------
 */
 
-export async function incrementarConsultasRevendedor(
-  revendedorId
-) {
-  const revendedor =
-    await obtenerRevendedorPorId(
-      revendedorId
-    );
-
-  if (!revendedor) {
-    throw new Error(
-      "No se encontró el revendedor."
-    );
+export async function obtenerRevendedorPorSlug(slug) {
+  if (!slug) {
+    return null;
   }
 
-  await updateDoc(
-    doc(
-      db,
-      "revendedores",
-      revendedorId
-    ),
-    {
-      consultas:
-        convertirNumero(
-          revendedor.consultas
-        ) + 1,
+  const slugLimpio = slug
+    .toString()
+    .trim()
+    .toLowerCase();
 
-      actualizadoEn: ahoraISO(),
+  try {
+    await asegurarAccesoPublicoRevendedor();
+
+    const q = query(
+      vendedoresPublicosRef,
+      where("slug", "==", slugLimpio)
+    );
+
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      return null;
     }
-  );
+
+    const documento = snapshot.docs[0];
+    const datos = documento.data();
+
+    if (datos.activo === false) {
+      return null;
+    }
+
+    return {
+      id: datos.revendedorId || documento.id,
+      ...datos,
+    };
+  } catch (error) {
+    console.error(
+      "Error obteniendo revendedor público por slug:",
+      error
+    );
+
+    throw error;
+  }
 }
 
 /*
@@ -608,19 +860,12 @@ export async function crearClienteRevendedor({
   vendedorOficialNombre = "",
 }) {
   if (!revendedorId) {
-    throw new Error(
-      "Falta el revendedor."
-    );
+    throw new Error("Falta el revendedor.");
   }
 
-  const nombreLimpio =
-    limpiarTexto(nombre);
-
-  const apellidoLimpio =
-    limpiarTexto(apellido);
-
-  const whatsappLimpio =
-    limpiarTexto(whatsapp);
+  const nombreLimpio = limpiarTexto(nombre);
+  const apellidoLimpio = limpiarTexto(apellido);
+  const whatsappLimpio = limpiarTexto(whatsapp);
 
   if (!nombreLimpio) {
     throw new Error(
@@ -636,23 +881,24 @@ export async function crearClienteRevendedor({
 
   const ahora = ahoraISO();
 
-  const revendedor =
-    await obtenerRevendedorPorId(revendedorId);
-
-  const vendedorCodigoAsignado =
-    limpiarTexto(
-      revendedor?.vendedorOficialCodigo
-    );
-
-  const vendedorNombreAsignado =
-    limpiarTexto(
-      revendedor?.vendedorOficialNombre
-    );
+  /*
+   * IMPORTANTE:
+   * Esta función puede ejecutarse desde el link público.
+   *
+   * NO consultamos:
+   *   revendedores/{revendedorId}
+   *
+   * porque ese documento es privado.
+   *
+   * Los datos del vendedor oficial ya vienen
+   * desde el acceso público.
+   */
 
   const cliente = {
     revendedorId,
 
     nombre: nombreLimpio,
+
     apellido: apellidoLimpio,
 
     nombreCompleto:
@@ -661,22 +907,26 @@ export async function crearClienteRevendedor({
     whatsapp: whatsappLimpio,
 
     vendedorOficialCodigo:
-      vendedorCodigoAsignado,
+      limpiarTexto(
+        vendedorOficialCodigo
+      ),
 
     vendedorOficialNombre:
-      vendedorNombreAsignado,
+      limpiarTexto(
+        vendedorOficialNombre
+      ),
 
     activo: true,
 
     creadoEn: ahora,
+
     actualizadoEn: ahora,
   };
 
-  const referencia =
-    await addDoc(
-      clientesRef,
-      cliente
-    );
+  const referencia = await addDoc(
+    clientesRef,
+    cliente
+  );
 
   return {
     id: referencia.id,
@@ -848,17 +1098,21 @@ export async function crearVentaRevendedor({
 
   const ahora = ahoraISO();
 
-  const revendedor =
-    await obtenerRevendedorPorId(revendedorId);
-
-  if (!revendedor) {
-    throw new Error(
-      "No se encontró el revendedor."
-    );
-  }
+  /*
+   * NO consultar revendedores/{revendedorId}
+   * porque el cliente público puede estar
+   * autenticado anónimamente.
+   *
+   * El porcentaje y los datos del vendedor
+   * deben venir preparados desde el flujo público.
+   */
 
   const porcentajeSnapshot =
-    convertirNumero(revendedor.porcentaje);
+    convertirNumero(
+      cliente?.porcentajeSnapshot ??
+      cliente?.porcentaje ??
+      0
+    );
 
   const productosNormalizados =
     normalizarProductosParaVenta(
@@ -866,27 +1120,19 @@ export async function crearVentaRevendedor({
       porcentajeSnapshot
     );
 
-  /*
-   * La asignación se toma de los datos del cliente
-   * que ya fueron creados para ese revendedor.
-   *
-   * Firestore Rules debe validar que esos dos campos
-   * coincidan con el cliente almacenado.
-   */
   const vendedorCodigoVenta =
     limpiarTexto(
-      cliente.vendedorOficialCodigo ||
-      revendedor.vendedorOficialCodigo
+      cliente.vendedorOficialCodigo
     );
 
   const vendedorNombreVenta =
     limpiarTexto(
-      cliente.vendedorOficialNombre ||
-      revendedor.vendedorOficialNombre
+      cliente.vendedorOficialNombre
     );
 
   const venta = {
     revendedorId,
+
     clienteId,
 
     cliente: {
@@ -924,25 +1170,35 @@ export async function crearVentaRevendedor({
 
     estado,
 
-    resultadoComercial: "pendiente",
+    resultadoComercial:
+      "pendiente",
 
-    confirmadaPorRevendedorEn: null,
+    confirmadaPorRevendedorEn:
+      null,
 
-    validadaPorElectroHogarEn: null,
+    validadaPorElectroHogarEn:
+      null,
 
-    enviadaAElectroHogarEn: null,
+    enviadaAElectroHogarEn:
+      null,
 
-    pedidoConsolidadoId: null,
+    pedidoConsolidadoId:
+      null,
 
-    comisionGenerada: 0,
+    comisionGenerada:
+      0,
 
-    comisionFinalizada: false,
+    comisionFinalizada:
+      false,
 
-    procesadoEn: null,
+    procesadoEn:
+      null,
 
-    creadoEn: ahora,
+    creadoEn:
+      ahora,
 
-    actualizadoEn: ahora,
+    actualizadoEn:
+      ahora,
   };
 
   const referencia =
@@ -1877,13 +2133,13 @@ export async function finalizarPedidoRevendedor(
     );
   }
 
-  const porcentaje =
-    convertirNumero(
-      pedido.porcentajeSnapshot
-    ) ||
-    convertirNumero(
-      revendedorReal.porcentaje
-    );
+const porcentaje =
+  convertirNumero(
+    pedido.porcentajeSnapshot
+  ) ||
+  convertirNumero(
+    revendedor.porcentaje
+  );
 
   let totalVenta = 0;
   let totalBase = 0;

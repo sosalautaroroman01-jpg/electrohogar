@@ -11,26 +11,43 @@ export default function ProductPrice({ producto }) {
 
   const {
     activo: modoRevendedor,
-    porcentaje,
     obtenerPrecioRevendedor,
   } = useRevendedorPublico();
 
+  if (!producto) return null;
+
   const esUSD = esProductoUSD(producto);
   const precioBase = Number(producto?.precio) || 0;
-  const precioFinal = modoRevendedor
-    ? precioBase *
-      (1 + (Number(porcentaje) || 0) / 100)
+
+  /*
+   * El precio del revendedor se calcula SIEMPRE desde
+   * RevendedorPublicoContext.
+   *
+   * De esta manera evitamos duplicar el porcentaje
+   * dentro de este componente y garantizamos que todos
+   * los productos utilicen exactamente la misma lógica.
+   */
+  const precioRevendedor = modoRevendedor
+    ? obtenerPrecioRevendedor(producto, 1, blue)
     : precioBase;
 
   if (esUSD) {
     const precioARS = modoRevendedor
-      ? obtenerPrecioRevendedor(producto, 1, blue)
+      ? precioRevendedor
       : calcularPrecioARS(precioBase, blue);
+
+    /*
+     * Para USD, el precio mostrado en dólares también
+     * debe respetar el margen del revendedor.
+     */
+    const precioUSD = modoRevendedor
+      ? precioRevendedor
+      : precioBase;
 
     return (
       <>
         <p className="precio">
-          {`💵 USD ${formatearPrecio(precioFinal)}`}
+          {`💵 USD ${formatearPrecio(precioUSD)}`}
         </p>
 
         {blue && (
@@ -43,13 +60,9 @@ export default function ProductPrice({ producto }) {
     );
   }
 
-  const precioARS = modoRevendedor
-    ? obtenerPrecioRevendedor(producto, 1, blue)
-    : precioBase;
-
   return (
     <p className="precio">
-      ${formatearPrecio(precioARS)}
+      ${formatearPrecio(precioRevendedor)}
     </p>
   );
 }

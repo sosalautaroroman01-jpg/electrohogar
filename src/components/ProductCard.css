@@ -1,567 +1,2043 @@
-.card{
+/* =========================================================
+   ELECTRO HOGAR — PRODUCT CARD
+   Vista limpia basada en HomeProductCard.
+   Este CSS está aislado con .product-card para que ningún
+   .card / button global pueda romperlo.
+========================================================= */
 
-    background:#fff;
+.product-card {
+  position: relative !important;
 
-    max-width:320px;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
 
-    width:100%;
+  display: flex !important;
+  flex-direction: column !important;
 
-    margin:auto;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 
-    border-radius:22px;
+  background: #fff !important;
 
-    overflow:hidden;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 14px !important;
 
-    display:flex;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .035) !important;
 
-    flex-direction:column;
-
-    box-shadow:0 12px 35px rgba(0,0,0,.08);
-
-    transition:.30s;
-
-    border:1px solid rgba(0,0,0,.05);
-
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    border-color .22s ease;
 }
 
-.card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 22px 45px rgba(0,0,0,.15);
+.product-card:hover {
+  border-color: #d7dce1 !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, .09) !important;
+  transform: none !important;
 }
 
-/* ===================== IMAGEN ===================== */
+/* =========================================================
+   BADGE
+========================================================= */
 
-.image-container{
-    position:relative;
-    background:#fff;
-    overflow:visible;
+.product-card .card-top-badges {
+  position: absolute !important;
+  top: 10px !important;
+  left: 10px !important;
+  z-index: 50 !important;
+  pointer-events: none !important;
 }
 
-.image-box{
-    width:100%;
-    height:250px;
+.product-card .card-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+  min-height: 23px !important;
+  padding: 0 8px !important;
 
-    background:#fff;
-    border-radius:18px;
+  border-radius: 6px !important;
+
+  background: #16a34a !important;
+  color: #fff !important;
+
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 850 !important;
+  letter-spacing: .45px !important;
 }
 
-.card-img{
-    width:100%;
-    height:250px;
+/* =========================================================
+   GALERÍA
+========================================================= */
 
-    object-fit:contain;
-    object-position:center;
+.product-card .image-container {
+  position: relative !important;
 
-    display:block;
+  width: 100% !important;
+  height: 250px !important;
+  min-height: 250px !important;
+  max-height: 250px !important;
 
-    padding:15px;
+  flex: 0 0 250px !important;
 
-    cursor:zoom-in;
+  display: flex !important;
+  flex-direction: column !important;
 
-    transition:.30s;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  background: #fafafa !important;
+
+  border-bottom: 1px solid #eeeeee !important;
 }
 
-.card-img:hover{
-    transform:scale(1.03);
+.product-card .image-box {
+  position: relative !important;
+
+  width: 100% !important;
+  height: 210px !important;
+  min-height: 210px !important;
+  max-height: 210px !important;
+
+  flex: 0 0 210px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  background: #fafafa !important;
 }
 
-/* ===================== FLECHAS ===================== */
+.product-card .card-img {
+  display: block !important;
 
-.image-arrow{
-    position:absolute;
-    top:50%;
-    transform:translateY(-50%);
+  width: 100% !important;
+  max-width: 100% !important;
 
-    width:58px;
-    height:58px;
+  height: 210px !important;
+  min-height: 210px !important;
+  max-height: 210px !important;
 
-    border:none;
-    border-radius:50%;
+  margin: 0 !important;
+  padding: 8px !important;
 
-    background:#fff;
-    color:#16a34a;
+  box-sizing: border-box !important;
 
-    cursor:pointer;
+  object-fit: contain !important;
+  object-position: center !important;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+  cursor: zoom-in !important;
 
-    font-size:38px;
-    font-weight:300;
-
-    box-shadow:0 10px 30px rgba(0,0,0,.18);
-
-    transition:.25s;
-
-    z-index:100;
+  transform: none !important;
 }
 
-.image-arrow.left{
-    left:0;
+.product-card:hover .card-img {
+  transform: scale(1.015) !important;
 }
 
-.image-arrow.right{
-    right:0;
+/* =========================================================
+   FLECHAS
+========================================================= */
+
+.product-card .image-arrow {
+  position: absolute !important;
+  top: 105px !important;
+  z-index: 30 !important;
+
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 1px solid #e5e7eb !important;
+  border-radius: 50% !important;
+
+  background: #fff !important;
+  color: #16a34a !important;
+
+  font-family: inherit !important;
+  font-size: 21px !important;
+  line-height: 1 !important;
+
+  cursor: pointer !important;
+
+  box-shadow: 0 4px 12px rgba(15, 23, 42, .10) !important;
+
+  transform: translateY(-50%) !important;
 }
 
-.image-arrow:hover{
-    background:#16a34a;
-    color:#fff;
-    transform:translateY(-50%) scale(1.08);
+.product-card .image-arrow.left {
+  left: 8px !important;
 }
 
-/* ===================== CONTADOR ===================== */
-
-.image-counter{
-    position:absolute;
-    bottom:12px;
-    right:12px;
-    background:rgba(0,0,0,.70);
-    color:white;
-    padding:5px 10px;
-    border-radius:30px;
-    font-size:13px;
-    font-weight:bold;
+.product-card .image-arrow.right {
+  right: 8px !important;
 }
 
-/* ===================== MINIATURAS ===================== */
-
-.thumbnail-strip{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
-    padding:12px;
-    flex-wrap:wrap;
-    background:#fff;
+.product-card .image-arrow:hover {
+  background: #fff !important;
+  color: #15803d !important;
 }
 
-.thumbnail{
-    width:52px;
-    height:52px;
-    object-fit:contain;
-    border-radius:10px;
-    border:2px solid transparent;
-    cursor:pointer;
-    transition:.25s;
-    background:#fff;
+/* =========================================================
+   CONTADOR
+========================================================= */
+
+.product-card .image-counter {
+  position: absolute !important;
+
+  right: 8px !important;
+  bottom: 45px !important;
+
+  z-index: 31 !important;
+
+  padding: 5px 8px !important;
+
+  border-radius: 999px !important;
+
+  background: rgba(15, 23, 42, .72) !important;
+  color: #fff !important;
+
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
 }
 
-.thumbnail:hover{
-    transform:scale(1.08);
+/* =========================================================
+   MINIATURAS
+========================================================= */
+
+.product-card .thumbnail-strip {
+  position: relative !important;
+  z-index: 5 !important;
+
+  width: 100% !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 5px !important;
+
+  padding: 3px 7px !important;
+  margin: 0 !important;
+
+  box-sizing: border-box !important;
+
+  background: #fff !important;
+
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+
+  scrollbar-width: none !important;
 }
 
-.thumbnail.active{
-    border-color:#16a34a;
+.product-card .thumbnail-strip::-webkit-scrollbar {
+  display: none !important;
 }
 
-/* ===================== CUERPO ===================== */
+.product-card .thumbnail {
+  display: block !important;
 
-.card-body{
-    padding:18px;
-    display:flex;
-    flex-direction:column;
+  width: 31px !important;
+  height: 31px !important;
+
+  min-width: 31px !important;
+  max-width: 31px !important;
+
+  flex: 0 0 31px !important;
+
+  padding: 1px !important;
+  margin: 0 !important;
+
+  object-fit: contain !important;
+
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 6px !important;
+
+  background: #fff !important;
+
+  cursor: pointer !important;
 }
 
-.card-body h3{
-    font-size:20px;
-    font-weight:700;
-    line-height:1.35;
-    color:#222;
-    text-align:center;
-
-    margin:0 0 16px;
-
-    display:-webkit-box;
-    -webkit-box-orient:vertical;
-    -webkit-line-clamp: 3;   /* Antes era 2 */
-    line-clamp: 3;
-    overflow:hidden;
-
-    min-height:84px;        /* Antes era 56px */
+.product-card .thumbnail.active {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, .10) !important;
 }
 
-.precio{
-    font-size:38px;
-    font-weight:900;
-    color:#14963d;
-    text-align:center;
-    margin:0 0 18px;
+/* =========================================================
+   CONTENIDO
+========================================================= */
+
+.product-card .card-body {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 132px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  padding: 13px 13px 15px !important;
+  margin: 0 !important;
+
+  box-sizing: border-box !important;
+
+  background: #fff !important;
 }
 
-/* ===================== PRECIO EN PESOS ===================== */
+.product-card .card-body h3 {
+  display: -webkit-box !important;
 
-.precio-ars{
+  width: 100% !important;
+  height: 38px !important;
+  min-height: 38px !important;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
+  margin: 0 !important;
+  padding: 0 !important;
 
-    margin:-6px auto 18px;
+  overflow: hidden !important;
 
-    padding:12px 16px;
+  color: #1f2937 !important;
 
-    width:fit-content;
-    min-width:220px;
+  font-size: 13px !important;
+  line-height: 19px !important;
+  font-weight: 650 !important;
 
-    background:#f0fdf4;
+  text-align: left !important;
 
-    border:1px solid #22c55e;
-
-    border-radius:12px;
-
-    color:#166534;
-
-    font-size:20px;
-    font-weight:800;
-
-    box-shadow:0 4px 12px rgba(34,197,94,.12);
-
-    transition:.25s;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
 }
 
-.precio-ars:hover{
+.product-card .card-body .precio {
+  width: 100% !important;
 
-    transform:translateY(-1px);
+  margin: 10px 0 0 !important;
+  padding-top: 10px !important;
 
-    box-shadow:0 8px 20px rgba(34,197,94,.18);
+  border-top: 1px solid #f0f1f2 !important;
+
+  color: #111827 !important;
+
+  font-size: 24px !important;
+  line-height: 29px !important;
+  font-weight: 800 !important;
+
+  letter-spacing: -.6px !important;
+
+  text-align: left !important;
 }
 
-.precio-ars span{
-    font-size:13px;
-    font-weight:700;
+/* =========================================================
+   MAYORISTA
+========================================================= */
+
+.product-card .product-wholesale-area {
+  width: 100% !important;
+  margin-top: 8px !important;
 }
 
-/* ===================== PRECIOS MAYORISTAS ===================== */
+.product-card .product-wholesale-box {
+  width: 100% !important;
 
-/* ===================== PRECIOS MAYORISTAS ===================== */
+  margin: 0 !important;
+  padding: 9px 10px !important;
 
-.card-body > div{
-    border-radius:12px !important;
+  box-sizing: border-box !important;
+
+  border: 1px solid #86efac !important;
+  border-radius: 10px !important;
+
+  background: #f3fff5 !important;
+
+  color: #374151 !important;
+
+  font-size: 13px !important;
+  line-height: 19px !important;
 }
 
-/* ===================== BOTON ===================== */
+/* =========================================================
+   INFO
+========================================================= */
 
-.card-body > button{
-    width:100%;
-    border:none;
-    border-radius:14px;
-    padding:16px;
-    background:linear-gradient(135deg,#16a34a,#22c55e);
-    color:white;
-    font-size:18px;
-    font-weight:700;
-    cursor:pointer;
-    transition:.25s;
+.product-card .info-btn {
+  align-self: flex-start !important;
+
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  margin: 7px 0 0 !important;
+  padding: 4px 9px !important;
+
+  border: 1px solid #86efac !important;
+  border-radius: 999px !important;
+
+  background: #fff !important;
+  color: #16a34a !important;
+
+  font-family: inherit !important;
+  font-size: 10px !important;
+  line-height: 13px !important;
+  font-weight: 750 !important;
+
+  cursor: pointer !important;
+
+  box-shadow: none !important;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
 }
 
-.card-body > button:hover{
-    transform:translateY(-2px);
-    box-shadow:0 12px 28px rgba(22,163,74,.35);
+/* =========================================================
+   BOTÓN CARRITO — FORZADO
+========================================================= */
+
+.product-card .product-cart-area {
+  width: 100% !important;
+
+  margin-top: auto !important;
+  padding-top: 12px !important;
 }
 
-.card button:hover{
-    transform:translateY(-2px);
-    box-shadow:0 12px 28px rgba(22,163,74,.35);
+.product-card .product-add-cart-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+
+  min-height: 40px !important;
+  height: 40px !important;
+
+  margin: 0 !important;
+  padding: 10px 12px !important;
+
+  box-sizing: border-box !important;
+
+  border: 0 !important;
+  border-radius: 9px !important;
+
+  background: #16a34a !important;
+  color: #fff !important;
+
+  font-family: inherit !important;
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+
+  text-align: center !important;
+  white-space: nowrap !important;
+
+  cursor: pointer !important;
+
+  box-shadow: 0 5px 12px rgba(22, 163, 74, .16) !important;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
 }
 
-/* ===================== MODAL ===================== */
+.product-card .product-add-cart-btn:hover {
+  background: #15803d !important;
+  color: #fff !important;
 
-.image-modal{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.85);
-    backdrop-filter:blur(8px);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:99999;
+  transform: translateY(-1px) !important;
+
+  box-shadow: 0 7px 16px rgba(22, 163, 74, .22) !important;
 }
 
-.image-modal-content{
-    position:relative;
+.product-card .product-add-cart-btn:active {
+  transform: translateY(0) !important;
 }
 
-.image-preview{
-    max-width:92vw;
-    max-height:90vh;
-    border-radius:18px;
+/* =========================================================
+   MODAL INFO — YA FUNCIONA, SE CONSERVA
+========================================================= */
+
+.product-card .descripcion-tooltip {
+  display: none !important;
 }
 
-.close-image{
-    position:absolute;
-    top:-15px;
-    right:-15px;
-    width:42px !important;
-    height:42px;
-    border:none;
-    border-radius:50% !important;
-    background:#16a34a !important;
-    color:white;
-    font-size:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    cursor:pointer;
+.product-card .descripcion-modal {
+  position: fixed !important;
+  inset: 0 !important;
+
+  z-index: 999999 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+
+  padding: 20px !important;
+
+  box-sizing: border-box !important;
+
+  background: rgba(15, 23, 42, .52) !important;
+
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-/* ===================== CELULAR ===================== */
+.product-card .descripcion-box {
+  position: relative !important;
 
-@media (max-width:768px){
+  width: min(520px, 92vw) !important;
+  max-width: 520px !important;
+  max-height: 75vh !important;
 
-    .card{
-        width:100%;
-        max-width:380px;
-        margin:auto;
-        border-radius:18px;
-    }
+  margin: 0 auto !important;
+  padding: 24px !important;
 
-    .image-container{
-        min-height:230px;
-    }
+  overflow-y: auto !important;
 
-    .image-box{
-        height:230px;
-        padding:10px;
-    }
+  box-sizing: border-box !important;
 
-    .card-img{
-    width:92%;
-    height:100%;
-    object-fit:contain;
-    margin:auto;
+  background: #fff !important;
+
+  border: 1px solid #e5e7eb !important;
+  border-radius: 16px !important;
+
+  box-shadow: 0 24px 65px rgba(0, 0, 0, .25) !important;
 }
 
-    .card-body{
-        padding:18px;
-    }
-
-    .card-body h3{
-    font-size:18px;
-    line-height:1.35;
-
-    display:-webkit-box;
-    -webkit-box-orient:vertical;
-    -webkit-line-clamp:3;
-    line-clamp:3;
-    overflow:hidden;
-
-    min-height:74px;
+.product-card .descripcion-box h2 {
+  margin: 0 42px 13px 0 !important;
+  color: #1f2937 !important;
+  font-size: 20px !important;
+  line-height: 1.22 !important;
+  font-weight: 800 !important;
 }
 
-    .precio{
-        font-size:30px;
-    }
-
-    .image-arrow{
-    width:44px;
-    height:44px;
-    font-size:24px;
+.product-card .descripcion-box p {
+  margin: 0 !important;
+  color: #4b5563 !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  white-space: pre-wrap !important;
 }
 
-.image-arrow.left{
-    left:8px;
+.product-card .descripcion-box .close-image {
+  position: absolute !important;
+
+  top: 10px !important;
+  right: 10px !important;
+
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: 0 !important;
+  border-radius: 50% !important;
+
+  background: #16a34a !important;
+  color: #fff !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  cursor: pointer !important;
 }
 
-.image-arrow.right{
-    right:8px;
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+  .product-card .image-container {
+    height: 230px !important;
+    min-height: 230px !important;
+    max-height: 230px !important;
+    flex-basis: 230px !important;
+  }
+
+  .product-card .image-box,
+  .product-card .card-img {
+    height: 190px !important;
+    min-height: 190px !important;
+    max-height: 190px !important;
+  }
+
+  .product-card .image-arrow {
+    top: 95px !important;
+  }
+
+  .product-card .card-body .precio {
+    font-size: 22px !important;
+    line-height: 27px !important;
+  }
 }
 
-    .thumbnail-strip{
-        padding:8px;
-        gap:6px;
-    }
+@media (max-width: 768px) {
+  .product-card {
+    border-radius: 12px !important;
+  }
 
-    .thumbnail{
-        width:48px;
-        height:48px;
-    }
+  .product-card .image-container {
+    height: 205px !important;
+    min-height: 205px !important;
+    max-height: 205px !important;
+    flex-basis: 205px !important;
+  }
 
-}
-/* ===================== DESCRIPCION ===================== */
+  .product-card .image-box,
+  .product-card .card-img {
+    height: 165px !important;
+    min-height: 165px !important;
+    max-height: 165px !important;
+  }
 
-.descripcion-modal{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.65);
-    backdrop-filter:blur(6px);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:99999;
-    animation:fadeIn .25s ease;
-}
+  .product-card .card-img {
+    padding: 7px !important;
+  }
 
-.descripcion-box{
-    position:relative;
-    background:#fff;
-    width:min(92vw,500px);
-    max-height:80vh;
-    overflow-y:auto;
-    border-radius:20px;
-    padding:28px;
-    box-shadow:0 25px 60px rgba(0,0,0,.25);
-    animation:subir .25s ease;
-}
+  .product-card .image-arrow {
+    top: 82px !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    font-size: 18px !important;
+  }
 
-.descripcion-box h2{
-    margin:0 0 18px;
-    color:#16a34a;
-    font-size:24px;
-    text-align:center;
-}
+  .product-card .thumbnail-strip {
+    height: 40px !important;
+    min-height: 40px !important;
+  }
 
-.descripcion-box p{
-    margin:0;
-    color:#444;
-    line-height:1.7;
-    white-space:pre-wrap;
-    font-size:16px;
-}
+  .product-card .thumbnail {
+    width: 27px !important;
+    height: 27px !important;
+    min-width: 27px !important;
+  }
 
-@keyframes fadeIn{
-    from{opacity:0;}
-    to{opacity:1;}
-}
+  .product-card .card-body {
+    min-height: 119px !important;
+    padding: 10px 10px 12px !important;
+  }
 
-@keyframes subir{
-    from{
-        opacity:0;
-        transform:translateY(20px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
-/* Botón de información */
+  .product-card .card-body h3 {
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 11.5px !important;
+    line-height: 17px !important;
+  }
 
-.info-btn{
-    display:none;
-}
+  .product-card .card-body .precio {
+    font-size: 20px !important;
+    line-height: 25px !important;
+  }
 
-@media (max-width:768px){
+  .product-card .product-wholesale-box {
+    padding: 7px 8px !important;
+    font-size: 10.5px !important;
+    line-height: 15px !important;
+  }
 
-.info-btn{
-
-    display:inline-flex;
-
-    align-items:center;
-    justify-content:center;
-
-    width:auto !important;
-
-    padding:6px 12px !important;
-
-    margin:0 auto 12px;
-
-    background:#fff !important;
-    color:#16a34a !important;
-
-    border:1px solid #16a34a !important;
-
-    border-radius:999px !important;
-
-    font-size:13px;
-
-    font-weight:700;
-
-    cursor:pointer;
-
-    box-shadow:none !important;
+  .product-card .product-add-cart-btn {
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 8px !important;
+    font-size: 10.5px !important;
+  }
 }
 
-}
-.descripcion-tooltip{
+@media (max-width: 430px) {
+  .product-card .image-container {
+    height: 195px !important;
+    min-height: 195px !important;
+    max-height: 195px !important;
+    flex-basis: 195px !important;
+  }
 
-    position:absolute;
+  .product-card .image-box,
+  .product-card .card-img {
+    height: 155px !important;
+    min-height: 155px !important;
+    max-height: 155px !important;
+  }
 
-    top:50%;
-    left:calc(100% + 20px);
+  .product-card .image-arrow {
+    top: 77px !important;
+  }
 
-    transform:translateY(-50%);
+  .product-card .thumbnail {
+    width: 25px !important;
+    height: 25px !important;
+    min-width: 25px !important;
+  }
 
-    width:320px;
-    max-width:340px;
+  .product-card .card-body {
+    padding: 9px 9px 11px !important;
+  }
 
-    padding:18px;
+  .product-card .card-body h3 {
+    font-size: 11px !important;
+    line-height: 16px !important;
+  }
 
-    border-radius:18px;
+  .product-card .card-body .precio {
+    font-size: 19px !important;
+    line-height: 24px !important;
+  }
 
-    background:rgba(255,255,255,.78);
-    backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.45);
-
-    box-shadow:
-        0 18px 40px rgba(0,0,0,.18),
-        0 4px 12px rgba(255,255,255,.35) inset;
-
-    color:#222;
-
-    z-index:999;
-
-    animation:tooltipFade .25s ease;
-
-    pointer-events:auto;
-}
-
-.descripcion-tooltip h4{
-
-    margin:0 0 12px;
-
-    color:#16a34a;
-
-    font-size:17px;
-
-    font-weight:700;
-}
-
-.descripcion-tooltip p{
-
-    margin:0;
-
-    line-height:1.65;
-
-    font-size:14px;
-
-    color:#333;
-
-    white-space:pre-wrap;
+  .product-card .product-add-cart-btn {
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 7px 6px !important;
+    font-size: 10px !important;
+  }
 }
 
-@keyframes tooltipFade{
 
-    from{
+/* =========================================================
+   ULTIMO OVERRIDE — BOTÓN AGREGAR AL CARRITO
+   Tiene prioridad sobre cualquier CSS viejo/global.
+========================================================= */
 
-        opacity:0;
+.product-card .product-cart-area button.product-add-cart-btn,
+.product-card .product-add-cart-btn {
+  appearance: none !important;
+  -webkit-appearance: none !important;
 
-        transform:
-            translateY(-50%)
-            translateX(-12px);
-    }
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 
-    to{
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
 
-        opacity:1;
+  margin: 0 !important;
+  padding: 0 14px !important;
 
-        transform:
-            translateY(-50%)
-            translateX(0);
-    }
+  box-sizing: border-box !important;
+
+  background: #16a34a !important;
+  background-color: #16a34a !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+
+  border-radius: 10px !important;
+
+  color: #ffffff !important;
+  text-shadow: none !important;
+
+  font-family: inherit !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+
+  text-align: center !important;
+  white-space: nowrap !important;
+
+  cursor: pointer !important;
+
+  box-shadow: 0 5px 14px rgba(22, 163, 74, .18) !important;
 }
 
-@media (max-width:768px){
+.product-card .product-cart-area button.product-add-cart-btn:hover,
+.product-card .product-add-cart-btn:hover {
+  background: #16a34a !important;
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+  border: 0 !important;
 
-    .descripcion-tooltip{
-        display:none;
-    }
+  transform: translateY(-1px) !important;
 
+  box-shadow: 0 7px 17px rgba(22, 163, 74, .24) !important;
 }
+
+.product-card .product-cart-area button.product-add-cart-btn:active,
+.product-card .product-add-cart-btn:active {
+  background: #15803d !important;
+  background-color: #15803d !important;
+  color: #ffffff !important;
+
+  transform: translateY(0) !important;
+}
+
+@media (max-width: 768px) {
+  .product-card .product-cart-area button.product-add-cart-btn,
+  .product-card .product-add-cart-btn {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .product-card .product-cart-area button.product-add-cart-btn,
+  .product-card .product-add-cart-btn {
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+
+    font-size: 10.5px !important;
+  }
+}
+
+
+/* =========================================================
+   VISOR DE IMAGEN — CORRECCIÓN FINAL
+   La imagen abierta debe ser un modal fijo sobre toda
+   la pantalla, nunca aparecer debajo de las tarjetas.
+========================================================= */
+
+body.image-modal-open {
+  overflow: hidden !important;
+}
+
+.image-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 20px !important;
+  box-sizing: border-box !important;
+
+  background: rgba(15, 23, 42, .72) !important;
+  backdrop-filter: blur(7px) !important;
+  -webkit-backdrop-filter: blur(7px) !important;
+
+  overflow: hidden !important;
+}
+
+.image-modal-content {
+  position: relative !important;
+
+  width: min(94vw, 1200px) !important;
+  height: min(90vh, 860px) !important;
+
+  max-width: 94vw !important;
+  max-height: 90vh !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  box-sizing: border-box !important;
+}
+
+.image-modal-stage {
+  width: 100% !important;
+  height: 100% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.image-preview {
+  display: block !important;
+
+  width: auto !important;
+  height: auto !important;
+
+  max-width: 82vw !important;
+  max-height: 82vh !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  border-radius: 10px !important;
+
+  transform: none !important;
+  animation: none !important;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .32) !important;
+
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+.image-preview--video {
+  width: auto !important;
+  height: auto !important;
+
+  max-width: 82vw !important;
+  max-height: 82vh !important;
+
+  background: #000 !important;
+}
+
+/* CERRAR */
+
+.image-modal .close-image {
+  position: absolute !important;
+
+  top: 8px !important;
+  right: 8px !important;
+
+  z-index: 50 !important;
+
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: 0 !important;
+  border-radius: 50% !important;
+
+  background: #16a34a !important;
+  color: #fff !important;
+
+  font-family: inherit !important;
+  font-size: 27px !important;
+  line-height: 1 !important;
+  font-weight: 400 !important;
+
+  cursor: pointer !important;
+
+  box-shadow: 0 7px 20px rgba(0, 0, 0, .25) !important;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+.image-modal .close-image:hover {
+  background: #15803d !important;
+}
+
+/* FLECHAS */
+
+.image-modal .image-modal-arrow {
+  position: absolute !important;
+
+  top: 50% !important;
+
+  z-index: 40 !important;
+
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  transform: translateY(-50%) !important;
+
+  border: 0 !important;
+  border-radius: 50% !important;
+
+  background: rgba(255,255,255,.96) !important;
+  color: #16a34a !important;
+
+  font-size: 36px !important;
+  line-height: 1 !important;
+  font-weight: 300 !important;
+
+  cursor: pointer !important;
+
+  box-shadow: 0 8px 22px rgba(0,0,0,.20) !important;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+.image-modal .image-modal-arrow:hover {
+  background: #fff !important;
+  color: #15803d !important;
+}
+
+.image-modal .image-modal-arrow--left {
+  left: 4px !important;
+}
+
+.image-modal .image-modal-arrow--right {
+  right: 4px !important;
+}
+
+/* CONTADOR */
+
+.image-modal .image-modal-counter {
+  position: absolute !important;
+
+  left: 50% !important;
+  bottom: 8px !important;
+
+  z-index: 40 !important;
+
+  transform: translateX(-50%) !important;
+
+  padding: 6px 10px !important;
+
+  border-radius: 999px !important;
+
+  background: rgba(15,23,42,.80) !important;
+  color: #fff !important;
+
+  font-size: 11px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+
+  white-space: nowrap !important;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+  .image-modal {
+    padding: 8px !important;
+  }
+
+  .image-modal-content {
+    width: 96vw !important;
+    height: 90vh !important;
+
+    max-width: 96vw !important;
+    max-height: 90vh !important;
+  }
+
+  .image-preview,
+  .image-preview--video {
+    max-width: 90vw !important;
+    max-height: 78vh !important;
+
+    border-radius: 8px !important;
+  }
+
+  .image-modal .close-image {
+    top: 4px !important;
+    right: 4px !important;
+
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+
+    font-size: 23px !important;
+  }
+
+  .image-modal .image-modal-arrow {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+
+    font-size: 28px !important;
+  }
+
+  .image-modal .image-modal-arrow--left {
+    left: 0 !important;
+  }
+
+  .image-modal .image-modal-arrow--right {
+    right: 0 !important;
+  }
+
+  .image-modal .image-modal-counter {
+    bottom: 3px !important;
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .image-modal-content {
+    width: 98vw !important;
+    height: 92vh !important;
+
+    max-width: 98vw !important;
+    max-height: 92vh !important;
+  }
+
+  .image-preview,
+  .image-preview--video {
+    max-width: 92vw !important;
+    max-height: 76vh !important;
+  }
+}
+
+
+/* =========================================================
+   FIX DEFINITIVO DEL VISOR
+   Nunca debe quedar encerrado dentro de .product-card
+========================================================= */
+
+.image-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+
+  z-index: 2147483647 !important;
+
+  transform: none !important;
+  contain: none !important;
+  filter: none !important;
+}
+
+.image-modal-content {
+  position: relative !important;
+  transform: none !important;
+  contain: none !important;
+}
+
+.image-modal img,
+.image-modal video {
+  transform: none !important;
+}
+
+
+/* =========================================================
+   FIX VISOR CON VARIAS FOTOS
+   Miniaturas siempre ABAJO de la foto.
+   Nunca al costado ni ocupando todo el ancho.
+========================================================= */
+
+.image-modal .image-modal-content {
+  position: relative !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: min(94vw, 1200px) !important;
+  height: min(90vh, 860px) !important;
+
+  padding: 0 70px 78px !important;
+  box-sizing: border-box !important;
+}
+
+/* La foto principal queda centrada */
+.image-modal .image-preview {
+  display: block !important;
+
+  width: auto !important;
+  height: auto !important;
+
+  max-width: 82vw !important;
+  max-height: 76vh !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  margin: auto !important;
+  padding: 0 !important;
+
+  flex: 0 1 auto !important;
+
+  border-radius: 10px !important;
+}
+
+/* Si abre video, también queda centrado */
+.image-modal .image-modal-content > video.card-img {
+  display: block !important;
+
+  width: auto !important;
+  height: auto !important;
+
+  max-width: 82vw !important;
+  max-height: 76vh !important;
+
+  object-fit: contain !important;
+
+  margin: auto !important;
+
+  flex: 0 1 auto !important;
+
+  background: #000 !important;
+  border-radius: 10px !important;
+}
+
+/* =========================================================
+   MINIATURAS DEL VISOR
+========================================================= */
+
+.image-modal .thumbnail-strip {
+  position: absolute !important;
+
+  left: 50% !important;
+  bottom: 16px !important;
+
+  transform: translateX(-50%) !important;
+
+  width: auto !important;
+  max-width: min(90vw, 700px) !important;
+  height: auto !important;
+  min-height: 48px !important;
+
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 7px !important;
+
+  padding: 5px 8px !important;
+  margin: 0 !important;
+
+  box-sizing: border-box !important;
+
+  background: rgba(255,255,255,.96) !important;
+
+  border: 1px solid rgba(15,23,42,.10) !important;
+  border-radius: 10px !important;
+
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.20) !important;
+
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+
+  scrollbar-width: none !important;
+
+  z-index: 45 !important;
+}
+
+.image-modal .thumbnail-strip::-webkit-scrollbar {
+  display: none !important;
+}
+
+.image-modal .thumbnail-strip .thumbnail {
+  flex: 0 0 auto !important;
+
+  width: 42px !important;
+  height: 42px !important;
+
+  min-width: 42px !important;
+  min-height: 42px !important;
+
+  max-width: 42px !important;
+  max-height: 42px !important;
+
+  display: block !important;
+
+  margin: 0 !important;
+  padding: 2px !important;
+
+  box-sizing: border-box !important;
+
+  object-fit: cover !important;
+
+  border: 1px solid #d9dee5 !important;
+  border-radius: 6px !important;
+
+  background: #fff !important;
+
+  cursor: pointer !important;
+
+  opacity: .88 !important;
+
+  transition:
+    border-color .15s ease,
+    opacity .15s ease,
+    transform .15s ease !important;
+}
+
+.image-modal .thumbnail-strip .thumbnail:hover {
+  opacity: 1 !important;
+  transform: translateY(-1px) !important;
+}
+
+.image-modal .thumbnail-strip .thumbnail.active {
+  border: 2px solid #16a34a !important;
+  opacity: 1 !important;
+}
+
+/* El thumbnail de video también respeta el mismo tamaño */
+.image-modal .thumbnail-strip > div.thumbnail {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+
+  max-width: 42px !important;
+  max-height: 42px !important;
+
+  flex: 0 0 42px !important;
+
+  box-sizing: border-box !important;
+
+  border: 1px solid #d9dee5 !important;
+  border-radius: 6px !important;
+
+  background: #fff !important;
+}
+
+/* =========================================================
+   FLECHAS DEL VISOR
+========================================================= */
+
+.image-modal .image-modal-content > .image-arrow,
+.image-modal .image-modal-content > .image-modal-arrow {
+  position: absolute !important;
+
+  top: 50% !important;
+
+  z-index: 50 !important;
+
+  transform: translateY(-50%) !important;
+}
+
+.image-modal .image-modal-content > .image-arrow.left,
+.image-modal .image-modal-content > .image-modal-arrow.left,
+.image-modal .image-modal-content > .image-modal-arrow--left {
+  left: 8px !important;
+}
+
+.image-modal .image-modal-content > .image-arrow.right,
+.image-modal .image-modal-content > .image-modal-arrow.right,
+.image-modal .image-modal-content > .image-modal-arrow--right {
+  right: 8px !important;
+}
+
+/* El contador no debe mezclarse con las miniaturas */
+.image-modal .image-counter,
+.image-modal .image-modal-counter {
+  position: absolute !important;
+
+  left: auto !important;
+  right: 12px !important;
+  bottom: 18px !important;
+
+  transform: none !important;
+
+  z-index: 55 !important;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .image-modal .image-modal-content {
+    width: 96vw !important;
+    height: 92vh !important;
+
+    max-width: 96vw !important;
+    max-height: 92vh !important;
+
+    padding:
+      0 42px 68px !important;
+  }
+
+  .image-modal .image-preview,
+  .image-modal .image-modal-content > video.card-img {
+    max-width: 88vw !important;
+    max-height: 72vh !important;
+  }
+
+  .image-modal .thumbnail-strip {
+    bottom: 10px !important;
+
+    max-width: 88vw !important;
+
+    min-height: 44px !important;
+
+    padding: 4px 6px !important;
+
+    gap: 5px !important;
+  }
+
+  .image-modal .thumbnail-strip .thumbnail,
+  .image-modal .thumbnail-strip > div.thumbnail {
+    width: 36px !important;
+    height: 36px !important;
+
+    min-width: 36px !important;
+    min-height: 36px !important;
+
+    max-width: 36px !important;
+    max-height: 36px !important;
+  }
+
+  .image-modal .image-counter,
+  .image-modal .image-modal-counter {
+    right: 7px !important;
+    bottom: 13px !important;
+  }
+}
+
+
+
+/* =========================================================
+   AJUSTE FINAL — FOTO GRANDE EN EL VISOR
+   Antes: width:auto + height:auto podía respetar el tamaño
+   natural de imágenes pequeñas y hacerlas ver demasiado chicas.
+========================================================= */
+
+.image-modal .image-preview {
+  display: block !important;
+
+  width: min(72vw, 900px) !important;
+  height: auto !important;
+
+  max-width: 82vw !important;
+  max-height: 76vh !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  margin: auto !important;
+  padding: 0 !important;
+
+  flex: 0 1 auto !important;
+}
+
+.image-modal .image-modal-content > video.card-img {
+  display: block !important;
+
+  width: min(72vw, 900px) !important;
+  height: auto !important;
+
+  max-width: 82vw !important;
+  max-height: 76vh !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  object-fit: contain !important;
+
+  margin: auto !important;
+}
+
+/* En pantallas grandes, aprovechamos más espacio */
+@media (min-width: 1200px) {
+  .image-modal .image-preview,
+  .image-modal .image-modal-content > video.card-img {
+    width: min(68vw, 1000px) !important;
+    max-width: 78vw !important;
+    max-height: 78vh !important;
+  }
+}
+
+/* En celular, la foto sigue siendo grande pero deja espacio
+   para flechas y miniaturas */
+@media (max-width: 768px) {
+  .image-modal .image-preview,
+  .image-modal .image-modal-content > video.card-img {
+    width: min(84vw, 700px) !important;
+    max-width: 88vw !important;
+    max-height: 72vh !important;
+  }
+}
+
+
+/* =========================================================
+   ELIMINAR "RETRATO" / RECTÁNGULO BORROSO DETRÁS DE LA FOTO
+   El fondo desenfocado debe pertenecer SOLO al .image-modal.
+   El contenedor de la foto debe ser completamente transparente.
+========================================================= */
+
+.image-modal .image-modal-content,
+.image-modal .image-modal-stage {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+
+  box-shadow: none !important;
+
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+
+  outline: none !important;
+  border: 0 !important;
+
+  isolation: auto !important;
+}
+
+/* Por si alguna regla anterior creó una capa visual */
+.image-modal .image-modal-content::before,
+.image-modal .image-modal-content::after,
+.image-modal .image-modal-stage::before,
+.image-modal .image-modal-stage::after {
+  content: none !important;
+  display: none !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* El único fondo/blur permitido es el del modal completo */
+.image-modal {
+  background: rgba(15, 23, 42, .72) !important;
+
+  backdrop-filter: blur(7px) !important;
+  -webkit-backdrop-filter: blur(7px) !important;
+
+  box-shadow: none !important;
+}
+
+
+/* =========================================================
+   AJUSTE FINAL — X MÁS CERCA + FOTOS DE PRODUCTO APENAS MÁS GRANDES
+========================================================= */
+
+/* La X queda cerca del visor, sin quedar pegada a la pantalla */
+.image-modal .close-image {
+  top: 10px !important;
+  right: 10px !important;
+}
+
+/* En pantallas grandes la X sigue cerca del área del visor */
+@media (min-width: 769px) {
+  .image-modal .close-image {
+    top: 10px !important;
+    right: 10px !important;
+  }
+}
+
+/* En celular: fácil de tocar y sin quedar alejada */
+@media (max-width: 768px) {
+  .image-modal .close-image {
+    top: 8px !important;
+    right: 8px !important;
+
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+}
+
+/* =========================================================
+   FOTOS DE LAS TARJETAS
+   Apenas más grandes, manteniendo EXACTAMENTE la misma
+   estructura y alineación de las tarjetas.
+========================================================= */
+
+/* No modificamos altura ni ancho del contenedor.
+   Solo hacemos que la imagen aproveche un poco más el espacio. */
+
+.product-card .product-image,
+.product-card .card-image,
+.product-card .product-img,
+.product-card img.card-img {
+  transform: scale(1.045) !important;
+  transform-origin: center center !important;
+}
+
+/* Evita que el pequeño zoom altere la distribución */
+.product-card .image-container,
+.product-card .product-image-container,
+.product-card .card-image-container {
+  overflow: hidden !important;
+}
+
+/* En celular, un poquito menos para conservar la alineación */
+@media (max-width: 768px) {
+  .product-card .product-image,
+  .product-card .card-image,
+  .product-card .product-img,
+  .product-card img.card-img {
+    transform: scale(1.035) !important;
+  }
+}
+
+
+/* =========================================================
+   FIX DEFINITIVO DEL VISOR
+   SOLO DEBEN EXISTIR 2 CAPAS:
+   1) foto visible
+   2) fondo general desenfocado
+
+   Se elimina completamente cualquier "capa del medio"
+   detrás de la foto.
+========================================================= */
+
+/* El contenedor interno NO pinta absolutamente nada */
+.image-modal .image-modal-content,
+.image-modal .image-modal-stage {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+
+  opacity: 1 !important;
+}
+
+/* Eliminar cualquier pseudo-elemento que pueda estar
+   creando el recuadro borroso */
+.image-modal .image-modal-content::before,
+.image-modal .image-modal-content::after,
+.image-modal .image-modal-stage::before,
+.image-modal .image-modal-stage::after {
+  content: none !important;
+  display: none !important;
+
+  background: none !important;
+  background-image: none !important;
+
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+
+  box-shadow: none !important;
+}
+
+/* El stage tampoco debe tener una capa visual */
+.image-modal .image-modal-stage {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+/* =========================================================
+   X — CERCA DEL VISOR
+   La colocamos respecto al contenedor de la galería,
+   no respecto a toda la pantalla.
+========================================================= */
+
+.image-modal .image-modal-content {
+  position: relative !important;
+}
+
+.image-modal .close-image {
+  position: absolute !important;
+
+  top: -52px !important;
+  right: 0 !important;
+
+  z-index: 999 !important;
+
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: 0 !important;
+  border-radius: 50% !important;
+
+  background: #16a34a !important;
+  color: #fff !important;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,.22) !important;
+
+  transform: none !important;
+}
+
+/* En celular queda todavía más cerca */
+@media (max-width: 768px) {
+  .image-modal .close-image {
+    top: -46px !important;
+    right: 0 !important;
+
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+}
+
+
+/* =========================================================
+   FIX DEFINITIVO — EL RECUADRO DEL MEDIO
+   El contenedor estaba ocupando casi toda la pantalla.
+   Lo reducimos al contenido real de la galería para que
+   NO pueda generar un tercer tono.
+========================================================= */
+
+.image-modal .image-modal-content {
+  position: relative !important;
+
+  width: fit-content !important;
+  height: fit-content !important;
+
+  max-width: 92vw !important;
+  max-height: 92vh !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  padding: 0 0 68px !important;
+  margin: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+
+  isolation: isolate !important;
+}
+
+/* El stage tampoco puede crear un rectángulo */
+.image-modal .image-modal-stage {
+  width: auto !important;
+  height: auto !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  box-shadow: none !important;
+
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Solo la imagen tiene superficie visible */
+.image-modal .image-preview {
+  position: relative !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+
+  box-shadow: 0 18px 55px rgba(0,0,0,.30) !important;
+
+  z-index: 2 !important;
+}
+
+/* La X se mantiene pegada al contenido real */
+.image-modal .close-image {
+  top: -52px !important;
+  right: 0 !important;
+}
+
+/* Las miniaturas siguen formando parte de la galería,
+   pero no crean una caja gigante */
+.image-modal .thumbnail-strip {
+  position: absolute !important;
+
+  left: 50% !important;
+  bottom: 8px !important;
+
+  transform: translateX(-50%) !important;
+
+  width: max-content !important;
+  max-width: 90vw !important;
+
+  z-index: 10 !important;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+  .image-modal .image-modal-content {
+    width: fit-content !important;
+    height: fit-content !important;
+
+    max-width: 94vw !important;
+    max-height: 94vh !important;
+
+    padding-bottom: 62px !important;
+  }
+
+  .image-modal .close-image {
+    top: -46px !important;
+    right: 0 !important;
+  }
+}
+
+
+/* =========================================================
+   FIX FINAL REAL — VISOR SIN RECTANGULO INTERMEDIO
+   El problema era que .image-modal-content y
+   .image-modal-stage ocupaban gran parte de la pantalla.
+   Ahora ambos se ajustan SOLO al contenido.
+========================================================= */
+
+.image-modal {
+  overflow: hidden !important;
+}
+
+/* Caja principal: solo mide lo que mide la galería */
+.image-modal .image-modal-content {
+  position: relative !important;
+
+  width: max-content !important;
+  height: max-content !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  max-width: 94vw !important;
+  max-height: 94vh !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+
+  isolation: isolate !important;
+}
+
+/* ELIMINA EL SEGUNDO RECTANGULO:
+   el stage ya NO tiene 100% de ancho/alto */
+.image-modal .image-modal-stage {
+  position: relative !important;
+
+  width: max-content !important;
+  height: max-content !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  flex: 0 0 auto !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  overflow: visible !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* La foto queda exactamente como estaba */
+.image-modal .image-preview,
+.image-modal .image-preview--video {
+  display: block !important;
+
+  width: auto !important;
+  height: auto !important;
+
+  max-width: 82vw !important;
+  max-height: 82vh !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  background: transparent !important;
+  border-radius: 8px !important;
+
+  transform: none !important;
+  animation: none !important;
+
+  box-shadow: 0 18px 55px rgba(0,0,0,.32) !important;
+
+  flex: 0 0 auto !important;
+}
+
+/* Miniaturas: debajo de la foto, sin caja gigante */
+.image-modal .thumbnail-strip {
+  position: relative !important;
+
+  width: max-content !important;
+  max-width: 90vw !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+
+  margin: 8px auto 0 !important;
+  padding: 5px 7px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  flex: 0 0 auto !important;
+
+  background: rgba(255,255,255,.96) !important;
+  border-radius: 10px !important;
+
+  box-sizing: border-box !important;
+}
+
+/* X pegada a la esquina real de la galería */
+.image-modal .close-image {
+  top: -18px !important;
+  right: -18px !important;
+
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+
+  z-index: 100 !important;
+}
+
+/* Flechas siempre a los costados de la foto */
+.image-modal .image-modal-arrow--left {
+  left: -62px !important;
+}
+
+.image-modal .image-modal-arrow--right {
+  right: -62px !important;
+}
+
+/* Contador fuera de la foto pero sin crear otro fondo */
+.image-modal .image-modal-counter {
+  left: auto !important;
+  right: -12px !important;
+  bottom: -38px !important;
+  transform: none !important;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .image-modal {
+    padding: 8px !important;
+  }
+
+  .image-modal .image-modal-content {
+    width: max-content !important;
+    height: max-content !important;
+
+    max-width: 94vw !important;
+    max-height: 94vh !important;
+  }
+
+  .image-modal .image-preview,
+  .image-modal .image-preview--video {
+    max-width: 88vw !important;
+    max-height: 76vh !important;
+  }
+
+  .image-modal .close-image {
+    top: -14px !important;
+    right: -14px !important;
+
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+  }
+
+  .image-modal .image-modal-arrow--left {
+    left: -42px !important;
+  }
+
+  .image-modal .image-modal-arrow--right {
+    right: -42px !important;
+  }
+
+  .image-modal .thumbnail-strip {
+    max-width: 86vw !important;
+    margin-top: 7px !important;
+  }
+
+  .image-modal .image-modal-counter {
+    right: -4px !important;
+    bottom: -30px !important;
+  }
+}
+

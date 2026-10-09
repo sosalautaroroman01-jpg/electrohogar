@@ -68,6 +68,48 @@ import ProtectedRoute from "./admin/components/ProtectedRoute";
 |
 */
 
+function CatalogoPorDominio() {
+  if (typeof window === "undefined") {
+    return <Home />;
+  }
+
+  const hostname =
+    window.location.hostname
+      .toLowerCase()
+      .replace(/^www\./, "")
+      .trim();
+
+  /*
+   * Dominios propios del sistema:
+   * se mantienen como catálogo general.
+   */
+  const dominiosBase = new Set([
+    "electrohogar-lovat.vercel.app",
+    "localhost",
+    "127.0.0.1",
+  ]);
+
+  if (dominiosBase.has(hostname)) {
+    return <Home />;
+  }
+
+  /*
+   * En cualquier dominio personalizado intentamos
+   * resolver el nombre del dominio como slug.
+   *
+   * Ejemplos:
+   * depositomayorista.com
+   * -> depositomayorista
+   *
+   * juan.depositomayorista.com
+   * -> juan
+   *
+   * Si no existe ese revendedor, Revendedor mostrará
+   * "Catálogo no disponible" sin tocar el catálogo general.
+   */
+  return <Revendedor />;
+}
+
 function MisVentasProtegidas() {
   const {
     revendedor,
@@ -122,7 +164,7 @@ function App() {
 
           <Route
             path="/"
-            element={<Home />}
+            element={<CatalogoPorDominio />}
           />
 
           {/* =========================================================

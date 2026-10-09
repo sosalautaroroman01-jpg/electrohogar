@@ -1,229 +1,816 @@
-.header{
-    display:grid;
-    grid-template-columns:64px minmax(0,1fr) 64px;
-    align-items:center;
-    width:100%;
-    max-width:1440px;
-    margin:0 auto 18px;
-    padding:18px 22px;
-    box-sizing:border-box;
-    position:relative;
-    z-index:20;
+/* =========================================================
+   ELECTRO HOGAR — HEADER COMPLETO
+   Desktop + Tablet + Mobile
+   Mobile: LOGO | BUSCADOR | ADMIN | CARRITO
+========================================================= */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 5000;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.hero-logo{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:100%;
+/* =========================================================
+   BARRA PRINCIPAL
+========================================================= */
+
+.header-main {
+  width: min(1440px, 100%);
+  min-height: 82px;
+  margin: 0 auto;
+  padding: 12px 28px;
+  box-sizing: border-box;
+
+  display: grid;
+  grid-template-columns:
+    minmax(210px, 280px)
+    minmax(300px, 1fr)
+    auto;
+
+  align-items: center;
+  gap: 30px;
 }
 
-.logo{
-    display:block;
-    width:360px;
-    max-width:100%;
-    margin:0 auto;
-    filter:
-        drop-shadow(0 10px 24px rgba(0,0,0,.34))
-        drop-shadow(0 0 18px rgba(34,197,94,.08));
-    transition:transform .35s ease, filter .35s ease;
+/* =========================================================
+   LOGO
+========================================================= */
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
-.logo:hover{
-    transform:scale(1.015);
-    filter:
-        drop-shadow(0 12px 28px rgba(0,0,0,.38))
-        drop-shadow(0 0 22px rgba(34,197,94,.12));
+.header-logo-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-decoration: none;
 }
 
-/* ================= USUARIO ================= */
-
-.header-user{
-    position:relative;
-    justify-self:start;
+.header-logo {
+  display: block;
+  width: 205px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  transition: transform .2s ease, filter .2s ease;
 }
 
-.user-btn{
-    width:52px;
-    height:52px;
-    padding:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    box-sizing:border-box;
-    border:1px solid rgba(255,255,255,.16);
-    border-radius:50%;
-    cursor:pointer;
-    text-decoration:none;
-    color:#fff;
-    background:
-        linear-gradient(145deg,#18c866 0%,#12a653 100%);
-    box-shadow:
-        0 10px 25px rgba(0,0,0,.24),
-        0 7px 24px rgba(22,163,74,.20);
-    transition:
-        transform .22s ease,
-        box-shadow .22s ease,
-        filter .22s ease;
+.header-logo:hover {
+  transform: scale(1.015);
 }
 
-.user-btn:hover{
-    transform:translateY(-2px);
-    filter:brightness(1.05);
-    box-shadow:
-        0 14px 30px rgba(0,0,0,.28),
-        0 10px 30px rgba(22,163,74,.28);
+/* =========================================================
+   BUSCADOR
+========================================================= */
+
+.header-search {
+  height: 50px;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 0 18px;
+  box-sizing: border-box;
+
+  background: #f3f4f6;
+  border: 1px solid #e1e5e8;
+  border-radius: 12px;
+  color: #6b7280;
+
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
 }
 
-.user-btn:focus-visible{
-    outline:2px solid rgba(255,255,255,.9);
-    outline-offset:3px;
+.header-search:focus-within {
+  background: #fff;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, .10);
 }
 
-.user-icon{
-    width:28px;
-    height:28px;
-    display:block;
-    color:#fff;
-    flex:0 0 28px;
+.header-search svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  color: #64748b;
 }
 
-.header-space{
-    width:52px;
+.header-search input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111827;
+
+  font:
+    500 15px/1 Arial,
+    sans-serif;
 }
 
-/* ================= MENU ================= */
-
-.admin-menu{
-    position:relative;
-    display:inline-block;
+.header-search input::placeholder {
+  color: #7a828a;
 }
 
-.admin-menu::after{
-    content:"";
-    position:absolute;
-    left:0;
-    top:50px;
-    width:100%;
-    height:16px;
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.admin-dropdown{
-    position:absolute;
-    top:62px;
-    left:0;
-    width:280px;
-    padding:18px;
-    box-sizing:border-box;
-    border-radius:18px;
-    background:rgba(15,23,32,.97);
-    backdrop-filter:blur(24px);
-    -webkit-backdrop-filter:blur(24px);
-    border:1px solid rgba(255,255,255,.10);
-    box-shadow:
-        0 22px 55px rgba(0,0,0,.40),
-        0 8px 24px rgba(0,0,0,.22);
-    z-index:999;
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(10px) scale(.98);
-    transform-origin:top left;
-    transition:
-        opacity .22s ease,
-        transform .22s ease,
-        visibility .22s;
+.header-account {
+  position: relative;
+}
+
+.header-action,
+.header-cart {
+  min-height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 7px 13px;
+  box-sizing: border-box;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2937;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+.header-action:hover,
+.header-cart:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, .06);
+}
+
+.header-action svg,
+.header-cart svg {
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
+  color: #16a34a;
+}
+
+.header-action-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.header-action-text small {
+  color: #6b7280;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.header-action-text strong {
+  color: #111827;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.header-cart {
+  min-width: 82px;
+}
+
+.header-cart span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   MENÚ ADMIN / REVENDEDOR
+========================================================= */
+
+.admin-menu {
+  position: relative;
+}
+
+.admin-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+
+  width: 275px;
+  padding: 14px;
+  box-sizing: border-box;
+
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  box-shadow: 0 20px 45px rgba(0, 0, 0, .14);
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+
+  transition:
+    opacity .18s ease,
+    visibility .18s ease,
+    transform .18s ease;
 }
 
 .admin-menu:hover .admin-dropdown,
-.admin-menu:focus-within .admin-dropdown{
-    opacity:1;
-    visibility:visible;
-    transform:translateY(0) scale(1);
+.admin-menu:focus-within .admin-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
-.admin-dropdown p{
-    margin:0 0 14px;
-    padding:0 2px;
-    color:#f5f7f8;
-    font-size:14px;
-    font-weight:700;
-    line-height:1.45;
-    word-break:break-word;
+.admin-dropdown p {
+  margin: 2px 5px 12px;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
-.dropdown-link{
-    width:100%;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:13px 14px;
-    margin:0 0 8px;
-    box-sizing:border-box;
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:13px;
-    background:rgba(255,255,255,.055);
-    color:#f3f6f7;
-    font:600 14px/1.2 inherit;
-    text-decoration:none;
-    cursor:pointer;
-    text-align:left;
-    transition:
-        background .2s ease,
-        border-color .2s ease,
-        color .2s ease,
-        transform .2s ease;
+.dropdown-link {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 11px 12px;
+  margin-bottom: 6px;
+  box-sizing: border-box;
+
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #374151;
+
+  font:
+    600 13px/1.2 Arial,
+    sans-serif;
+
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    color .18s ease;
 }
 
-.dropdown-link:last-child{
-    margin-bottom:0;
+.dropdown-link:last-child {
+  margin-bottom: 0;
 }
 
-.dropdown-link:hover{
-    background:linear-gradient(135deg,#16a34a,#22c55e);
-    border-color:rgba(255,255,255,.12);
-    color:#fff;
-    transform:translateX(3px);
+.dropdown-link:hover {
+  background: #f0fdf4;
+  color: #15803d;
 }
 
-.dropdown-icon{
-    width:18px;
-    height:18px;
-    display:block;
-    flex:0 0 18px;
+.dropdown-link svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
 }
 
-/* ================= MOBILE ================= */
+/* =========================================================
+   NAVEGACIÓN
+========================================================= */
 
-@media (max-width:768px){
-    .header{
-        grid-template-columns:50px minmax(0,1fr) 50px;
-        padding:12px 12px 7px;
-        margin-bottom:7px;
-    }
+.header-nav {
+  width: 100%;
+  border-top: 1px solid #f0f1f2;
+  background: #fff;
+}
 
-    .logo{
-        width:235px;
-    }
+.header-nav-inner {
+  width: min(1440px, 100%);
+  min-height: 46px;
+  margin: 0 auto;
+  padding: 0 28px;
+  box-sizing: border-box;
 
-    .user-btn{
-        width:46px;
-        height:46px;
-    }
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
-    .user-icon{
-        width:25px;
-        height:25px;
-        flex-basis:25px;
-    }
+  overflow-x: auto;
+  scrollbar-width: none;
+}
 
-    .header-space{
-        width:46px;
-    }
+.header-nav-inner::-webkit-scrollbar {
+  display: none;
+}
 
-    .admin-dropdown{
-        top:56px;
-        left:-6px;
-        width:250px;
-        padding:15px;
-    }
+.header-nav-inner a,
+.nav-category {
+  height: 46px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 0 15px;
+
+  border: 0;
+  border-bottom: 2px solid transparent;
+
+  background: transparent;
+  color: #4b5563;
+
+  font:
+    600 13px/1 Arial,
+    sans-serif;
+
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    color .18s ease,
+    border-color .18s ease,
+    background .18s ease;
+}
+
+.header-nav-inner a:hover,
+.nav-category:hover {
+  color: #15803d;
+  border-bottom-color: #16a34a;
+  background: #f8faf9;
+}
+
+.nav-category {
+  color: #111827;
+  font-weight: 800;
+}
+
+.nav-category svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* =========================================================
+   BOTÓN MENÚ MOBILE
+   Se mantiene oculto para dejar:
+   LOGO | BUSCADOR | ADMIN | CARRITO
+========================================================= */
+
+.mobile-menu-btn {
+  display: none;
+
+  width: 42px;
+  height: 42px;
+  padding: 0;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+}
+
+.mobile-menu-btn svg {
+  width: 21px;
+  height: 21px;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1050px) {
+
+  .header-main {
+    grid-template-columns:
+      190px
+      minmax(260px, 1fr)
+      auto;
+
+    gap: 16px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .header-logo {
+    width: 175px;
+  }
+
+  .header-action-text {
+    display: none;
+  }
+
+  .header-action,
+  .header-cart {
+    width: 48px;
+    min-width: 48px;
+    padding: 0;
+  }
+
+  .header-cart span {
+    display: none;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   UNA SOLA FILA:
+   LOGO | BUSCADOR | ADMIN | CARRITO
+
+   IMPORTANTE:
+   - No hay segunda fila.
+   - El buscador NO usa grid-row: 2.
+   - El header es verde oscuro.
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 5000;
+
+    background:
+      linear-gradient(
+        135deg,
+        #0b2925 0%,
+        #102d2a 52%,
+        #071b22 100%
+      ) !important;
+
+    border-bottom:
+      1px solid rgba(22, 163, 74, .45) !important;
+
+    box-shadow:
+      0 3px 14px rgba(0, 0, 0, .20) !important;
+  }
+
+  .header-main {
+    width: 100%;
+    min-height: 64px;
+
+    display: grid !important;
+
+    grid-template-columns:
+      auto
+      minmax(0, 1fr)
+      auto
+      auto !important;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 7px 9px !important;
+    box-sizing: border-box;
+  }
+
+  .header-left {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Sin hamburguesa */
+  .mobile-menu-btn {
+    display: none !important;
+  }
+
+  .header-logo-link {
+    display: flex;
+    align-items: center;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .header-logo {
+    display: block;
+
+    width: 112px;
+    max-width: 112px;
+
+    height: auto;
+    object-fit: contain;
+
+    filter:
+      drop-shadow(
+        0 1px 2px rgba(0, 0, 0, .35)
+      );
+  }
+
+  /* =======================================================
+     BUSCADOR — MISMA FILA
+  ======================================================= */
+
+  .header-search {
+    grid-column: auto !important;
+    grid-row: auto !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    height: 42px !important;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 0 10px !important;
+    box-sizing: border-box;
+
+    background: #fff !important;
+
+    border:
+      1px solid #dfe4e8 !important;
+
+    border-radius: 10px !important;
+
+    color: #64748b !important;
+
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, .10);
+
+    overflow: hidden;
+  }
+
+  .header-search:focus-within {
+    background: #fff !important;
+
+    border-color:
+      #16a34a !important;
+
+    box-shadow:
+      0 0 0 3px
+      rgba(22, 163, 74, .15) !important;
+  }
+
+  .header-search svg {
+    width: 19px !important;
+    height: 19px !important;
+    min-width: 19px;
+
+    color: #64748b !important;
+  }
+
+  .header-search input {
+    width: 100%;
+    min-width: 0;
+
+    padding: 0;
+    border: 0;
+    outline: none;
+
+    background: transparent;
+
+    color: #111827;
+
+    font:
+      500 13px/1 Arial,
+      sans-serif;
+  }
+
+  .header-search input::placeholder {
+    color: #8b95a1;
+    opacity: 1;
+  }
+
+  /* =======================================================
+     ADMIN + CARRITO
+  ======================================================= */
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    flex-shrink: 0;
+  }
+
+  .header-account {
+    position: relative;
+  }
+
+  .header-action,
+  .header-cart {
+    width: 38px !important;
+    min-width: 38px !important;
+
+    height: 38px !important;
+    min-height: 38px !important;
+
+    padding: 0 !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+      1px solid
+      rgba(255, 255, 255, .25) !important;
+
+    border-radius: 9px !important;
+
+    background:
+      rgba(255, 255, 255, .97) !important;
+
+    color:
+      #16a34a !important;
+
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, .12);
+
+    transform: none !important;
+  }
+
+  .header-action:hover,
+  .header-cart:hover {
+    background:
+      #fff !important;
+
+    border-color:
+      rgba(255, 255, 255, .45) !important;
+
+    transform: none !important;
+  }
+
+  .header-action svg,
+  .header-cart svg {
+    width: 19px !important;
+    height: 19px !important;
+
+    color:
+      #16a34a !important;
+  }
+
+  .header-action-text,
+  .header-cart span {
+    display: none !important;
+  }
+
+  /* =======================================================
+     DROPDOWN ADMIN
+  ======================================================= */
+
+  .admin-dropdown {
+    position: fixed !important;
+
+    top: 58px !important;
+    right: 8px !important;
+    left: auto !important;
+
+    width:
+      min(280px, calc(100vw - 16px)) !important;
+
+    z-index: 99999 !important;
+  }
+
+  /* =======================================================
+     OCULTAR NAVEGACIÓN EN MOBILE
+     Evita que aparezca una segunda zona debajo.
+  ======================================================= */
+
+  .header-nav {
+    display: none !important;
+  }
+}
+
+/* =========================================================
+   MOBILE PEQUEÑO
+========================================================= */
+
+@media (max-width: 430px) {
+
+  .header-main {
+    min-height: 60px;
+
+    gap: 5px;
+
+    padding:
+      6px 7px !important;
+  }
+
+  .header-logo {
+    width: 102px;
+    max-width: 102px;
+  }
+
+  .header-search {
+    height: 40px !important;
+
+    padding:
+      0 9px !important;
+
+    border-radius:
+      9px !important;
+  }
+
+  .header-search svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .header-search input {
+    font-size: 12px;
+  }
+
+  .header-action,
+  .header-cart {
+    width: 36px !important;
+    min-width: 36px !important;
+
+    height: 36px !important;
+    min-height: 36px !important;
+
+    border-radius: 8px !important;
+  }
+
+  .header-action svg,
+  .header-cart svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
+
+/* =========================================================
+   CELULAR MUY CHICO
+========================================================= */
+
+@media (max-width: 360px) {
+
+  .header-main {
+    gap: 4px;
+    padding: 5px !important;
+  }
+
+  .header-logo {
+    width: 91px;
+    max-width: 91px;
+  }
+
+  .header-search {
+    height: 38px !important;
+    padding: 0 7px !important;
+  }
+
+  .header-search input {
+    font-size: 11px;
+  }
+
+  .header-search svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .header-action,
+  .header-cart {
+    width: 34px !important;
+    min-width: 34px !important;
+
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+
+  .header-action svg,
+  .header-cart svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
 }

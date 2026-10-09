@@ -1,125 +1,156 @@
-.search-container{
+/* ELECTRO HOGAR — BUSCADOR */
 
-    display:flex;
-    justify-content:center;
-
-    width:100%;
-
-    margin:20px auto 24px;
-    padding:0 16px;
-
-    box-sizing:border-box;
-
+.searchbar {
+  width: 100%;
+  min-width: 0;
 }
 
-.search-box{
-
-    position:relative;
-
-    width:100%;
-    max-width:900px;
-
+.searchbar-inner {
+  position: relative;
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  border: 1px solid #dfe4ea;
+  border-radius: 15px;
+  background: #fff;
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease;
 }
 
-.search-icon{
-
-    position:absolute;
-
-    left:20px;
-    top:50%;
-
-    transform:translateY(-50%);
-
-    font-size:20px;
-
-    opacity:.55;
-
-    pointer-events:none;
-
-    z-index:2;
-
+.searchbar-inner:focus-within {
+  border-color: rgba(22, 163, 74, .65);
+  box-shadow:
+    0 0 0 3px rgba(22, 163, 74, .09),
+    0 5px 18px rgba(15, 23, 42, .05);
 }
 
-.search-input{
-
-    width:100%;
-    height:60px;
-
-    padding:0 24px 0 58px;
-
-    border:none;
-    border-radius:18px;
-
-    background:rgba(255,255,255,.95);
-
-    backdrop-filter:blur(20px);
-    -webkit-backdrop-filter:blur(20px);
-
-    font-size:17px;
-    font-weight:500;
-
-    color:#222;
-
-    outline:none;
-
-    box-sizing:border-box;
-
-    transition:.30s;
-
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-
+.searchbar-icon {
+  position: absolute;
+  left: 17px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: text;
+  z-index: 2;
 }
 
-.search-input::placeholder{
-
-    color:#8d8d8d;
-
+.searchbar-inner:focus-within .searchbar-icon {
+  color: #16a34a;
 }
 
-.search-input:hover{
-
-    transform:translateY(-2px);
-
-    box-shadow:0 16px 36px rgba(0,0,0,.10);
-
+.searchbar-inner input {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0 84px 0 49px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #18212f;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  appearance: none;
 }
 
-.search-input:focus{
-
-    box-shadow:
-        0 0 0 4px rgba(22,163,74,.12),
-        0 18px 40px rgba(22,163,74,.18);
-
+.searchbar-inner input::placeholder {
+  color: #7b8794;
+  opacity: 1;
 }
 
-/* ================= MOBILE ================= */
+.searchbar-inner input::-webkit-search-cancel-button {
+  display: none;
+}
 
-@media (max-width:768px){
+.searchbar-shortcut {
+  position: absolute;
+  right: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  padding: 0 8px;
+  border: 1px solid #e3e7ec;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #7b8794;
+  font-size: 10px;
+  font-weight: 700;
+  pointer-events: none;
+}
 
-    .search-container{
+.searchbar-clear {
+  position: absolute;
+  right: 11px;
+  width: 31px;
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: pointer;
+}
 
-        margin:14px 0 18px;
-        padding:0 14px;
+.searchbar-clear:hover {
+  background: #16a34a;
+  color: #fff;
+}
 
-    }
+@media (max-width: 768px) {
+  .searchbar-inner {
+    height: 48px;
+    border-radius: 13px;
+  }
 
-    .search-icon{
+  .searchbar-icon {
+    left: 14px;
+  }
 
-        left:16px;
-        font-size:18px;
+  .searchbar-inner input {
+    padding-left: 45px;
+    padding-right: 48px;
+    font-size: 14px;
+  }
 
-    }
+  .searchbar-shortcut {
+    display: none;
+  }
+}
 
-    .search-input{
+@media (max-width: 430px) {
+  .searchbar-inner {
+    height: 46px;
+  }
 
-        height:52px;
+  .searchbar-inner input {
+    padding-left: 43px;
+    padding-right: 45px;
+    font-size: 13px;
+  }
 
-        padding:0 18px 0 48px;
+  .searchbar-icon {
+    left: 13px;
+    width: 20px;
+    height: 20px;
+  }
 
-        border-radius:16px;
-
-        font-size:15px;
-
-    }
-
+  .searchbar-clear {
+    right: 8px;
+    width: 29px;
+    height: 29px;
+  }
 }

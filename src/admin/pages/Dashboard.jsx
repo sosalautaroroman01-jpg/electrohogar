@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "../../context/CartContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import { useDollar } from "../../context/DollarContext";
+import { escucharProductos } from "../../services/productosService";
+import { convertirPrecio } from "../../utils/calcularPrecios";
 
 import {
   cambiarEstadoRevendedor,
+  eliminarRevendedorCompleto,
   crearCuentaRevendedor,
   crearRevendedor,
   editarRevendedor,
@@ -215,7 +219,8 @@ const FORM_INICIAL = {
 };
 
 export default function Dashboard() {
-  const { agregarAlCarrito } = useCart();
+  const navigate = useNavigate();
+  const { agregarAlCarrito, setAbierto, prepararCarritoModoLocal } = useCart();
 
   const [revendedores, setRevendedores] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -228,6 +233,8 @@ export default function Dashboard() {
   const [form, setForm] = useState(FORM_INICIAL);
 
   const [busqueda, setBusqueda] = useState("");
+  const [filtroVendedorOficial, setFiltroVendedorOficial] = useState("Todos");
+  const [filtroEstadoRevendedor, setFiltroEstadoRevendedor] = useState("Todos");
 
   const [error, setError] = useState("");
 
@@ -241,6 +248,17 @@ export default function Dashboard() {
   const [pedidoError, setPedidoError] = useState("");
   const [pedidoEditando, setPedidoEditando] = useState(false);
   const [pedidoClientesEditados, setPedidoClientesEditados] = useState([]);
+
+  // Catálogo maestro para poder AGREGAR productos mientras se edita
+  // una venta desde el Dashboard.
+  const [productosCatalogo, setProductosCatalogo] = useState([]);
+  const [pedidoBusquedaProducto, setPedidoBusquedaProducto] = useState("");
+  const [pedidoClienteProductoActivo, setPedidoClienteProductoActivo] =
+    useState(null);
+  const [pedidoCantidadProductoNuevo, setPedidoCantidadProductoNuevo] =
+    useState(1);
+
+  const blue = useDollar();
 
   /*
    * Escucha los revendedores en tiempo real.
@@ -273,10 +291,6 @@ export default function Dashboard() {
   const listaFiltrada = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
 
-    if (!texto) {
-      return revendedores;
-    }
-
     return revendedores.filter((item) => {
       const contenido = [
         item.nombre,
@@ -284,14 +298,25 @@ export default function Dashboard() {
         item.nombreCompleto,
         item.whatsapp,
         item.slug,
+        item.email,
       ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
 
-      return contenido.includes(texto);
+      const coincideBusqueda = !texto || contenido.includes(texto);
+      const vendedor = String(item.vendedorOficialCodigo || item.vendedorOficialNombre || "").toUpperCase();
+      const coincideVendedor =
+        filtroVendedorOficial === "Todos" ||
+        vendedor === filtroVendedorOficial.toUpperCase();
+      const estado = item.activo === false ? "Inactivo" : "Activo";
+      const coincideEstado =
+        filtroEstadoRevendedor === "Todos" ||
+        estado === filtroEstadoRevendedor;
+
+      return coincideBusqueda && coincideVendedor && coincideEstado;
     });
-  }, [revendedores, busqueda]);
+  }, [revendedores, busqueda, filtroVendedorOficial, filtroEstadoRevendedor]);
 
   const ESTADOS_PEDIDO = ["Todos","Pendiente","En revisión","En preparación","Procesado","Cancelado"];
   const VENDEDORES_OFICIALES = [
@@ -342,6 +367,326 @@ export default function Dashboard() {
   const pedidosRevision=pedidos.filter(p=>p.estado==="En revisión").length;
   const pedidosPreparacion=pedidos.filter(p=>p.estado==="En preparación").length;
   const pedidosProcesados=pedidos.filter(p=>p.estado==="Procesado").length;
+
+  /*
+   * CATÁLOGO MAESTRO
+   *
+   * Se mantiene escuchando para que "Editar pedido" pueda buscar
+   * y agregar productos que no estaban originalmente en la venta.
+   */
+  useEffect(() => {
+    const cancelar = escucharProductos((lista) => {
+      setProductosCatalogo(
+        Array.isArray(lista)
+          ? lista.filter(
+              (producto) =>
+                producto && producto.visible !== false
+            )
+          : []
+      );
+    });
+
+    return () => {
+      if (typeof cancelar === "function") {
+        cancelar();
+      }
+    };
+  }, []);
+
+  const productosDisponiblesPedido = useMemo(() => {
+    const texto = pedidoBusquedaProducto.trim().toLowerCase();
+
+    if (!texto || pedidoClienteProductoActivo === null) {
+      return [];
+    }
+
+    const idsActuales = new Set(
+      pedidoClientesEditados.flatMap((cliente) =>
+        (Array.isArray(cliente?.productos) ? cliente.productos : []).map(
+          (producto) => producto?.productoId || producto?.id
+        )
+      )
+    );
+
+    return productosCatalogo
+      .filter((producto) => {
+        if (idsActuales.has(producto.id)) {
+          return false;
+        }
+
+        const campos = [
+          producto?.nombre,
+          producto?.descripcion,
+          producto?.marca,
+          producto?.categoria,
+          producto?.subcategoria,
+          producto?.medida,
+        ];
+
+        return campos.some((campo) =>
+          String(campo || "").toLowerCase().includes(texto)
+        );
+      })
+      .slice(0, 8);
+  }, [
+    productosCatalogo,
+    pedidoBusquedaProducto,
+    pedidoClienteProductoActivo,
+    pedidoClientesEditados,
+  ]);
+
+  function obtenerPrecioEdicionPedido(
+    producto,
+    cantidad = 1
+  ) {
+    const cantidadNumero = Math.max(
+      1,
+      Number(cantidad) || 1
+    );
+
+    let precioBase =
+      cantidadNumero >= 12 && Number(producto?.precio12) > 0
+        ? Number(producto.precio12)
+        : cantidadNumero >= 9 && Number(producto?.precio9) > 0
+          ? Number(producto.precio9)
+          : cantidadNumero >= 6 && Number(producto?.precio6) > 0
+            ? Number(producto.precio6)
+            : cantidadNumero >= 3 && Number(producto?.precio3) > 0
+              ? Number(producto.precio3)
+              : cantidadNumero >= 2 && Number(producto?.precio2) > 0
+                ? Number(producto.precio2)
+                : Number(producto?.precio) || 0;
+
+    precioBase = convertirPrecio(
+      precioBase,
+      producto,
+      blue
+    );
+
+    const revendedor =
+      revendedores.find(
+        (item) =>
+          item?.id ===
+          pedidoSeleccionado?.revendedorId
+      ) ||
+      revendedores.find(
+        (item) =>
+          item?.id ===
+          pedidoSeleccionado?.revendedor?.id
+      ) ||
+      pedidoSeleccionado?.revendedor ||
+      null;
+
+    // El pedido guarda el porcentaje que tenía ese revendedor
+    // al momento de crear la venta. Ese snapshot es el que debe
+    // aplicarse al agregar productos nuevos para no mezclar
+    // porcentajes de otros revendedores ni recalcular una venta.
+    const porcentajeSnapshot = Number(
+      pedidoSeleccionado?.porcentajeSnapshot
+    );
+
+    const porcentaje =
+      Number.isFinite(porcentajeSnapshot) &&
+      porcentajeSnapshot > 0
+        ? porcentajeSnapshot
+        : Number(revendedor?.porcentaje) || 0;
+
+    return precioBase * (1 + porcentaje / 100);
+  }
+
+  function abrirBuscadorProductoPedido() {
+    setPedidoClienteProductoActivo(0);
+    setPedidoBusquedaProducto("");
+    setPedidoCantidadProductoNuevo(1);
+  }
+
+  function cerrarBuscadorProductoPedido() {
+    setPedidoClienteProductoActivo(null);
+    setPedidoBusquedaProducto("");
+    setPedidoCantidadProductoNuevo(1);
+  }
+
+  function agregarProductoAlClientePedido(producto) {
+    if (!producto?.id || pedidoClientesEditados.length === 0) return;
+
+    const cantidadNueva = Math.max(
+      1,
+      Number(pedidoCantidadProductoNuevo) || 1
+    );
+
+    setPedidoClientesEditados((actuales) =>
+      actuales.map((cliente, indexCliente) => {
+        if (indexCliente !== 0) return cliente;
+
+        const productosActuales = Array.isArray(cliente?.productos)
+          ? cliente.productos
+          : [];
+
+        const indiceExistente = productosActuales.findIndex(
+          (item) => (item?.productoId || item?.id) === producto.id
+        );
+
+        if (indiceExistente >= 0) {
+          return {
+            ...cliente,
+            productos: productosActuales.map((item, indexProducto) => {
+              if (indexProducto !== indiceExistente) return item;
+
+              const cantidadTotal =
+                (Number(item?.cantidad) || 1) + cantidadNueva;
+
+              const precioFinal = obtenerPrecioEdicionPedido(
+                producto,
+                cantidadTotal
+              );
+
+              return {
+                ...item,
+                ...producto,
+                productoId: producto.id,
+                cantidad: cantidadTotal,
+                precioFinal,
+                precioVenta: precioFinal,
+              };
+            }),
+          };
+        }
+
+        const precioFinal = obtenerPrecioEdicionPedido(
+          producto,
+          cantidadNueva
+        );
+
+        return {
+          ...cliente,
+          productos: [
+            ...productosActuales,
+            {
+              ...producto,
+              productoId: producto.id,
+              cantidad: cantidadNueva,
+              precioFinal,
+              precioVenta: precioFinal,
+              porcentajeSnapshot:
+                Number(pedidoSeleccionado?.porcentajeSnapshot) ||
+                Number(
+                  revendedores.find(
+                    (item) => item?.id === pedidoSeleccionado?.revendedorId
+                  )?.porcentaje
+                ) ||
+                0,
+            },
+          ],
+        };
+      })
+    );
+
+    cerrarBuscadorProductoPedido();
+  }
+
+  function obtenerProductosPedidoUnificados() {
+    const mapa = new Map();
+
+    pedidoClientesEditados.forEach((cliente) => {
+      const productos = Array.isArray(cliente?.productos)
+        ? cliente.productos
+        : [];
+
+      productos.forEach((producto) => {
+        const id = producto?.productoId || producto?.id;
+        if (!id) return;
+
+        const cantidad = Math.max(1, Number(producto?.cantidad) || 1);
+        const precio =
+          Number(producto?.precioFinal) ||
+          Number(producto?.precioVenta) ||
+          Number(producto?.precio) ||
+          0;
+
+        if (!mapa.has(id)) {
+          mapa.set(id, {
+            ...producto,
+            productoId: id,
+            cantidad,
+            subtotal: precio * cantidad,
+          });
+        } else {
+          const actual = mapa.get(id);
+          actual.cantidad += cantidad;
+          actual.subtotal += precio * cantidad;
+        }
+      });
+    });
+
+    return Array.from(mapa.values());
+  }
+
+  function cambiarCantidadProductoGeneral(productoId, valor) {
+    const cantidad = Math.max(1, Number(valor) || 1);
+
+    setPedidoClientesEditados((actuales) => {
+      let aplicado = false;
+
+      return actuales.map((cliente) => {
+        const productos = Array.isArray(cliente?.productos)
+          ? cliente.productos
+          : [];
+
+        const nuevosProductos = [];
+
+        productos.forEach((producto) => {
+          const id = producto?.productoId || producto?.id;
+
+          if (id !== productoId) {
+            nuevosProductos.push(producto);
+            return;
+          }
+
+          if (aplicado) {
+            return;
+          }
+
+          aplicado = true;
+
+          const productoCatalogo =
+            productosCatalogo.find((item) => item?.id === productoId) ||
+            producto;
+
+          const precioFinal = obtenerPrecioEdicionPedido(
+            productoCatalogo,
+            cantidad
+          );
+
+          nuevosProductos.push({
+            ...producto,
+            cantidad,
+            precioFinal,
+            precioVenta: precioFinal,
+          });
+        });
+
+        return {
+          ...cliente,
+          productos: nuevosProductos,
+        };
+      });
+    });
+  }
+
+  function eliminarProductoGeneral(productoId) {
+    setPedidoClientesEditados((actuales) =>
+      actuales.map((cliente) => ({
+        ...cliente,
+        productos: (Array.isArray(cliente?.productos)
+          ? cliente.productos
+          : []
+        ).filter(
+          (producto) =>
+            (producto?.productoId || producto?.id) !== productoId
+        ),
+      }))
+    );
+  }
 
   async function abrirPedido(pedido) {
     try {
@@ -406,6 +751,7 @@ export default function Dashboard() {
 
       setPedidoClientesEditados(clientes);
       setPedidoEditando(false);
+      cerrarBuscadorProductoPedido();
       setPedidoError("");
       setPedidoModalAbierto(true);
 
@@ -465,7 +811,10 @@ export default function Dashboard() {
   function cerrarPedido() {
     if(pedidoGuardando) return;
     setPedidoModalAbierto(false); setPedidoSeleccionado(null);
-    setPedidoClientesEditados([]); setPedidoEditando(false); setPedidoError("");
+    setPedidoClientesEditados([]);
+    setPedidoEditando(false);
+    cerrarBuscadorProductoPedido();
+    setPedidoError("");
   }
   function cambiarCantidadPedido(ci,pi,v) {
     const q=Math.max(1,Number(v)||1);
@@ -642,40 +991,63 @@ export default function Dashboard() {
             Number(producto?.cantidad) || 1
           );
 
-          const precioFinal =
-            Number(producto?.precioFinal) ||
-            Number(producto?.precioVenta) ||
-            Number(producto?.precio) ||
-            0;
-
           if (!producto?.id && !producto?.productoId) {
             return;
           }
 
           const productoId =
-            producto?.id ||
-            producto?.productoId;
+            producto?.productoId ||
+            producto?.id;
+
+          /*
+           * MUY IMPORTANTE:
+           *
+           * El pedido del revendedor muestra y guarda el precio
+           * final con su porcentaje. Pero el carrito oficial de
+           * Electro Hogar debe recibir SIEMPRE el producto maestro,
+           * con sus precios reales y sus escalas por cantidad.
+           *
+           * Por eso recuperamos el producto original del catálogo
+           * maestro y NO mandamos precioFinal/precioVenta como precio
+           * del carrito.
+           */
+          const productoMaestro =
+            productosCatalogo.find(
+              (item) =>
+                item?.id === productoId
+            ) ||
+            producto;
+
+          const precioVentaRevendedor =
+            Number(producto?.precioFinal) ||
+            Number(producto?.precioVenta) ||
+            Number(producto?.precio) ||
+            0;
 
           agregarAlCarrito(
             {
-              ...producto,
+              ...productoMaestro,
 
               id: productoId,
               productoId,
 
-              precio: precioFinal,
-              precio2: 0,
-              precio3: 0,
-              precio6: 0,
-              precio9: 0,
-              precio12: 0,
+              __productoMaestroId: productoId,
 
+              /* Precio oficial de Electro Hogar */
               esRevendedor: false,
               revendedorId: null,
               revendedorPorcentaje: 0,
 
-              precioFinal,
-              precioVenta: precioFinal,
+              /* Datos de referencia de la venta del revendedor.
+                 NO son usados por obtenerPrecio del carrito. */
+              precioVentaRevendedor:
+                precioVentaRevendedor,
+              precioFinalRevendedor:
+                precioVentaRevendedor,
+              porcentajeSnapshot:
+                Number(producto?.porcentajeSnapshot) ||
+                Number(pedidoSeleccionado?.porcentajeSnapshot) ||
+                0,
 
               __pedidoRevendedorId:
                 pedidoSeleccionado.id,
@@ -726,9 +1098,27 @@ export default function Dashboard() {
         )
       );
 
-      window.alert(
-        `Carrito armado correctamente.\n\nProductos cargados: ${cantidadItems}\n\nAhora podés trabajar la venta desde el carrito normal de Electro Hogar.`
-      );
+      /*
+       * IMPORTANTE:
+       * Los productos y cantidades ya fueron cargados en el carrito
+       * exactamente como estaban en el pedido.
+       *
+       * No cambiamos nada acá.
+       *
+       * Solamente marcamos que este carrito viene del pedido
+       * para que, AL ENTRAR AL MODO LOCAL, se reemplacen únicamente
+       * sus precios por los precios maestro de Electro Hogar.
+       */
+      prepararCarritoModoLocal();
+
+      setPedidoModalAbierto(false);
+      setPedidoSeleccionado(null);
+      setPedidoClientesEditados([]);
+      setPedidoEditando(false);
+      setPedidoError("");
+
+      setAbierto(true);
+      navigate("/local");
     } catch (error) {
       console.error(
         "Error armando carrito del pedido:",
@@ -1052,11 +1442,53 @@ export default function Dashboard() {
     }
   }
 
+  async function eliminarRevendedor(revendedor) {
+    const nombre =
+      revendedor.nombreCompleto ||
+      `${revendedor.nombre || ""} ${revendedor.apellido || ""}`.trim() ||
+      "este revendedor";
+    const link = obtenerLink(revendedor);
+
+    const confirmado = window.confirm(
+      `ELIMINACIÓN DEFINITIVA\n\nVas a borrar a ${nombre} y sus documentos asociados en Firestore (ficha, link público, clientes, ventas y pedidos vinculados).\n\nLink: ${link}\n\nEsta acción no se puede deshacer. Para conservar el historial, usá “Dar de baja”.\n\n¿Querés continuar?`
+    );
+
+    if (!confirmado) return;
+
+    const segundaConfirmacion = window.prompt(
+      `Para confirmar la eliminación de ${nombre}, escribí ELIMINAR`
+    );
+    if (segundaConfirmacion !== "ELIMINAR") {
+      window.alert("Eliminación cancelada.");
+      return;
+    }
+
+    try {
+      await eliminarRevendedorCompleto(revendedor.id);
+      window.alert(
+        `Se eliminaron los documentos de Firestore asociados a ${nombre}.\n\nNota: la cuenta de Firebase Authentication, si existe, no se elimina desde el navegador.`
+      );
+    } catch (err) {
+      console.error("Error eliminando revendedor:", err);
+      window.alert(
+        err?.message || "No se pudo eliminar el revendedor por completo."
+      );
+    }
+  }
+
   /*
    * Construye el link público.
    */
   function obtenerLink(revendedor) {
-    return `${window.location.origin}/v/${revendedor.slug}`;
+    const slug = String(revendedor?.slug || "")
+      .trim()
+      .toLowerCase();
+
+    if (!slug) {
+      return `${window.location.origin}/`;
+    }
+
+    return `https://${slug}.depositomayorista.com`;
   }
 
   /*
@@ -1286,14 +1718,35 @@ export default function Dashboard() {
               <input
                 type="search"
                 value={busqueda}
-                onChange={(e) =>
-                  setBusqueda(
-                    e.target.value
-                  )
-                }
-                placeholder="Buscar revendedor..."
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar nombre, WhatsApp, email o link..."
               />
 
+            </div>
+
+            <div className="revendedor-filter-controls">
+              <select
+                value={filtroVendedorOficial}
+                onChange={(e) => setFiltroVendedorOficial(e.target.value)}
+                aria-label="Filtrar por vendedor responsable"
+              >
+                <option value="Todos">Todos los vendedores</option>
+                {VENDEDORES_OFICIALES.map((vendedor) => (
+                  <option key={vendedor.codigo} value={vendedor.codigo}>
+                    {vendedor.nombre}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filtroEstadoRevendedor}
+                onChange={(e) => setFiltroEstadoRevendedor(e.target.value)}
+                aria-label="Filtrar por estado del revendedor"
+              >
+                <option value="Todos">Todos los estados</option>
+                <option value="Activo">Activos</option>
+                <option value="Inactivo">Inactivos</option>
+              </select>
             </div>
 
           </div>
@@ -1490,8 +1943,7 @@ export default function Dashboard() {
                                   revendedor
                                 )}
                               >
-                                /v/
-                                {revendedor.slug}
+                                {obtenerLink(revendedor).replace(/^https?:\/\//, "")}
                               </span>
 
                               <button
@@ -1582,6 +2034,16 @@ export default function Dashboard() {
                                     ? "Dar de baja"
                                     : "Reactivar"}
                                 </span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className="action-button action-danger"
+                                onClick={() => eliminarRevendedor(revendedor)}
+                                title="Eliminar definitivamente junto con datos vinculados"
+                              >
+                                <TrashIcon />
+                                <span>Eliminar</span>
                               </button>
 
                             </div>
@@ -1680,138 +2142,505 @@ export default function Dashboard() {
             {pedidoError && <div className="error-box">{pedidoError}</div>}
 
             <div className="pedido-clean-content">
-              {pedidoClientesEditados.map((cp, ci) => {
-                const c = cp.cliente || {};
-                const productos = Array.isArray(cp.productos) ? cp.productos : [];
-                const vendedorNombre = cp.vendedorOficialNombre || c.vendedorOficialNombre || "Sin asignar";
+              {(() => {
+                const vendedorAsignado =
+                  pedidoClientesEditados.find(
+                    (cliente) =>
+                      cliente?.vendedorOficialNombre ||
+                      cliente?.cliente?.vendedorOficialNombre
+                  );
+
+                const vendedorNombre =
+                  vendedorAsignado?.vendedorOficialNombre ||
+                  vendedorAsignado?.cliente?.vendedorOficialNombre ||
+                  pedidoSeleccionado?.revendedor?.vendedorOficialNombre ||
+                  "Sin asignar";
+
+                const productosUnificados =
+                  obtenerProductosPedidoUnificados();
 
                 return (
-                  <article
-                    className="pedido-clean-client"
-                    key={cp.ventaId || cp.clienteId || ci}
-                  >
-                    <div className="pedido-clean-client-header">
-                      <div>
-                        <span className="pedido-client-kicker">CLIENTE</span>
-                        <h3>
-                          {c.nombreCompleto || `${c.nombre || ""} ${c.apellido || ""}`.trim() || "Cliente"}
-                        </h3>
-                        <p>{c.whatsapp || "Sin WhatsApp"}</p>
-                      </div>
-
-                      <strong>$ {formatearPrecio(totalCliente(cp))}</strong>
+                  <>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "16px",
+                        marginBottom: "12px",
+                        padding: "12px 14px",
+                        border: "1px solid #e3e9e5",
+                        borderRadius: "12px",
+                        background: "#fbfcfb",
+                      }}
+                    >
+                      <span style={{ color: "#7a877f", fontSize: "11px" }}>
+                        Vendedor asignado
+                      </span>
+                      <strong
+                        style={{
+                          padding: "5px 10px",
+                          borderRadius: "8px",
+                          background: "#f1f7f3",
+                          color: "#26352d",
+                          fontSize: "11px",
+                        }}
+                      >
+                        {vendedorNombre}
+                      </strong>
                     </div>
 
-                    <div className="pedido-clean-assignment">
-                      <span>Vendedor asignado</span>
-                      <strong>{vendedorNombre}</strong>
-                    </div>
-
-                    <div className="pedido-result-box">
-                      <div className="pedido-result-head">
-                        <span>RESULTADO COMERCIAL</span>
-                        <strong>
-                          {cp.resultadoComercial === "concretada"
-                            ? "CONCRETADA"
-                            : cp.resultadoComercial === "caida"
-                              ? "CAÍDA"
-                              : "PENDIENTE DE VALIDACIÓN"}
+                    {pedidoEditando && (
+                      <div
+                        className="pedido-product-editor"
+                        style={{
+                          margin: "0 0 14px",
+                          padding: "14px",
+                          border: "1px solid #e3e9e5",
+                          borderRadius: "12px",
+                          background: "#f9fbfa",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            display: "block",
+                            color: "#26352d",
+                            fontSize: "13px",
+                          }}
+                        >
+                          Agregar producto
                         </strong>
-                      </div>
+                        <span
+                          style={{
+                            display: "block",
+                            marginTop: "3px",
+                            marginBottom: "9px",
+                            color: "#89948d",
+                            fontSize: "10px",
+                          }}
+                        >
+                          Buscá en el catálogo maestro.
+                        </span>
 
-                      {cp.resultadoComercial !== "concretada" &&
-                        cp.resultadoComercial !== "caida" &&
-                        pedidoSeleccionado?.estado !== "Procesado" &&
-                        pedidoSeleccionado?.estado !== "Cancelado" && (
-                          <div className="pedido-result-actions">
-                            <button
-                              type="button"
-                              className="pedido-result-button concretar"
-                              onClick={() => resolverVentaDesdePedido(cp, "concretada")}
-                              disabled={pedidoGuardando}
+                        {pedidoClienteProductoActivo === null ? (
+                          <button
+                            type="button"
+                            onClick={abrirBuscadorProductoPedido}
+                            disabled={pedidoGuardando}
+                            style={{
+                              width: "100%",
+                              minHeight: "42px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                              border: "1px solid #b9e5c7",
+                              borderRadius: "9px",
+                              background: "#effbf3",
+                              color: "#15803d",
+                              fontSize: "11px",
+                              fontWeight: "800",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <SearchIcon />
+                            Buscar y agregar producto
+                          </button>
+                        ) : (
+                          <>
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "minmax(0,1fr) auto",
+                                gap: "8px",
+                                alignItems: "center",
+                              }}
                             >
-                              <CheckIcon />
-                              Concretar venta
-                            </button>
-
-                            <button
-                              type="button"
-                              className="pedido-result-button caida"
-                              onClick={() => resolverVentaDesdePedido(cp, "caida")}
-                              disabled={pedidoGuardando}
-                            >
-                              <TrashIcon />
-                              Marcar caída
-                            </button>
-                          </div>
-                        )}
-                    </div>
-
-                    <div className="pedido-clean-products">
-                      {productos.length === 0 ? (
-                        <div className="pedido-no-products">Esta venta no tiene productos.</div>
-                      ) : (
-                        productos.map((p, pi) => {
-                          const q = Number(p?.cantidad) || 1;
-                          const precio = Number(p?.precioFinal) || Number(p?.precioVenta) || Number(p?.precio) || 0;
-
-                          return (
-                            <div className="pedido-clean-product" key={p?.productoId || p?.id || pi}>
-                              <div className="pedido-clean-product-info">
-                                <strong>{p?.nombre || p?.titulo || "Producto"}</strong>
-                                <small>{q} unidad{q === 1 ? "" : "es"}</small>
+                              <div style={{ position: "relative" }}>
+                                <SearchIcon
+                                  style={{
+                                    position: "absolute",
+                                    left: "11px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    width: "18px",
+                                    height: "18px",
+                                    color: "#64746b",
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  value={pedidoBusquedaProducto}
+                                  onChange={(e) =>
+                                    setPedidoBusquedaProducto(e.target.value)
+                                  }
+                                  placeholder="Buscar producto, marca o categoría..."
+                                  disabled={pedidoGuardando}
+                                  style={{
+                                    width: "100%",
+                                    height: "40px",
+                                    boxSizing: "border-box",
+                                    padding: "0 11px 0 36px",
+                                    border: "1px solid #dce5df",
+                                    borderRadius: "9px",
+                                    outline: "none",
+                                    background: "#fff",
+                                    color: "#26352d",
+                                    fontSize: "11px",
+                                  }}
+                                />
                               </div>
 
-                              {pedidoEditando ? (
-                                <div className="pedido-qty-controls">
-                                  <button
-                                    type="button"
-                                    onClick={() => cambiarCantidadPedido(ci, pi, q - 1)}
-                                    disabled={pedidoGuardando || q <= 1}
-                                  >
-                                    −
-                                  </button>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    value={q}
-                                    onChange={(e) => cambiarCantidadPedido(ci, pi, e.target.value)}
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => cambiarCantidadPedido(ci, pi, q + 1)}
-                                    disabled={pedidoGuardando}
-                                  >
-                                    +
-                                  </button>
-                                </div>
-                              ) : (
-                                <span className="pedido-clean-quantity">x{q}</span>
-                              )}
-
-                              <strong className="pedido-clean-subtotal">
-                                $ {formatearPrecio(precio * q)}
-                              </strong>
-
-                              {pedidoEditando && (
+                              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                                 <button
                                   type="button"
-                                  className="pedido-remove-button"
-                                  onClick={() => eliminarProductoPedido(ci, pi)}
-                                  disabled={pedidoGuardando}
-                                  title="Eliminar producto"
+                                  onClick={() =>
+                                    setPedidoCantidadProductoNuevo((v) =>
+                                      Math.max(1, Number(v) - 1)
+                                    )
+                                  }
+                                  disabled={
+                                    pedidoGuardando ||
+                                    pedidoCantidadProductoNuevo <= 1
+                                  }
+                                  style={{
+                                    width: "30px",
+                                    height: "30px",
+                                    border: "1px solid #dce5df",
+                                    borderRadius: "7px",
+                                    background: "#fff",
+                                  }}
                                 >
-                                  <TrashIcon />
+                                  −
                                 </button>
-                              )}
+
+                                <strong
+                                  style={{
+                                    minWidth: "24px",
+                                    textAlign: "center",
+                                    fontSize: "11px",
+                                  }}
+                                >
+                                  {pedidoCantidadProductoNuevo}
+                                </strong>
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setPedidoCantidadProductoNuevo((v) =>
+                                      Number(v) + 1
+                                    )
+                                  }
+                                  disabled={pedidoGuardando}
+                                  style={{
+                                    width: "30px",
+                                    height: "30px",
+                                    border: "1px solid #dce5df",
+                                    borderRadius: "7px",
+                                    background: "#fff",
+                                  }}
+                                >
+                                  +
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={cerrarBuscadorProductoPedido}
+                                  disabled={pedidoGuardando}
+                                  style={{
+                                    width: "30px",
+                                    height: "30px",
+                                    marginLeft: "2px",
+                                    border: "1px solid #dce5df",
+                                    borderRadius: "7px",
+                                    background: "#fff",
+                                    color: "#68766e",
+                                    fontSize: "15px",
+                                  }}
+                                >
+                                  ×
+                                </button>
+                              </div>
                             </div>
-                          );
-                        })
-                      )}
+
+                            {pedidoBusquedaProducto.trim() && (
+                              <div
+                                style={{
+                                  marginTop: "7px",
+                                  border: "1px solid #e3e9e5",
+                                  borderRadius: "9px",
+                                  background: "#fff",
+                                  overflow: "hidden",
+                                  maxHeight: "230px",
+                                  overflowY: "auto",
+                                  boxShadow: "0 10px 25px rgba(15,23,32,.10)",
+                                }}
+                              >
+                                {productosDisponiblesPedido.length > 0 ? (
+                                  productosDisponiblesPedido.map((producto) => {
+                                    const precio =
+                                      obtenerPrecioEdicionPedido(
+                                        producto,
+                                        pedidoCantidadProductoNuevo
+                                      );
+                                    const imagen =
+                                      producto?.imagenes?.[0] ||
+                                      producto?.imagen ||
+                                      "";
+
+                                    return (
+                                      <button
+                                        type="button"
+                                        key={producto.id}
+                                        onClick={() =>
+                                          agregarProductoAlClientePedido(producto)
+                                        }
+                                        disabled={pedidoGuardando}
+                                        style={{
+                                          width: "100%",
+                                          display: "grid",
+                                          gridTemplateColumns:
+                                            "38px minmax(0,1fr) auto 25px",
+                                          alignItems: "center",
+                                          gap: "9px",
+                                          padding: "8px 9px",
+                                          border: 0,
+                                          borderBottom: "1px solid #f0f3f1",
+                                          background: "#fff",
+                                          textAlign: "left",
+                                          cursor: "pointer",
+                                        }}
+                                      >
+                                        <span
+                                          style={{
+                                            width: "38px",
+                                            height: "38px",
+                                            borderRadius: "7px",
+                                            overflow: "hidden",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            background: "#f3f6f4",
+                                          }}
+                                        >
+                                          {imagen ? (
+                                            <img
+                                              src={imagen}
+                                              alt=""
+                                              style={{
+                                                width: "100%",
+                                                height: "100%",
+                                                objectFit: "contain",
+                                              }}
+                                            />
+                                          ) : (
+                                            <ShoppingBagIcon />
+                                          )}
+                                        </span>
+
+                                        <span style={{ minWidth: 0 }}>
+                                          <strong
+                                            style={{
+                                              display: "block",
+                                              overflow: "hidden",
+                                              textOverflow: "ellipsis",
+                                              whiteSpace: "nowrap",
+                                              color: "#29382f",
+                                              fontSize: "10px",
+                                            }}
+                                          >
+                                            {producto?.nombre || "Producto"}
+                                          </strong>
+                                          <small
+                                            style={{
+                                              display: "block",
+                                              marginTop: "2px",
+                                              color: "#89948d",
+                                              fontSize: "8px",
+                                            }}
+                                          >
+                                            {producto?.marca ||
+                                              producto?.categoria ||
+                                              "Catálogo maestro"}
+                                          </small>
+                                        </span>
+
+                                        <strong
+                                          style={{
+                                            color: "#15803d",
+                                            fontSize: "10px",
+                                            whiteSpace: "nowrap",
+                                          }}
+                                        >
+                                          $ {formatearPrecio(precio)}
+                                        </strong>
+
+                                        <span
+                                          style={{
+                                            width: "25px",
+                                            height: "25px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            borderRadius: "7px",
+                                            background: "#16a34a",
+                                            color: "#fff",
+                                            fontSize: "17px",
+                                            fontWeight: "900",
+                                          }}
+                                        >
+                                          +
+                                        </span>
+                                      </button>
+                                    );
+                                  })
+                                ) : (
+                                  <div
+                                    style={{
+                                      padding: "12px",
+                                      color: "#89948d",
+                                      fontSize: "10px",
+                                    }}
+                                  >
+                                    No encontramos ese producto.
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "12px",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      <strong
+                        style={{
+                          color: "#26352d",
+                          fontSize: "13px",
+                        }}
+                      >
+                        Productos del pedido
+                      </strong>
+                      <span
+                        style={{
+                          color: "#7a877f",
+                          fontSize: "10px",
+                        }}
+                      >
+                        {productosUnificados.reduce(
+                          (total, producto) =>
+                            total + (Number(producto.cantidad) || 1),
+                          0
+                        )}{" "}
+                        unidades
+                      </span>
                     </div>
-                  </article>
+
+                    <div className="pedido-clean-client">
+                      <div className="pedido-clean-products">
+                        {productosUnificados.length === 0 ? (
+                          <div className="pedido-no-products">
+                            Este pedido no tiene productos.
+                          </div>
+                        ) : (
+                          productosUnificados.map((producto, pi) => {
+                            const q = Number(producto?.cantidad) || 1;
+                            const subtotal = Number(producto?.subtotal) || 0;
+                            const id =
+                              producto?.productoId ||
+                              producto?.id ||
+                              `producto-${pi}`;
+
+                            return (
+                              <div
+                                className="pedido-clean-product"
+                                key={id}
+                              >
+                                <div className="pedido-clean-product-info">
+                                  <strong>
+                                    {producto?.nombre ||
+                                      producto?.titulo ||
+                                      "Producto"}
+                                  </strong>
+                                  <small>
+                                    {q} unidad{q === 1 ? "" : "es"}
+                                  </small>
+                                </div>
+
+                                {pedidoEditando ? (
+                                  <div className="pedido-qty-controls">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        cambiarCantidadProductoGeneral(id, q - 1)
+                                      }
+                                      disabled={pedidoGuardando || q <= 1}
+                                    >
+                                      −
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={q}
+                                      onChange={(e) =>
+                                        cambiarCantidadProductoGeneral(
+                                          id,
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        cambiarCantidadProductoGeneral(id, q + 1)
+                                      }
+                                      disabled={pedidoGuardando}
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="pedido-clean-quantity">
+                                    x{q}
+                                  </span>
+                                )}
+
+                                <strong className="pedido-clean-subtotal">
+                                  $ {formatearPrecio(subtotal)}
+                                </strong>
+
+                                {pedidoEditando && (
+                                  <button
+                                    type="button"
+                                    className="pedido-remove-button"
+                                    onClick={() =>
+                                      eliminarProductoGeneral(id)
+                                    }
+                                    disabled={pedidoGuardando}
+                                    title="Eliminar producto"
+                                  >
+                                    <TrashIcon />
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  </>
                 );
-              })}
+              })()}
             </div>
 
             <div className="pedido-clean-footer">
@@ -1832,6 +2661,9 @@ export default function Dashboard() {
                       className="primary-button"
                       onClick={() => {
                         setPedidoEditando(true);
+                        setPedidoClienteProductoActivo(null);
+                        setPedidoBusquedaProducto("");
+                        setPedidoCantidadProductoNuevo(1);
                         setPedidoError("");
                       }}
                     >
@@ -2864,6 +3696,8 @@ export default function Dashboard() {
          .pedido-result-button.caida:hover{background:#ffe8eb}
          .pedido-result-button:disabled{opacity:.55;cursor:not-allowed}
          .pedido-status-explanation{display:block;margin-top:4px;color:#7a857e;font-size:10px;line-height:1.4}
+         .pedido-product-editor button:hover{filter:brightness(.98)}
+         .pedido-product-editor input:focus{border-color:#86c99b!important;box-shadow:0 0 0 3px rgba(22,163,74,.08)}
          .pedido-clean-products{padding:3px 18px 10px}
          .pedido-clean-product{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f3f1}
          .pedido-clean-product:last-child{border-bottom:0}
@@ -2883,8 +3717,11 @@ export default function Dashboard() {
          .pedido-remove-button svg{width:14px;height:14px}
          .pedido-remove-button:hover{background:#ffecef}
         .pedido-clean-footer{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;padding:15px 28px 20px;border-top:1px solid #edf1ee;background:#fff}.pedido-clean-footer .primary-button,.pedido-clean-footer .secondary-button{min-height:42px}.pedido-clean-footer .primary-button svg{width:15px;height:15px}
+        .pedido-product-editor select:focus,.pedido-product-editor input:focus{border-color:#86c99b!important;box-shadow:0 0 0 3px rgba(22,163,74,.08)}
         .error-box{margin:0 28px 12px}
         @media (max-width:700px){
+           .pedido-product-editor > div:nth-child(2){grid-template-columns:minmax(0,1fr) auto!important}
+           .pedido-product-editor > div:nth-child(2) > div:last-child{justify-content:flex-start}
            .pedido-modal-clean{width:calc(100vw - 18px);max-height:calc(100vh - 18px);border-radius:18px}
            .pedido-clean-header{padding:18px 18px 8px}
            .pedido-clean-heading h2{font-size:22px}

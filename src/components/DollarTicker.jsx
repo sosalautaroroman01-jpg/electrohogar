@@ -6,28 +6,79 @@ function DollarTicker() {
 
   if (!blue) return null;
 
-  const texto = `💵 Cotización USD • Compra $${Number(
-    blue.compra
-  ).toLocaleString("es-AR")} • Venta $${Number(
-    blue.venta
-  ).toLocaleString(
-    "es-AR"
-  )} • Todos los productos publicados en USD se calculan automáticamente con la cotización de venta •`;
+  const compra = Number(blue.compra).toLocaleString("es-AR");
+  const venta = Number(blue.venta).toLocaleString("es-AR");
 
   return (
     <div className="ticker">
+
       <div className="live-box">
         <span className="live-dot"></span>
         <span>EN VIVO</span>
       </div>
 
       <div className="ticker-wrapper">
+
         <div className="ticker-track">
-          {[...Array(5)].map((_, index) => (
-            <span key={index}>{texto}</span>
-          ))}
+
+          <span>
+            🇦🇷 Cotización USD
+          </span>
+
+          <span className="ticker-separador">
+            •
+          </span>
+
+          <span>
+            Compra <strong>${compra}</strong>
+          </span>
+
+          <span className="ticker-separador">
+            •
+          </span>
+
+          <span>
+            Venta <strong>${venta}</strong>
+          </span>
+
+          <span className="ticker-separador">
+            •
+          </span>
+
+          <span className="ticker-info">
+            Productos publicados en USD se calculan automáticamente
+          </span>
+
+          <span className="ticker-separador">
+            •
+          </span>
+
+          {/* Repetimos una segunda vez para mantener el movimiento */}
+          
+          <span>
+            🇦🇷 Cotización USD
+          </span>
+
+          <span className="ticker-separador">
+            •
+          </span>
+
+          <span>
+            Compra <strong>${compra}</strong>
+          </span>
+
+          <span className="ticker-separador">
+            •
+          </span>
+
+          <span>
+            Venta <strong>${venta}</strong>
+          </span>
+
         </div>
+
       </div>
+
     </div>
   );
 }

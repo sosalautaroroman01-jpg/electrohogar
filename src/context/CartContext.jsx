@@ -5,6 +5,7 @@ import {
   useMemo,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 
 import {
@@ -13,6 +14,10 @@ import {
   actualizarBoleta,
   cerrarBoleta,
 } from "../services/pedidosService";
+
+import {
+  obtenerProductoPorId,
+} from "../services/productosService";
 
 const CartContext = createContext();
 
@@ -107,6 +112,15 @@ export function CartProvider({
     setGuardandoBoleta,
   ] = useState(false);
 
+  /*
+   * Cuando Dashboard arma un pedido concretado, el carrito queda
+   * EXACTAMENTE igual al pedido. Esta marca solamente indica que,
+   * al entrar a /local, hay que cambiar los precios por los precios
+   * maestro de Electro Hogar.
+   */
+  const carritoPreparadoModoLocalRef =
+    useRef(false);
+
   // =======================================================
   // ACTIVAR MODO LOCAL
   // =======================================================
@@ -131,12 +145,190 @@ export function CartProvider({
     useCallback(() => {
       setModoLocalActivo(true);
 
-      // Siempre arrancamos una sesión local nueva.
+      /*
+       * Si venimos desde Dashboard con un pedido concretado,
+       * NO tocamos el carrito ni sus productos/cantidades.
+       *
+       * La conversión de precios se hace abajo, ya dentro de
+       * Modo Local.
+       */
+      if (
+        carritoPreparadoModoLocalRef.current
+      ) {
+        setNumeroBoletaLocal(null);
+        setBoletaRecuperada(false);
+        setAbierto(true);
+        return;
+      }
+
+      /*
+       * Entrada NORMAL al Modo Local:
+       * exactamente como funcionaba antes.
+       */
       setCarrito([]);
       setNumeroBoletaLocal(null);
       setBoletaRecuperada(false);
       setAbierto(false);
     }, []);
+
+  /*
+   * =========================================================
+   * PREPARAR CARRITO PARA MODO LOCAL
+   * =========================================================
+   *
+   * NO cambia productos.
+   * NO cambia cantidades.
+   * NO cambia precios.
+   *
+   * Solo deja una marca para que, al entrar a /local,
+   * el Modo Local reemplace los precios por los maestros.
+   * =========================================================
+   */
+  const prepararCarritoModoLocal =
+    useCallback(() => {
+      carritoPreparadoModoLocalRef.current =
+        true;
+    }, []);
+
+  /*
+   * =========================================================
+   * CAMBIAR PRECIOS A MAESTRO SOLO EN MODO LOCAL
+   * =========================================================
+   *
+   * El carrito sigue siendo exactamente el mismo carrito
+   * armado desde el pedido.
+   *
+   * Solamente se reemplazan los campos de precio usando
+   * el producto maestro de Electro Hogar.
+   * =========================================================
+   */
+  useEffect(() => {
+    if (
+      !modoLocalActivo ||
+      !carritoPreparadoModoLocalRef.current ||
+      carrito.length === 0
+    ) {
+      return;
+    }
+
+    let cancelado = false;
+
+    async function aplicarPreciosMaestro() {
+      try {
+        const carritoActualizado =
+          await Promise.all(
+            carrito.map(async (item) => {
+              const productoId =
+                item?.__productoMaestroId ||
+                item?.productoId ||
+                item?.id;
+
+              if (!productoId) {
+                return item;
+              }
+
+              try {
+                const maestro =
+                  await obtenerProductoPorId(
+                    productoId
+                  );
+
+                if (!maestro) {
+                  return item;
+                }
+
+                /*
+                 * TODO lo demás queda exactamente igual.
+                 * Solo reemplazamos los precios por los del maestro.
+                 */
+                const precioMaestro =
+                  Number(maestro.precio) || 0;
+
+                return {
+                  ...item,
+
+                  /*
+                   * SOLO en Modo Local reemplazamos los precios
+                   * por los del producto maestro de Electro Hogar.
+                   */
+                  precio: precioMaestro,
+
+                  precio2:
+                    Number(maestro.precio2) || 0,
+
+                  precio3:
+                    Number(maestro.precio3) || 0,
+
+                  precio6:
+                    Number(maestro.precio6) || 0,
+
+                  precio9:
+                    Number(maestro.precio9) || 0,
+
+                  precio12:
+                    Number(maestro.precio12) || 0,
+
+                  precioFinal: precioMaestro,
+                  precioVenta: precioMaestro,
+
+                  /*
+                   * Dejamos guardado el precio maestro para que
+                   * obtenerPrecio() pueda usarlo exclusivamente
+                   * durante esta sesión de Modo Local.
+                   */
+                  __precioMaestroModoLocal:
+                    precioMaestro,
+
+                  /*
+                   * El producto sigue siendo el mismo.
+                   * Solo evitamos que se vuelva a aplicar margen
+                   * de revendedor sobre el precio maestro.
+                   */
+                  esRevendedor: false,
+                  revendedorPorcentaje: 0,
+                };
+              } catch (error) {
+                console.error(
+                  "Error obteniendo precio maestro del producto:",
+                  productoId,
+                  error
+                );
+
+                return item;
+              }
+            })
+          );
+
+        if (cancelado) return;
+
+        carritoPreparadoModoLocalRef.current =
+          false;
+
+        setCarrito(carritoActualizado);
+        setAbierto(true);
+      } catch (error) {
+        console.error(
+          "Error aplicando precios maestro en Modo Local:",
+          error
+        );
+
+        if (!cancelado) {
+          carritoPreparadoModoLocalRef.current =
+            false;
+          setAbierto(true);
+        }
+      }
+    }
+
+    aplicarPreciosMaestro();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [
+    modoLocalActivo,
+    carrito,
+  ]);
 
   // =======================================================
   // DESACTIVAR MODO LOCAL
@@ -629,7 +821,11 @@ export function CartProvider({
       return 0;
     }
 
-    let precioBase = Number(item.precio) || 0;
+    let precioBase =
+      modoLocalActivo &&
+      item.__precioMaestroModoLocal !== undefined
+        ? Number(item.__precioMaestroModoLocal) || 0
+        : Number(item.precio) || 0;
 
     if (
       Number(item.cantidad) >= 12 &&
@@ -958,6 +1154,8 @@ export function CartProvider({
         modoLocalActivo,
 
         activarModoLocal,
+
+        prepararCarritoModoLocal,
 
         desactivarModoLocal,
 

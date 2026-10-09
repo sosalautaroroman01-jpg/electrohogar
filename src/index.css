@@ -1,4 +1,8 @@
-/* ================= RESET GLOBAL ================= */
+/* =========================================================
+   ELECTRO HOGAR — FONDO GENERAL
+   ÚNICO CAMBIO: fondo oscuro arriba que se desvanece
+   progresivamente hacia claro detrás del contenido.
+========================================================= */
 
 *{
     margin:0;
@@ -12,40 +16,45 @@ html{
 }
 
 body{
-
     width:100%;
     min-height:100vh;
-
     overflow-x:hidden;
 
     font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 
     background:
-    radial-gradient(circle at top,#1b5fae 0%,#0b2447 35%,#041423 70%,#020b16 100%);
+        linear-gradient(
+            180deg,
+            #071b18 0px,
+            #0a2522 180px,
+            #12332f 300px,
+            #46645f 410px,
+            #9aa9a6 500px,
+            #dce4e2 610px,
+            #eef2f1 760px,
+            #f7f8f8 950px,
+            #f7f8f8 100%
+        );
 
-    background-attachment:fixed;
-
+    background-color:#f7f8f8;
+    background-attachment:scroll;
 }
 
 #root{
-
     width:100%;
+    min-height:100vh;
     overflow-x:hidden;
-
 }
 
 img{
-
     display:block;
     max-width:100%;
     height:auto;
-
 }
 
 /* ================= ANIMACIÓN ================= */
 
 @keyframes fondo{
-
     0%{
         transform:translateY(0) rotate(0deg);
     }
@@ -57,5 +66,22 @@ img{
     100%{
         transform:translateY(0) rotate(0deg);
     }
+}
 
+@media (max-width:768px){
+    body{
+        background:
+            linear-gradient(
+                180deg,
+                #071b18 0px,
+                #0a2522 150px,
+                #12332f 260px,
+                #526d68 360px,
+                #aebbb8 450px,
+                #e4eae9 560px,
+                #f5f7f7 700px,
+                #f8f9f9 100%
+            );
+        background-attachment:scroll;
+    }
 }

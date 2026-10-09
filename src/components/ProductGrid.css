@@ -1,69 +1,135 @@
-.productos{
+/* =========================================================
+   ELECTRO HOGAR
+   PRODUCT GRID
+   IMPORTANTE: este archivo controla SOLO la grilla.
+   El diseño de cada tarjeta está en ProductCard.css.
+   ========================================================= */
 
-    width:100%;
+.productos {
+  width: min(1720px, 100%);
+  margin: 24px auto 60px;
+  padding: 24px 34px 30px;
 
-    max-width:1600px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 28px 24px;
 
-    margin:24px auto 60px;
+  box-sizing: border-box;
 
-    padding:0 18px;
+  background: #ffffff;
+  border-radius: 24px;
 
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(310px,330px));
-
-    justify-content:center;
-
-    align-items:start;
-
-    gap:26px;
-
+  box-shadow:
+    0 8px 28px rgba(15, 23, 42, 0.045);
 }
 
-/* ================= TABLET ================= */
-
-@media (max-width:1024px){
-
-    .productos{
-
-        grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
-
-        gap:22px;
-
-        padding:0 16px;
-
-    }
-
+.productos > * {
+  min-width: 0;
 }
 
-/* ================= CELULAR ================= */
+/* =========================================================
+   PC GRANDE
+========================================================= */
 
-@media (max-width:768px){
-
-    .productos{
-
-        grid-template-columns:1fr;
-
-        gap:18px;
-
-        margin:18px auto 40px;
-
-        padding:0 12px;
-
-    }
-
+@media (min-width: 1600px) {
+  .productos {
+    padding-left: 40px;
+    padding-right: 40px;
+    column-gap: 26px;
+    row-gap: 30px;
+  }
 }
 
-/* ================= CELULARES PEQUEÑOS ================= */
+/* =========================================================
+   NOTEBOOK
+========================================================= */
 
-@media (max-width:430px){
+@media (max-width: 1350px) {
+  .productos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-left: 28px;
+    padding-right: 28px;
+    column-gap: 22px;
+    row-gap: 26px;
+    border-radius: 22px;
+  }
+}
 
-    .productos{
+/* =========================================================
+   TABLET
+========================================================= */
 
-        padding:0 10px;
+@media (max-width: 1050px) {
+  .productos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 22px 20px 28px;
+    column-gap: 18px;
+    row-gap: 24px;
+    border-radius: 20px;
+  }
+}
 
-        gap:16px;
+/* =========================================================
+   TABLET CHICA
+========================================================= */
 
-    }
+@media (max-width: 850px) {
+  .productos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 20px 16px 26px;
+    column-gap: 16px;
+    row-gap: 22px;
+    border-radius: 18px;
+  }
+}
 
+/* =========================================================
+   CELULAR
+========================================================= */
+
+@media (max-width: 650px) {
+  .productos {
+    width: 100%;
+    margin: 14px auto 38px;
+    padding: 14px 8px 24px;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 10px;
+    row-gap: 18px;
+
+    border-radius: 16px;
+
+    box-shadow:
+      0 6px 22px rgba(15, 23, 42, 0.04);
+
+    overflow: visible;
+  }
+}
+
+/* =========================================================
+   CELULAR CHICO
+========================================================= */
+
+@media (max-width: 430px) {
+  .productos {
+    margin-top: 10px;
+    padding: 10px 6px 20px;
+
+    column-gap: 8px;
+    row-gap: 15px;
+
+    border-radius: 14px;
+  }
+}
+
+/* =========================================================
+   CELULAR MUY CHICO
+========================================================= */
+
+@media (max-width: 360px) {
+  .productos {
+    padding-left: 5px;
+    padding-right: 5px;
+    column-gap: 7px;
+  }
 }

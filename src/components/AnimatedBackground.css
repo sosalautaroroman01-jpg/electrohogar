@@ -5,12 +5,7 @@
     z-index:-999;
     pointer-events:none;
 
-    background:
-        radial-gradient(circle at 18% 12%,
-            #26313d 0%,
-            #18222d 28%,
-            #111a24 58%,
-            #0c131b 100%);
+    background:transparent;
 }
 
 /* ================= Luces ================= */
@@ -23,7 +18,7 @@
 
     filter:blur(140px);
 
-    opacity:.25;
+    opacity:.12;
 
     animation:moveLight 18s ease-in-out infinite alternate;
 
@@ -62,7 +57,7 @@
 
     background:#38e07d;
 
-    opacity:.08;
+    opacity:.045;
 
     top:35%;
     left:42%;
@@ -81,7 +76,7 @@
 
     filter:blur(90px);
 
-    opacity:.10;
+    opacity:.055;
 
     animation:floatCircle 25s ease-in-out infinite;
 
@@ -123,7 +118,7 @@
     top:55%;
     right:35%;
 
-    opacity:.08;
+    opacity:.04;
 
 }
 
@@ -149,7 +144,7 @@
 
     background:#9ff5c4;
 
-    opacity:.16;
+    opacity:.08;
 
     animation:particleUp linear infinite;
 

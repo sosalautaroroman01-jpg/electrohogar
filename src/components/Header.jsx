@@ -1,25 +1,52 @@
 import "./Header.css";
 
+import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import logo from "../assets/logo.png";
 
 import { useAuth } from "../context/AuthContext";
 import { useRevendedorAuth } from "../context/RevendedorAuthContext";
+import { useFilter } from "../context/FilterContext";
+
+
+function SearchIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle
+        cx="11"
+        cy="11"
+        r="6.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+
+      <path
+        d="m16 16 5 5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 
 function UserIcon() {
   return (
     <svg
-      className="user-icon"
       viewBox="0 0 24 24"
-      fill="none"
       aria-hidden="true"
     >
       <circle
         cx="12"
         cy="7.5"
-        r="3.35"
+        r="3.2"
         fill="currentColor"
       />
 
@@ -32,10 +59,60 @@ function UserIcon() {
 }
 
 
+function CartIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        d="M3.5 4h2l1.7 10.1a2 2 0 0 0 2 1.7h8.9a2 2 0 0 0 1.9-1.5L21 7H7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <circle
+        cx="10"
+        cy="19"
+        r="1.4"
+        fill="currentColor"
+      />
+
+      <circle
+        cx="18"
+        cy="19"
+        r="1.4"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+
+function MenuIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 7h16M4 12h16M4 17h16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+
 function AdminIcon() {
   return (
     <svg
-      className="dropdown-icon"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
@@ -64,7 +141,6 @@ function AdminIcon() {
 function ProductsIcon() {
   return (
     <svg
-      className="dropdown-icon"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
@@ -90,7 +166,6 @@ function ProductsIcon() {
 function SalesIcon() {
   return (
     <svg
-      className="dropdown-icon"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
@@ -116,7 +191,6 @@ function SalesIcon() {
 function LogoutIcon() {
   return (
     <svg
-      className="dropdown-icon"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
@@ -146,7 +220,10 @@ function Header({
 }) {
   const location = useLocation();
 
-  const { usuario, logout } = useAuth();
+  const {
+    usuario,
+    logout,
+  } = useAuth();
 
   const {
     autenticado: revendedorAutenticado,
@@ -154,28 +231,23 @@ function Header({
     logout: logoutRevendedor,
   } = useRevendedorAuth();
 
+  const {
+    busqueda,
+    setBusqueda,
+  } = useFilter();
 
-  /*
-   * Detectamos si estamos dentro del catálogo
-   * público de un revendedor.
-   *
-   * Ejemplo:
-   * /v/pedro-alfonzo
-   * /v/pedro-alfonzo/mis-ventas
-   */
+  const inputRef = useRef(null);
+
 
   const esRutaRevendedor =
     location.pathname.startsWith("/v/");
 
 
-  /*
-   * Sacamos el slug desde la URL.
-   */
-
   const partesRuta =
     location.pathname
       .split("/")
       .filter(Boolean);
+
 
   const slugRevendedor =
     partesRuta[0] === "v"
@@ -183,222 +255,343 @@ function Header({
       : "";
 
 
-  /*
-   * ============================================================
-   * REVENDEDOR
-   * ============================================================
-   *
-   * En esta zona JAMÁS mostramos el menú Admin.
-   */
+  const usuarioAutenticado =
+    esRutaRevendedor
+      ? revendedorAutenticado
+      : Boolean(usuario);
 
-  if (esRutaRevendedor) {
-    return (
-      <header className="header">
+  function limpiarBusqueda() {
+    setBusqueda("");
+    inputRef.current?.focus();
+  }
 
-        <div className="header-user">
+  function manejarCambioBusqueda(e) {
+    setBusqueda(e.target.value);
+  }
 
-          {!revendedorAutenticado ? (
+  function manejarKeyDownBusqueda(e) {
+    if (e.key === "Escape") {
+      limpiarBusqueda();
+    }
+  }
 
+  useEffect(() => {
+    function manejarAtajoBusqueda(e) {
+      if (
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "k"
+      ) {
+        e.preventDefault();
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }
+    }
+
+    window.addEventListener("keydown", manejarAtajoBusqueda);
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        manejarAtajoBusqueda
+      );
+    };
+  }, []);
+
+
+  return (
+    <header className="site-header">
+
+      <div className="header-main">
+
+        {/* =====================================================
+            IZQUIERDA — LOGO
+        ====================================================== */}
+
+        <div className="header-left">
+
+          <button
+            type="button"
+            className="mobile-menu-btn"
+            aria-label="Abrir menú"
+          >
+            <MenuIcon />
+          </button>
+
+
+          {!ocultarLogo && (
             <Link
-              to={`/revendedor/login?slug=${encodeURIComponent(
-                slugRevendedor
-              )}`}
-              className="user-btn"
-              aria-label="Acceso revendedor"
+              to={
+                esRutaRevendedor
+                  ? `/v/${slugRevendedor}`
+                  : "/"
+              }
+              className="header-logo-link"
+              aria-label="Electro Hogar"
             >
-              <UserIcon />
+
+              <img
+                src={logo}
+                alt="Electro Hogar"
+                className="header-logo"
+              />
+
             </Link>
-
-          ) : (
-
-            <div className="admin-menu">
-
-              <button
-                type="button"
-                className="user-btn"
-                aria-label="Abrir menú revendedor"
-              >
-                <UserIcon />
-              </button>
-
-
-              <div className="admin-dropdown">
-
-                <p>
-                  {revendedor?.email ||
-                    revendedor?.nombreCompleto ||
-                    "Revendedor"}
-                </p>
-
-
-                <Link
-                  to={`/v/${
-                    revendedor?.slug ||
-                    slugRevendedor
-                  }/mis-ventas`}
-                  className="dropdown-link"
-                >
-                  <SalesIcon />
-
-                  <span>
-                    Mis ventas
-                  </span>
-                </Link>
-
-
-                <button
-                  type="button"
-                  className="dropdown-link"
-                  onClick={logoutRevendedor}
-                >
-                  <LogoutIcon />
-
-                  <span>
-                    Cerrar sesión
-                  </span>
-                </button>
-
-              </div>
-
-            </div>
-
           )}
 
         </div>
 
 
-        {!ocultarLogo && (
-          <div className="hero-logo">
+        {/* =====================================================
+            CENTRO — BUSCADOR
+        ====================================================== */}
 
-            <img
-              src={logo}
-              alt="Electro Hogar"
-              className="logo"
-            />
+        <div className="header-search">
 
-          </div>
-        )}
+          <SearchIcon />
 
-
-        <div
-          className="header-space"
-          aria-hidden="true"
-        />
-
-      </header>
-    );
-  }
-
-
-  /*
-   * ============================================================
-   * ADMIN / CATÁLOGO NORMAL
-   * ============================================================
-   *
-   * Acá sigue funcionando exactamente como antes.
-   */
-
-  return (
-    <header className="header">
-
-      <div className="header-user">
-
-        {!usuario ? (
-
-          <Link
-            to="/admin/login"
-            className="user-btn"
-            aria-label="Acceso administrador"
-          >
-            <UserIcon />
-          </Link>
-
-        ) : (
-
-          <div className="admin-menu">
-
-            <button
-              type="button"
-              className="user-btn"
-              aria-label="Abrir menú administrador"
-            >
-              <UserIcon />
-            </button>
-
-
-            <div className="admin-dropdown">
-
-              <p>
-                {usuario.email}
-              </p>
-
-
-              <Link
-                to="/admin"
-                className="dropdown-link"
-              >
-                <AdminIcon />
-
-                <span>
-                  Panel Admin
-                </span>
-              </Link>
-
-
-              <button
-                type="button"
-                className="dropdown-link"
-                onClick={() =>
-                  (window.location.href =
-                    "/admin/productos")
-                }
-              >
-                <ProductsIcon />
-
-                <span>
-                  Productos
-                </span>
-              </button>
-
-
-              <button
-                type="button"
-                className="dropdown-link"
-                onClick={logout}
-              >
-                <LogoutIcon />
-
-                <span>
-                  Cerrar sesión
-                </span>
-              </button>
-
-            </div>
-
-          </div>
-
-        )}
-
-      </div>
-
-
-      {!ocultarLogo && (
-        <div className="hero-logo">
-
-          <img
-            src={logo}
-            alt="Electro Hogar"
-            className="logo"
+          <input
+            ref={inputRef}
+            type="search"
+            value={busqueda || ""}
+            onChange={manejarCambioBusqueda}
+            onKeyDown={manejarKeyDownBusqueda}
+            placeholder="Buscar productos..."
+            aria-label="Buscar productos"
+            autoComplete="off"
+            spellCheck="false"
           />
 
+          {String(busqueda || "").length > 0 && (
+            <button
+              type="button"
+              className="header-search-clear"
+              onClick={limpiarBusqueda}
+              aria-label="Limpiar búsqueda"
+              title="Limpiar búsqueda"
+            >
+              ×
+            </button>
+          )}
+
+
         </div>
-      )}
 
 
-      <div
-        className="header-space"
-        aria-hidden="true"
-      />
+        {/* =====================================================
+            DERECHA — CUENTA + CARRITO
+        ====================================================== */}
+
+        <div className="header-actions">
+
+          {/* ================= CUENTA ================= */}
+
+          <div className="header-account">
+
+            {!usuarioAutenticado ? (
+
+              <Link
+                to={
+                  esRutaRevendedor
+                    ? `/revendedor/login?slug=${encodeURIComponent(
+                        slugRevendedor
+                      )}`
+                    : "/admin/login"
+                }
+                className="header-action"
+              >
+
+                <UserIcon />
+
+                <span className="header-action-text">
+
+                  <small>
+                    Mi cuenta
+                  </small>
+
+                  <strong>
+                    Ingresar
+                  </strong>
+
+                </span>
+
+              </Link>
+
+            ) : (
+
+              <div className="admin-menu">
+
+                <button
+                  type="button"
+                  className="header-action"
+                  aria-label="Abrir cuenta"
+                >
+
+                  <UserIcon />
+
+                  <span className="header-action-text">
+
+                    <small>
+                      Mi cuenta
+                    </small>
+
+                    <strong>
+                      {esRutaRevendedor
+                        ? "Revendedor"
+                        : "Administrador"}
+                    </strong>
+
+                  </span>
+
+                </button>
+
+
+                {/* ================= DROPDOWN ================= */}
+
+                <div className="admin-dropdown">
+
+                  <p>
+                    {esRutaRevendedor
+                      ? (
+                          revendedor?.email ||
+                          revendedor?.nombreCompleto ||
+                          "Revendedor"
+                        )
+                      : usuario?.email}
+                  </p>
+
+
+                  {esRutaRevendedor ? (
+
+                    <>
+
+                      <Link
+                        to={`/v/${
+                          revendedor?.slug ||
+                          slugRevendedor
+                        }/mis-ventas`}
+                        className="dropdown-link"
+                      >
+
+                        <SalesIcon />
+
+                        <span>
+                          Mis ventas
+                        </span>
+
+                      </Link>
+
+
+                      <button
+                        type="button"
+                        className="dropdown-link"
+                        onClick={
+                          logoutRevendedor
+                        }
+                      >
+
+                        <LogoutIcon />
+
+                        <span>
+                          Cerrar sesión
+                        </span>
+
+                      </button>
+
+                    </>
+
+                  ) : (
+
+                    <>
+
+                      <Link
+                        to="/admin"
+                        className="dropdown-link"
+                      >
+
+                        <AdminIcon />
+
+                        <span>
+                          Panel Admin
+                        </span>
+
+                      </Link>
+
+
+                      <button
+                        type="button"
+                        className="dropdown-link"
+                        onClick={() =>
+                          (
+                            window.location.href =
+                              "/admin/productos"
+                          )
+                        }
+                      >
+
+                        <ProductsIcon />
+
+                        <span>
+                          Productos
+                        </span>
+
+                      </button>
+
+
+                      <button
+                        type="button"
+                        className="dropdown-link"
+                        onClick={logout}
+                      >
+
+                        <LogoutIcon />
+
+                        <span>
+                          Cerrar sesión
+                        </span>
+
+                      </button>
+
+                    </>
+
+                  )}
+
+                </div>
+
+              </div>
+
+            )}
+
+          </div>
+
+
+          {/* ================= CARRITO ================= */}
+
+          <button
+            type="button"
+            className="header-cart"
+            aria-label="Abrir carrito"
+            onClick={() => {
+
+              window.dispatchEvent(
+                new CustomEvent(
+                  "abrir-carrito"
+                )
+              );
+
+            }}
+          >
+
+            <CartIcon />
+
+            <span>
+              Carrito
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
 
     </header>
   );

@@ -36,7 +36,7 @@ const boletasRef = collection(
 // NUMERACIÓN CORRELATIVA DE BOLETAS
 // =====================================================
 
-const NUMERO_INICIAL_BOLETA = 71909;
+const NUMERO_INICIAL_BOLETA = 74000;
 
 const contadorBoletasRef = doc(
   db,
